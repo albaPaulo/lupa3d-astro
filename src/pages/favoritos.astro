@@ -1,0 +1,67 @@
+---
+import BarraComparacao from "../components/BarraComparacao.astro";
+---
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, follow" />
+  <title>Favoritos — LUPA3D</title>
+  <meta name="description" content="Seus produtos favoritos no LUPA3D." />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="topo">
+    <div class="topo-linha">
+      <a href="/" class="logo-lupa3d">LUPA<span>3D</span></a>
+      <div class="busca-grande">
+        <span class="busca-icone" aria-hidden="true">🔍</span>
+        <input type="search" id="busca" placeholder="Pesquisar nos favoritos..." aria-label="Buscar nos favoritos" />
+      </div>
+      <nav class="abas">
+        <a href="/">&larr; Início</a>
+        <a href="/lojas/">Lojas</a>
+      </nav>
+    </div>
+    <div class="controles">
+      <select id="filtro-categoria">
+        <option value="">Todas as categorias</option>
+      </select>
+      <select id="filtro-material">
+        <option value="">Todos os materiais</option>
+      </select>
+      <select id="ordenar">
+        <option value="">Ordenar: padrão</option>
+        <option value="preco_asc">Menor preço</option>
+        <option value="preco_desc">Maior preço</option>
+        <option value="cliques">Mais clicados</option>
+        <option value="recentes">Mais recentes</option>
+      </select>
+      <label class="filtro-pix-linha">
+        <input type="checkbox" id="filtro-pix" />
+        Só com desconto no Pix
+      </label>
+    </div>
+  </header>
+
+  <p class="prototipo-aviso" style="text-align:center; padding:0.5rem; background:#fef3c7; margin:0;">
+    Protótipo Astro — página de favoritos não é gerada no build (favoritos são por visitante), busca os produtos favoritados na hora.
+  </p>
+
+  <div class="titulo-secao-grid-linha">
+    <h2 class="titulo-secao-grid">Favoritos</h2>
+    <button id="btn-compartilhar-favoritos" class="btn-limpar-secao oculto-tela">🔗 Compartilhar favoritos</button>
+  </div>
+
+  <p id="status" class="status-carregando">Carregando favoritos...</p>
+  <main id="grid" class="grid"></main>
+
+  <BarraComparacao />
+
+  <script is:inline src="/js/config.js"></script>
+  <script is:inline src="/js/favoritos.js"></script>
+  <script is:inline src="/js/interativo.js"></script>
+  <script is:inline src="/js/favoritos-pagina.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+---
+import { formatarPreco } from "../lib/supabase.js";
+
+const { p } = Astro.props;
+---
+<div class="parecido-item" data-id={p.id} data-href={`/produto/${p.id}/`}>
+  {p.imagem_url ? (
+    <img src={p.imagem_url} alt="" class="parecido-imagem" loading="lazy" referrerpolicy="no-referrer" />
+  ) : (
+    <span class="parecido-imagem parecido-imagem-vazia"></span>
+  )}
+  <span class="parecido-loja">{p.loja}</span>
+  <span class="parecido-nome">{p.nome}</span>
+  <span class="parecido-preco">{formatarPreco(p.preco)}</span>
+  <label class="checkbox-comparar" title="Adicionar à comparação">
+    <input type="checkbox" data-id={p.id} />
+    Comparar
+  </label>
+  <span class="parecido-seta">&rarr;</span>
+</div>

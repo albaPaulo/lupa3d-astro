@@ -1,0 +1,45 @@
+---
+import { formatarPreco, materialEfetivo, kitEfetivo, EMOJI_CATEGORIA } from "../lib/supabase.js";
+
+const { p, menorPreco = null, produtoNovo = null } = Astro.props;
+const material = materialEfetivo(p) || "";
+const kit = kitEfetivo(p);
+const temPix = p.preco_pix != null && Number(p.preco_pix) < Number(p.preco);
+---
+<article
+  class="card"
+  data-id={p.id}
+  data-nome={p.nome.toLowerCase()}
+  data-categoria={p.categoria || ""}
+  data-material={material}
+  data-pix={temPix ? "1" : "0"}
+  data-preco={p.preco}
+  data-cliques={p.cliques_total || 0}
+  data-criado={p.criado_em || ""}
+>
+  <button class="btn-favorito" data-id={p.id} title="Favoritar" aria-label="Favoritar" aria-pressed="false">☆</button>
+  {p.destaque && <span class="badge-destaque">🔥</span>}
+  {kit && <span class="badge-kit">Kit/Combo</span>}
+  {menorPreco && <span class="badge-menor-preco">{menorPreco.icone ? `${menorPreco.icone} ` : ""}{menorPreco.label || `Menor preço em ${menorPreco.dias} dias`}</span>}
+  {produtoNovo && <span class="badge-produto-novo">{produtoNovo.icone ? `${produtoNovo.icone} ` : ""}{produtoNovo.label || "Novo"}</span>}
+  <div class="card-imagem">
+    {p.imagem_url ? (
+      <img src={p.imagem_url} alt={p.nome} loading="lazy" referrerpolicy="no-referrer" />
+    ) : (
+      <span class="card-imagem-vazia">{EMOJI_CATEGORIA[p.categoria] || "📦"}</span>
+    )}
+  </div>
+  <div class="card-corpo">
+    <h3 class="card-nome">{p.nome}</h3>
+    <div class="card-precos">
+      <span class="card-preco">{formatarPreco(p.preco)}</span>
+      {p.preco_pix && <span class="card-preco-pix">{formatarPreco(p.preco_pix)} no Pix</span>}
+    </div>
+    <span class="card-vendido-por">Vendido por {p.loja}</span>
+    <label class="checkbox-comparar">
+      <input type="checkbox" data-id={p.id} />
+      Comparar
+    </label>
+    <a href={`/produto/${p.id}/`} class="btn-ver-oferta">Ver detalhes</a>
+  </div>
+</article>

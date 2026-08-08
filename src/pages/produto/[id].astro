@@ -1,0 +1,155 @@
+---
+import BarraComparacao from "../../components/BarraComparacao.astro";
+import ParecidoItem from "../../components/ParecidoItem.astro";
+import {
+  fetchProdutos,
+  fetchHistoricoTodos,
+  fetchConfiguracoes,
+  buildHistoricoPorProduto,
+  produtosParecidos,
+  formatarPreco,
+} from "../../lib/supabase.js";
+import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo } from "../../lib/badges.js";
+import { desenharGraficoSVG } from "../../lib/grafico.js";
+
+export async function getStaticPaths() {
+  const [produtos, historicoTodos, config] = await Promise.all([
+    fetchProdutos(),
+    fetchHistoricoTodos(),
+    fetchConfiguracoes(),
+  ]);
+
+  const historicoPorProduto = buildHistoricoPorProduto(historicoTodos);
+  const badgesMenorPreco = badgesMenorPrecoDeConfig(config);
+  const badgesProdutoNovo = badgesProdutoNovoDeConfig(config);
+  const faixaPrecoAtiva = config.parecidos_faixa_preco_ativa === "true";
+
+  return produtos.map((p) => ({
+    params: { id: String(p.id) },
+    props: {
+      produto: p,
+      historico: historicoPorProduto.get(p.id) || [],
+      parecidos: produtosParecidos(produtos, p, faixaPrecoAtiva),
+      menorPreco: badgeMenorPreco(p, badgesMenorPreco, historicoPorProduto),
+      produtoNovo: badgeProdutoNovo(p, badgesProdutoNovo),
+    },
+  }));
+}
+
+const { produto: p, historico, parecidos, menorPreco, produtoNovo } = Astro.props;
+const titulo = `${p.nome} — LUPA3D`;
+const descricao = `${p.nome} por ${formatarPreco(p.preco)} na ${p.loja}. Compare com outras lojas de filamento e resina 3D no LUPA3D.`;
+const graficoSVG = desenharGraficoSVG(historico);
+---
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{titulo}</title>
+  <meta name="description" content={descricao} />
+
+  <meta property="og:type" content="product" />
+  <meta property="og:site_name" content="LUPA3D" />
+  <meta property="og:title" content={titulo} />
+  <meta property="og:description" content={descricao} />
+  {p.imagem_url && <meta property="og:image" content={p.imagem_url} />}
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="topo">
+    <div class="topo-linha">
+      <a class="logo-lupa3d" href="/">LUPA<span>3D</span></a>
+      <a href="/" class="link-voltar">&larr; Voltar para todos os produtos</a>
+      <nav class="abas">
+        <a href="/favoritos/">Favoritos (<span data-contador-favoritos>0</span>)</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="produto-pagina">
+    <p class="prototipo-aviso" style="text-align:center; padding:0.5rem; background:#fef3c7;">
+      Protótipo Astro — esta página (e a meta description/OG acima) foi gerada 100% estática no build, sem esperar nenhum JavaScript rodar.
+    </p>
+
+    <nav class="breadcrumb" aria-label="Navegação">
+      <a href="/">Início</a>
+      {p.categoria && <><span>›</span> <span>{p.categoria}</span></>}
+      <span>›</span> <a href={`/loja/${p.loja}/`}>{p.loja}</a>
+      <span>›</span> <span class="breadcrumb-atual">{p.nome}</span>
+    </nav>
+
+    <div class="produto-box produto-titulo-box">
+      {menorPreco && (
+        <span class="badge-menor-preco-titulo">{menorPreco.icone ? `${menorPreco.icone} ` : ""}{menorPreco.label || `Menor preço em ${menorPreco.dias} dias`}</span>
+      )}
+      {produtoNovo && (
+        <span class="badge-produto-novo-titulo">{produtoNovo.icone ? `${produtoNovo.icone} ` : ""}{produtoNovo.label || "Novo"}</span>
+      )}
+      <h1>{p.nome}</h1>
+    </div>
+
+    <div class="produto-grid">
+      <div class="produto-col-esq">
+        <div class="produto-box produto-imagem-box">
+          <button class="btn-favorito" data-id={p.id} title="Favoritar" aria-label="Favoritar" aria-pressed="false">☆</button>
+          <div class="detalhe-imagem">
+            {p.imagem_url ? (
+              <img src={p.imagem_url} alt={p.nome} referrerpolicy="no-referrer" />
+            ) : (
+              <span class="card-imagem-vazia">📦</span>
+            )}
+          </div>
+        </div>
+
+        <div class="produto-box produto-historico-box">
+          <h3 class="produto-box-titulo">Histórico de preço</h3>
+          <div id="grafico-container" set:html={graficoSVG}></div>
+        </div>
+      </div>
+
+      <div class="produto-col-dir">
+        <div class="produto-linha-topo">
+          <div class="produto-box produto-descricao-box">
+            <h3 class="produto-box-titulo">Descrição</h3>
+            <p class="detalhe-descricao">{p.descricao_manual || p.descricao || "Sem descrição disponível para este produto."}</p>
+          </div>
+
+          <div class="produto-box produto-vendido-box">
+            <h3 class="produto-box-titulo">Vendido por</h3>
+            <a href={`/loja/${p.loja}/`} class="card-loja-link">{p.loja} &rarr;</a>
+            <div class="card-precos">
+              <span class="card-preco">{formatarPreco(p.preco)}</span>
+              {p.preco_pix && <span class="card-preco-pix">{formatarPreco(p.preco_pix)} no Pix</span>}
+            </div>
+            <label class="checkbox-comparar">
+              <input type="checkbox" data-id={p.id} />
+              Comparar
+            </label>
+            <a href={p.url} target="_blank" rel="noopener" class="btn-ver-oferta">Ver Oferta!</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="produto-box produto-parecidos-box">
+      <h3 class="produto-box-titulo">Produtos parecidos em outras lojas</h3>
+      {parecidos.length === 0 ? (
+        <p class="grafico-vazio">Nenhum produto parecido encontrado em outras lojas.</p>
+      ) : (
+        <div class="parecidos-lista">
+          {parecidos.map((parecido) => <ParecidoItem p={parecido} />)}
+        </div>
+      )}
+    </div>
+  </main>
+
+  <BarraComparacao />
+
+  <script is:inline src="/js/config.js"></script>
+  <script is:inline src="/js/favoritos.js"></script>
+  <script is:inline src="/js/interativo.js"></script>
+</body>
+</html>

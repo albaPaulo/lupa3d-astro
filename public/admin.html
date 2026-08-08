@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LUPA3D — Administração</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="css/style.css?v=61">
+</head>
+<body>
+  <header class="topo">
+    <h1>🔍 LUPA3D <span class="tag-admin">admin</span></h1>
+    <div id="admin-usuario-logado" class="admin-usuario oculto-tela">
+      <span id="admin-email-logado"></span>
+      <button id="btn-logout" class="secundario">Sair</button>
+    </div>
+  </header>
+
+  <div id="tela-login" class="admin-login">
+    <form id="form-login" class="admin-login-caixa">
+      <h2>Entrar</h2>
+      <p id="login-erro" class="login-erro"></p>
+      <label>
+        E-mail
+        <input type="email" id="login-email" required autocomplete="username">
+      </label>
+      <label>
+        Senha
+        <input type="password" id="login-senha" required autocomplete="current-password">
+      </label>
+      <button type="submit">Entrar</button>
+    </form>
+  </div>
+
+  <main id="tela-admin" class="admin-painel oculto-tela">
+    <nav class="admin-menu">
+      <button class="admin-menu-item ativo" data-aba="config">⚙️ Configurações</button>
+      <button class="admin-menu-item" data-aba="secoes">🧩 Seções da Home</button>
+      <button class="admin-menu-item" data-aba="produtos">📦 Produtos</button>
+      <button class="admin-menu-item" data-aba="lojas">🏬 Lojas</button>
+      <button class="admin-menu-item" data-aba="analytics">📊 Analytics</button>
+    </nav>
+
+    <div class="admin-conteudo">
+    <section class="admin-secao admin-aba" data-aba="config">
+      <h2>Configurações do site</h2>
+      <form id="form-config" class="admin-config-form">
+        <label>
+          Título do site
+          <input type="text" id="config-titulo">
+        </label>
+        <label>
+          Aviso / banner (deixe vazio para não mostrar nada)
+          <input type="text" id="config-banner" placeholder="ex: Frete grátis em compras acima de R$ 300 na Quanton3D">
+        </label>
+        <label class="checkbox-linha">
+          <input type="checkbox" id="config-manutencao">
+          Site em manutenção (mostra um aviso e esconde a lista de produtos)
+        </label>
+        <label>
+          Colunas na grade de produtos (telas grandes — celular sempre ajusta sozinho)
+          <select id="config-colunas">
+            <option value="2">2 colunas</option>
+            <option value="3">3 colunas</option>
+            <option value="4">4 colunas</option>
+            <option value="5">5 colunas</option>
+            <option value="6">6 colunas</option>
+          </select>
+        </label>
+        <div class="config-categorias-campo">
+          <span class="config-categorias-titulo">Categorias visíveis no site (desmarque para esconder os produtos dessa categoria em todo o site — busca, filtros, seções e página do produto)</span>
+          <div id="config-categorias-toggle" class="config-categorias-toggle"></div>
+        </div>
+        <label class="checkbox-linha">
+          <input type="checkbox" id="config-parecidos-faixa-preco" checked>
+          Em "Produtos parecidos", usar faixa de preço (metade a o dobro) como filtro extra quando não há subcategoria detectada (ex: pigmento) — desmarque se estiver zerando resultados em categorias com poucos produtos
+        </label>
+        <div class="config-categorias-campo">
+          <span class="config-categorias-titulo">Badges "Menor preço" nos cards — cada uma com seu ícone e prazo (mostra só a mais forte que o produto atingir; lista vazia desativa)</span>
+          <div id="config-badges-lista" class="config-badges-lista"></div>
+          <div class="config-badges-novo">
+            <input type="text" id="badge-novo-icone" maxlength="4" placeholder="🔥">
+            <input type="number" id="badge-novo-dias" min="1" placeholder="dias">
+            <input type="text" id="badge-novo-label" placeholder="Texto (opcional — ex: Menor preço em 90 dias)">
+            <button type="button" id="btn-adicionar-badge">+ Adicionar</button>
+          </div>
+        </div>
+        <div class="config-categorias-campo">
+          <span class="config-categorias-titulo">Badges "Produto novo" nos cards — mostra a mais recente que o produto atingir (ex: chegou há até 7 dias); lista vazia desativa. Precisa da migration_013 aplicada.</span>
+          <div id="config-badges-novidade-lista" class="config-badges-lista"></div>
+          <div class="config-badges-novo">
+            <input type="text" id="badge-novidade-novo-icone" maxlength="4" placeholder="🆕">
+            <input type="number" id="badge-novidade-novo-dias" min="1" placeholder="dias">
+            <input type="text" id="badge-novidade-novo-label" placeholder="Texto (opcional — ex: Novidade)">
+            <button type="button" id="btn-adicionar-badge-novidade">+ Adicionar</button>
+          </div>
+        </div>
+        <button type="submit">Salvar configurações</button>
+        <span id="config-status" class="admin-status"></span>
+      </form>
+    </section>
+
+    <section class="admin-secao admin-aba oculto-tela" data-aba="secoes">
+      <h2>Seções da Home</h2>
+
+      <div id="secoes-lista" class="secoes-lista"></div>
+
+      <h3 id="secao-form-titulo">Nova seção</h3>
+      <form id="form-secao" class="admin-config-form">
+        <input type="hidden" id="secao-id">
+        <label>
+          Nome
+          <input type="text" id="secao-nome" required placeholder="ex: Ofertas Quentes">
+        </label>
+        <div class="secao-form-linha">
+          <label>
+            Ícone (emoji)
+            <input type="text" id="secao-icone" maxlength="4" placeholder="🔥">
+          </label>
+          <label>
+            Cor da faixa
+            <input type="color" id="secao-cor" value="#2563eb">
+          </label>
+          <label>
+            Ordem
+            <input type="number" id="secao-ordem" value="0">
+          </label>
+        </div>
+        <div class="secao-form-linha">
+          <label>
+            Layout
+            <select id="secao-layout">
+              <option value="scroll">Rolagem horizontal</option>
+              <option value="grade">Grade (linhas x colunas)</option>
+            </select>
+          </label>
+          <label>
+            Colunas (na grade)
+            <input type="number" id="secao-colunas" value="4" min="1" max="8">
+          </label>
+          <label>
+            Linhas (na grade)
+            <input type="number" id="secao-linhas" value="1" min="1" max="10">
+          </label>
+        </div>
+        <div class="secao-form-linha">
+          <label>
+            Filtrar por categoria (opcional)
+            <select id="secao-categoria"><option value="">Qualquer categoria</option></select>
+          </label>
+          <label>
+            Filtrar por loja/marca (opcional)
+            <select id="secao-marca"><option value="">Qualquer loja</option></select>
+          </label>
+          <label>
+            Preço máximo (opcional)
+            <input type="number" id="secao-preco-maximo" step="0.01" placeholder="ex: 200">
+          </label>
+          <label>
+            Só o menor preço dos últimos N dias (opcional)
+            <input type="number" id="secao-menor-preco-dias" min="1" placeholder="ex: 30">
+          </label>
+        </div>
+        <label class="checkbox-linha">
+          <input type="checkbox" id="secao-ativo" checked>
+          Seção ativa (aparece no site)
+        </label>
+        <label class="checkbox-linha">
+          <input type="checkbox" id="secao-ordenar-cliques">
+          Ordenar automaticamente pelos produtos mais clicados
+        </label>
+
+        <label>
+          Fixar produtos específicos no topo da seção (opcional)
+          <input type="search" id="secao-busca-produto" placeholder="Buscar produto pelo nome...">
+        </label>
+        <div id="secao-busca-resultados" class="secao-busca-resultados"></div>
+        <div id="secao-pinados" class="secao-pinados"></div>
+
+        <div class="secao-form-acoes">
+          <button type="submit">Salvar seção</button>
+          <button type="button" id="btn-cancelar-edicao-secao" class="secundario oculto-tela">Cancelar edição</button>
+        </div>
+        <span id="secao-status" class="admin-status"></span>
+      </form>
+    </section>
+
+    <section class="admin-secao admin-aba oculto-tela" data-aba="produtos">
+      <h2>Produtos (<span id="admin-contador">0</span>)</h2>
+      <div class="admin-produtos-filtros">
+        <input type="search" id="admin-busca" placeholder="Buscar produto...">
+        <select id="admin-filtro-loja"><option value="">Todas as lojas</option></select>
+        <select id="admin-filtro-categoria"><option value="">Todas as categorias</option></select>
+        <select id="admin-filtro-material"><option value="">Todos os materiais</option></select>
+        <label class="checkbox-linha">
+          <input type="checkbox" id="admin-filtro-faltando">
+          Mostrar só sem categoria/subcategoria (<span id="admin-contador-faltando">0</span>)
+        </label>
+      </div>
+      <div class="admin-tabela-wrap">
+        <table class="admin-tabela">
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Loja</th>
+              <th>Preço</th>
+              <th>Cliques</th>
+              <th>Categoria</th>
+              <th>Material</th>
+              <th>Descrição manual</th>
+              <th>Destaque</th>
+              <th>Oculto</th>
+              <th>Kit/Combo</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="admin-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="admin-secao admin-aba oculto-tela" data-aba="lojas">
+      <h2>Lojas</h2>
+      <p class="admin-status">Personalize o banner e o logotipo exibidos quando alguém clicar em "Vendido por" numa loja.</p>
+      <div id="admin-lojas-lista" class="admin-lojas-lista"></div>
+    </section>
+
+    <section class="admin-secao admin-aba oculto-tela" data-aba="analytics">
+      <h2>Analytics de cliques</h2>
+      <p class="admin-status">Baseado nos cliques em "Ver Oferta!" (home, seções e página do produto).</p>
+
+      <h3>Cliques por dia (últimos 30 dias)</h3>
+      <div id="analytics-grafico-dias" class="analytics-grafico"></div>
+
+      <div class="analytics-colunas">
+        <div>
+          <h3>Top 10 produtos mais clicados</h3>
+          <div id="analytics-top-produtos" class="analytics-lista"></div>
+        </div>
+        <div>
+          <h3>Cliques por loja</h3>
+          <div id="analytics-por-loja" class="analytics-lista"></div>
+        </div>
+      </div>
+    </section>
+    </div>
+  </main>
+
+  <script src="js/config.js?v=61"></script>
+  <script src="js/admin-api.js?v=61"></script>
+  <script src="js/admin.js?v=61"></script>
+</body>
+</html>

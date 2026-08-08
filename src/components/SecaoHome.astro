@@ -1,0 +1,18 @@
+---
+import ProductCard from "./ProductCard.astro";
+
+const { secao, produtos, temMais, badgesPorId } = Astro.props;
+const grade = secao.layout === "grade";
+const estiloGrade = grade ? `--secao-colunas: ${secao.colunas || 4};` : "";
+---
+<section class="secao-home" style={`--cor-secao: ${secao.cor}; ${estiloGrade}`}>
+  <div class="secao-cabecalho">
+    <h2 class="secao-titulo">{secao.icone ? `${secao.icone} ` : ""}{secao.nome}</h2>
+    {temMais && <a href="/#grid" class="secao-ver-mais">Ver mais &rarr;</a>}
+  </div>
+  <div class={grade ? "secao-grade" : "secao-scroll"}>
+    {produtos.map((p) => (
+      <ProductCard p={p} menorPreco={badgesPorId.get(p.id)?.menorPreco} produtoNovo={badgesPorId.get(p.id)?.produtoNovo} />
+    ))}
+  </div>
+</section>

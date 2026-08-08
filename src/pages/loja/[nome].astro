@@ -1,0 +1,143 @@
+---
+import ProductCard from "../../components/ProductCard.astro";
+import BarraComparacao from "../../components/BarraComparacao.astro";
+import {
+  fetchProdutos,
+  fetchLojas,
+  fetchHistoricoTodos,
+  fetchConfiguracoes,
+  buildHistoricoPorProduto,
+  materialEfetivo,
+  REDES_LOJA,
+} from "../../lib/supabase.js";
+import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo } from "../../lib/badges.js";
+
+export async function getStaticPaths() {
+  const [produtos, lojasConfig, historicoTodos, config] = await Promise.all([
+    fetchProdutos(),
+    fetchLojas(),
+    fetchHistoricoTodos(),
+    fetchConfiguracoes(),
+  ]);
+  const nomes = [...new Set(produtos.map((p) => p.loja))];
+  const historicoPorProduto = buildHistoricoPorProduto(historicoTodos);
+  const badgesMenorPreco = badgesMenorPrecoDeConfig(config);
+  const badgesProdutoNovo = badgesProdutoNovoDeConfig(config);
+
+  return nomes.map((nome) => {
+    const produtosDaLoja = produtos.filter((p) => p.loja === nome);
+    return {
+      params: { nome },
+      props: {
+        nome,
+        produtosDaLoja,
+        loja: lojasConfig.find((l) => l.nome === nome) || null,
+        categorias: [...new Set(produtosDaLoja.map((p) => p.categoria).filter(Boolean))].sort(),
+        materiais: [...new Set(produtosDaLoja.map(materialEfetivo).filter(Boolean))].sort(),
+        badges: produtosDaLoja.map((p) => ({
+          id: p.id,
+          menorPreco: badgeMenorPreco(p, badgesMenorPreco, historicoPorProduto),
+          produtoNovo: badgeProdutoNovo(p, badgesProdutoNovo),
+        })),
+      },
+    };
+  });
+}
+
+const { nome, produtosDaLoja, loja, categorias, materiais, badges } = Astro.props;
+const badgesPorId = new Map(badges.map((b) => [b.id, b]));
+const titulo = `${nome} — LUPA3D`;
+const descricao = loja?.descricao || `Confira os ${produtosDaLoja.length} produtos e preços da ${nome} no LUPA3D.`;
+const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
+---
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{titulo}</title>
+  <meta name="description" content={descricao} />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="LUPA3D" />
+  <meta property="og:title" content={titulo} />
+  <meta property="og:description" content={descricao} />
+  {loja?.logo_url && <meta property="og:image" content={loja.logo_url} />}
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="topo">
+    <div class="topo-linha">
+      <a href="/" class="logo-lupa3d">LUPA<span>3D</span></a>
+      <div class="busca-grande">
+        <span class="busca-icone" aria-hidden="true">🔍</span>
+        <input type="search" id="busca" placeholder="Pesquisar produto nesta loja..." aria-label="Buscar produtos nesta loja" />
+      </div>
+      <nav class="abas">
+        <a href="/">&larr; Todas as lojas</a>
+        <a href="/lojas/">Lojas</a>
+        <a href="/favoritos/">Favoritos (<span data-contador-favoritos>0</span>)</a>
+      </nav>
+    </div>
+    <div class="controles">
+      <select id="filtro-categoria">
+        <option value="">Todas as categorias</option>
+        {categorias.map((c) => <option value={c}>{c}</option>)}
+      </select>
+      <select id="filtro-material">
+        <option value="">Todos os materiais</option>
+        {materiais.map((m) => <option value={m}>{m}</option>)}
+      </select>
+      <select id="ordenar">
+        <option value="">Ordenar: padrão</option>
+        <option value="preco_asc">Menor preço</option>
+        <option value="preco_desc">Maior preço</option>
+        <option value="cliques">Mais clicados</option>
+        <option value="recentes">Mais recentes</option>
+      </select>
+      <label class="filtro-pix-linha">
+        <input type="checkbox" id="filtro-pix" />
+        Só com desconto no Pix
+      </label>
+    </div>
+  </header>
+
+  <section class="loja-perfil">
+    {loja?.banner_url && (
+      <div class="loja-perfil-banner" style={`background-image:url("${loja.banner_url}")`}></div>
+    )}
+    <div class="loja-perfil-cabecalho">
+      <div class="loja-perfil-logo-wrap">
+        {loja?.logo_url && <img src={loja.logo_url} class="loja-perfil-logo" alt="" referrerpolicy="no-referrer" />}
+      </div>
+      <h2 class="loja-perfil-nome">{nome}</h2>
+    </div>
+    {loja?.descricao && <p class="loja-perfil-descricao">{loja.descricao}</p>}
+    {redes.length > 0 && (
+      <div class="loja-perfil-redes">
+        {redes.map((r) => (
+          <a href={loja[r.chave]} target="_blank" rel="noopener" class="loja-perfil-rede-btn">{r.emoji} {r.label}</a>
+        ))}
+      </div>
+    )}
+  </section>
+
+  <div class="titulo-secao-grid-linha">
+    <h2 class="titulo-secao-grid">Produtos ({produtosDaLoja.length})</h2>
+  </div>
+
+  <main id="grid" class="grid">
+    {produtosDaLoja.map((p) => (
+      <ProductCard p={p} menorPreco={badgesPorId.get(p.id)?.menorPreco} produtoNovo={badgesPorId.get(p.id)?.produtoNovo} />
+    ))}
+  </main>
+
+  <BarraComparacao />
+
+  <script is:inline src="/js/config.js"></script>
+  <script is:inline src="/js/favoritos.js"></script>
+  <script is:inline src="/js/interativo.js"></script>
+</body>
+</html>

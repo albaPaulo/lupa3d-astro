@@ -1,0 +1,108 @@
+---
+import ProductCard from "../components/ProductCard.astro";
+import BarraComparacao from "../components/BarraComparacao.astro";
+import SecaoHome from "../components/SecaoHome.astro";
+import { fetchProdutos, fetchHistoricoTodos, fetchConfiguracoes, fetchSecoes, buildHistoricoPorProduto, materialEfetivo } from "../lib/supabase.js";
+import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo } from "../lib/badges.js";
+import { computarProdutosDaSecao } from "../lib/secoes.js";
+
+const [produtos, historicoTodos, config, secoesRaw] = await Promise.all([
+  fetchProdutos(),
+  fetchHistoricoTodos(),
+  fetchConfiguracoes(),
+  fetchSecoes(),
+]);
+const historicoPorProduto = buildHistoricoPorProduto(historicoTodos);
+const badgesMenorPreco = badgesMenorPrecoDeConfig(config);
+const badgesProdutoNovo = badgesProdutoNovoDeConfig(config);
+const badgesPorId = new Map(
+  produtos.map((p) => [
+    p.id,
+    { menorPreco: badgeMenorPreco(p, badgesMenorPreco, historicoPorProduto), produtoNovo: badgeProdutoNovo(p, badgesProdutoNovo) },
+  ])
+);
+
+const secoes = secoesRaw
+  .map((secao) => ({ secao, ...computarProdutosDaSecao(secao, produtos, historicoPorProduto) }))
+  .filter(({ produtos: p }) => p.length > 0);
+
+const categorias = [...new Set(produtos.map((p) => p.categoria).filter(Boolean))].sort();
+const materiais = [...new Set(produtos.map(materialEfetivo).filter(Boolean))].sort();
+---
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LUPA3D — Comparador de preços de filamento e resina 3D</title>
+  <meta name="description" content="Compare preços de filamentos e resinas 3D de várias lojas brasileiras num só lugar. Favoritos, comparação e histórico de preço, sem cadastro." />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="LUPA3D" />
+  <meta property="og:title" content="LUPA3D — Comparador de preços de filamento e resina 3D" />
+  <meta property="og:description" content="Compare preços de filamentos e resinas 3D de várias lojas brasileiras num só lugar. Favoritos, comparação e histórico de preço, sem cadastro." />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="topo">
+    <div class="topo-linha">
+      <div class="logo-lupa3d">LUPA<span>3D</span></div>
+      <div class="busca-grande">
+        <span class="busca-icone" aria-hidden="true">🔍</span>
+        <input type="search" id="busca" placeholder="Pesquisar produto..." aria-label="Buscar produtos" />
+      </div>
+      <nav class="abas">
+        <a href="/favoritos/">Favoritos (<span data-contador-favoritos>0</span>)</a>
+        <a href="/lojas/">Lojas</a>
+      </nav>
+    </div>
+    <div class="controles">
+      <select id="filtro-categoria">
+        <option value="">Todas as categorias</option>
+        {categorias.map((c) => <option value={c}>{c}</option>)}
+      </select>
+      <select id="filtro-material">
+        <option value="">Todos os materiais</option>
+        {materiais.map((m) => <option value={m}>{m}</option>)}
+      </select>
+      <select id="ordenar">
+        <option value="">Ordenar: padrão</option>
+        <option value="preco_asc">Menor preço</option>
+        <option value="preco_desc">Maior preço</option>
+        <option value="cliques">Mais clicados</option>
+        <option value="recentes">Mais recentes</option>
+      </select>
+      <label class="filtro-pix-linha">
+        <input type="checkbox" id="filtro-pix" />
+        Só com desconto no Pix
+      </label>
+    </div>
+  </header>
+
+  <p class="prototipo-aviso" style="text-align:center; padding:0.5rem; background:#fef3c7; margin:0;">
+    Protótipo Astro — {produtos.length} produtos gerados estaticamente no build, pra comparar com o site atual.
+  </p>
+
+  {secoes.map(({ secao, produtos: produtosDaSecao, temMais }) => (
+    <SecaoHome secao={secao} produtos={produtosDaSecao} temMais={temMais} badgesPorId={badgesPorId} />
+  ))}
+
+  <div class="titulo-secao-grid-linha">
+    <h2 class="titulo-secao-grid">Últimas Ofertas!</h2>
+  </div>
+
+  <main id="grid" class="grid">
+    {produtos.map((p) => (
+      <ProductCard p={p} menorPreco={badgesPorId.get(p.id)?.menorPreco} produtoNovo={badgesPorId.get(p.id)?.produtoNovo} />
+    ))}
+  </main>
+
+  <BarraComparacao />
+
+  <script is:inline src="/js/config.js"></script>
+  <script is:inline src="/js/favoritos.js"></script>
+  <script is:inline src="/js/interativo.js"></script>
+</body>
+</html>
