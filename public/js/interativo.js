@@ -234,8 +234,45 @@ function ligarFiltros() {
   document.getElementById("filtro-pix")?.addEventListener("change", aplicarFiltros);
 }
 
+// Banner de aviso e modo manutenção precisam ser conferidos ao vivo (não no
+// build) — sem isso, ligar o modo manutenção no admin só valeria a partir do
+// próximo rebuild, não imediatamente, que é o objetivo desse tipo de aviso.
+async function verificarConfigSite() {
+  const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.LUPA3D_CONFIG;
+  try {
+    const resp = await fetch(
+      `${SUPABASE_URL}/rest/v1/configuracoes?select=chave,valor&chave=in.(aviso_banner,manutencao)`,
+      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
+    );
+    const linhas = await resp.json();
+    const config = {};
+    for (const { chave, valor } of linhas) config[chave] = valor;
+
+    const banner = document.getElementById("banner-aviso");
+    if (banner && config.aviso_banner) {
+      banner.textContent = config.aviso_banner;
+      banner.classList.remove("oculto-tela");
+    }
+
+    if (config.manutencao === "true") {
+      const grid = document.getElementById("grid");
+      if (grid) {
+        const aviso = document.createElement("p");
+        aviso.textContent = "Estamos atualizando o site — volte em breve.";
+        aviso.style.textAlign = "center";
+        aviso.style.padding = "3rem 1rem";
+        grid.replaceWith(aviso);
+      }
+      document.querySelectorAll(".secao-home, .titulo-secao-grid-linha, .categorias-nav").forEach((el) => el.remove());
+    }
+  } catch {
+    // sem config, segue normal
+  }
+}
+
 restaurarEstadoDaURL();
 hidratarFavoritos();
 hidratarComparacao();
 ligarEventosInterativos();
 ligarFiltros();
+verificarConfigSite();

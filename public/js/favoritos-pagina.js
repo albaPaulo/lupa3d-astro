@@ -73,9 +73,27 @@ function renderizarGridFavoritos() {
   aplicarFiltros();
 }
 
+async function aplicarColunasGrid() {
+  const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.LUPA3D_CONFIG;
+  const grid = document.getElementById("grid");
+  if (!grid) return;
+  try {
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/configuracoes?select=valor&chave=eq.colunas_grid`, {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+    });
+    const linhas = await resp.json();
+    const colunas = Math.min(6, Math.max(2, parseInt(linhas[0]?.valor, 10) || 3));
+    grid.style.setProperty("--colunas-grid", colunas);
+  } catch {
+    // sem config, fica no padrão do CSS (3 colunas)
+  }
+}
+
 async function carregarFavoritos() {
   const status = document.getElementById("status");
   const ids = getFavoritos();
+
+  aplicarColunasGrid();
 
   if (ids.length === 0) {
     renderizarGridFavoritos();

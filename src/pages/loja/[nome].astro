@@ -24,6 +24,7 @@ export async function getStaticPaths() {
   const historicoPorProduto = buildHistoricoPorProduto(historicoTodos);
   const badgesMenorPreco = badgesMenorPrecoDeConfig(config);
   const badgesProdutoNovo = badgesProdutoNovoDeConfig(config);
+  const colunasGrid = Math.min(6, Math.max(2, parseInt(config.colunas_grid, 10) || 3));
 
   return nomes.map((nome) => {
     const produtosDaLoja = produtos.filter((p) => p.loja === nome);
@@ -32,6 +33,7 @@ export async function getStaticPaths() {
       props: {
         nome,
         produtosDaLoja,
+        colunasGrid,
         loja: lojasConfig.find((l) => l.nome === nome) || null,
         categorias: [...new Set(produtosDaLoja.map((p) => p.categoria).filter(Boolean))].sort(),
         materiais: [...new Set(produtosDaLoja.map(materialEfetivo).filter(Boolean))].sort(),
@@ -45,7 +47,7 @@ export async function getStaticPaths() {
   });
 }
 
-const { nome, produtosDaLoja, loja, categorias, materiais, badges } = Astro.props;
+const { nome, produtosDaLoja, loja, categorias, materiais, badges, colunasGrid } = Astro.props;
 const badgesPorId = new Map(badges.map((b) => [b.id, b]));
 const titulo = `${nome} — LUPA3D`;
 const descricao = loja?.descricao || `Confira os ${produtosDaLoja.length} produtos e preços da ${nome} no LUPA3D.`;
@@ -69,6 +71,8 @@ const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
+  <div id="banner-aviso" class="banner-aviso oculto-tela"></div>
+
   <header class="topo">
     <div class="topo-linha">
       <a href="/" class="logo-lupa3d">LUPA<span>3D</span></a>
@@ -129,7 +133,7 @@ const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
     <h2 class="titulo-secao-grid">Produtos ({produtosDaLoja.length})</h2>
   </div>
 
-  <main id="grid" class="grid">
+  <main id="grid" class="grid" style={`--colunas-grid: ${colunasGrid}`}>
     {produtosDaLoja.map((p) => (
       <ProductCard p={p} menorPreco={badgesPorId.get(p.id)?.menorPreco} produtoNovo={badgesPorId.get(p.id)?.produtoNovo} />
     ))}

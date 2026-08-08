@@ -16,6 +16,7 @@ const [produtos, historicoTodos, config, secoesRaw] = await Promise.all([
 const historicoPorProduto = buildHistoricoPorProduto(historicoTodos);
 const badgesMenorPreco = badgesMenorPrecoDeConfig(config);
 const badgesProdutoNovo = badgesProdutoNovoDeConfig(config);
+const colunasGrid = Math.min(6, Math.max(2, parseInt(config.colunas_grid, 10) || 3));
 const badgesPorId = new Map(
   produtos.map((p) => [
     p.id,
@@ -29,13 +30,15 @@ const secoes = secoesRaw
 
 const categorias = [...new Set(produtos.map((p) => p.categoria).filter(Boolean))].sort();
 const materiais = [...new Set(produtos.map(materialEfetivo).filter(Boolean))].sort();
+
+const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de filamento e resina 3D";
 ---
 <!doctype html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>LUPA3D — Comparador de preços de filamento e resina 3D</title>
+  <title>{tituloPagina}</title>
   <meta name="description" content="Compare preços de filamentos e resinas 3D de várias lojas brasileiras num só lugar. Favoritos, comparação e histórico de preço, sem cadastro." />
 
   <meta property="og:type" content="website" />
@@ -47,6 +50,8 @@ const materiais = [...new Set(produtos.map(materialEfetivo).filter(Boolean))].so
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
+  <div id="banner-aviso" class="banner-aviso oculto-tela"></div>
+
   <header class="topo">
     <div class="topo-linha">
       <div class="logo-lupa3d">LUPA<span>3D</span></div>
@@ -91,7 +96,7 @@ const materiais = [...new Set(produtos.map(materialEfetivo).filter(Boolean))].so
     <h2 class="titulo-secao-grid">Últimas Ofertas!</h2>
   </div>
 
-  <main id="grid" class="grid">
+  <main id="grid" class="grid" style={`--colunas-grid: ${colunasGrid}`}>
     {produtos.map((p) => (
       <ProductCard p={p} menorPreco={badgesPorId.get(p.id)?.menorPreco} produtoNovo={badgesPorId.get(p.id)?.produtoNovo} />
     ))}
