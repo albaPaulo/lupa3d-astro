@@ -2,6 +2,7 @@
 import ProductCard from "../components/ProductCard.astro";
 import BarraComparacao from "../components/BarraComparacao.astro";
 import SecaoHome from "../components/SecaoHome.astro";
+import Footer from "../components/Footer.astro";
 import { fetchProdutos, fetchHistoricoTodos, fetchConfiguracoes, fetchSecoes, buildHistoricoPorProduto, materialEfetivo } from "../lib/supabase.js";
 import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo } from "../lib/badges.js";
 import { computarProdutosDaSecao } from "../lib/secoes.js";
@@ -95,6 +96,8 @@ const materiais = [...new Set(produtos.map(materialEfetivo).filter(Boolean))].so
       <ProductCard p={p} menorPreco={badgesPorId.get(p.id)?.menorPreco} produtoNovo={badgesPorId.get(p.id)?.produtoNovo} />
     ))}
   </main>
+
+  <Footer />
 
   <BarraComparacao />
 

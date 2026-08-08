@@ -1765,3 +1765,35 @@ header.topo {
   padding: 0.5rem;
   font-size: 0.85rem;
 }
+
+.rodape {
+  margin-top: 3rem;
+  padding: 1.5rem 1rem;
+  border-top: 1px solid var(--cor-borda);
+  text-align: center;
+  color: var(--cor-texto);
+  opacity: 0.75;
+  font-size: 0.85rem;
+}
+
+.rodape-sobre {
+  max-width: 40rem;
+  margin: 0 auto 0.75rem;
+}
+
+.rodape-linha {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.rodape-linha a {
+  color: var(--cor-marca);
+  text-decoration: none;
+}
+
+.rodape-linha a:hover {
+  text-decoration: underline;
+}

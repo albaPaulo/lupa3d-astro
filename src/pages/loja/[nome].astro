@@ -1,6 +1,7 @@
 ---
 import ProductCard from "../../components/ProductCard.astro";
 import BarraComparacao from "../../components/BarraComparacao.astro";
+import Footer from "../../components/Footer.astro";
 import {
   fetchProdutos,
   fetchLojas,
@@ -133,6 +134,8 @@ const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
       <ProductCard p={p} menorPreco={badgesPorId.get(p.id)?.menorPreco} produtoNovo={badgesPorId.get(p.id)?.produtoNovo} />
     ))}
   </main>
+
+  <Footer />
 
   <BarraComparacao />
 

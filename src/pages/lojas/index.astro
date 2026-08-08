@@ -1,5 +1,6 @@
 ---
 import { fetchProdutos, fetchLojas } from "../../lib/supabase.js";
+import Footer from "../../components/Footer.astro";
 
 const [produtos, lojasConfig] = await Promise.all([fetchProdutos(), fetchLojas()]);
 
@@ -48,5 +49,7 @@ const nomesLojas = [...contagemPorLoja.keys()].sort();
       })}
     </div>
   </main>
+
+  <Footer />
 </body>
 </html>

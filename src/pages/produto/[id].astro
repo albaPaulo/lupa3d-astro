@@ -1,6 +1,7 @@
 ---
 import BarraComparacao from "../../components/BarraComparacao.astro";
 import ParecidoItem from "../../components/ParecidoItem.astro";
+import Footer from "../../components/Footer.astro";
 import {
   fetchProdutos,
   fetchHistoricoTodos,
@@ -141,6 +142,8 @@ const graficoSVG = desenharGraficoSVG(historico);
       )}
     </div>
   </main>
+
+  <Footer />
 
   <BarraComparacao />
 
