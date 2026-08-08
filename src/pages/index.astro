@@ -81,9 +81,6 @@ const materiais = [...new Set(produtos.map(materialEfetivo).filter(Boolean))].so
     </div>
   </header>
 
-  <p class="prototipo-aviso" style="text-align:center; padding:0.5rem; background:#fef3c7; margin:0;">
-    Protótipo Astro — {produtos.length} produtos gerados estaticamente no build, pra comparar com o site atual.
-  </p>
 
   {secoes.map(({ secao, produtos: produtosDaSecao, temMais }) => (
     <SecaoHome secao={secao} produtos={produtosDaSecao} temMais={temMais} badgesPorId={badgesPorId} />
