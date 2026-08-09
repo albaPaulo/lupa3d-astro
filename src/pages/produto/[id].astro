@@ -104,7 +104,7 @@ const graficoSVG = desenharGraficoSVG(historico);
         </div>
 
         <div class="produto-box produto-historico-box">
-          <h3 class="produto-box-titulo">Histórico de preço</h3>
+          <h2 class="produto-box-titulo">Histórico de preço</h2>
           <div id="grafico-container" set:html={graficoSVG}></div>
         </div>
       </div>
@@ -112,12 +112,12 @@ const graficoSVG = desenharGraficoSVG(historico);
       <div class="produto-col-dir">
         <div class="produto-linha-topo">
           <div class="produto-box produto-descricao-box">
-            <h3 class="produto-box-titulo">Descrição</h3>
+            <h2 class="produto-box-titulo">Descrição</h2>
             <p class="detalhe-descricao">{p.descricao_manual || p.descricao || "Sem descrição disponível para este produto."}</p>
           </div>
 
           <div class="produto-box produto-vendido-box">
-            <h3 class="produto-box-titulo">Vendido por</h3>
+            <h2 class="produto-box-titulo">Vendido por</h2>
             <a href={`/loja/${p.loja}/`} class="card-loja-link">{p.loja} &rarr;</a>
             <div class="card-precos">
               <span class="card-preco">{formatarPreco(p.preco)}</span>
@@ -134,7 +134,7 @@ const graficoSVG = desenharGraficoSVG(historico);
     </div>
 
     <div class="produto-box produto-parecidos-box">
-      <h3 class="produto-box-titulo">Produtos parecidos em outras lojas</h3>
+      <h2 class="produto-box-titulo">Produtos parecidos em outras lojas</h2>
       {parecidos.length === 0 ? (
         <p class="grafico-vazio">Nenhum produto parecido encontrado em outras lojas.</p>
       ) : (
