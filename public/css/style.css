@@ -5,7 +5,7 @@
   --cor-borda: #e2e2e5;
   --cor-marca: #2563eb;
   --cor-pix: #16a34a;
-  --cor-favorito: #f59e0b;
+  --cor-favorito: #b45309;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -14,6 +14,8 @@
     --cor-texto: #f0f0f0;
     --cor-card: #1c1c1f;
     --cor-borda: #2e2e33;
+    --cor-marca: #60a5fa;
+    --cor-favorito: #fbbf24;
   }
 }
 
@@ -630,9 +632,13 @@ header.topo {
 
 .barra-comparacao {
   position: fixed;
-  bottom: -100px;
+  bottom: 1.5rem;
   left: 50%;
-  transform: translateX(-50%);
+  /* translateY em % (não px fixo) esconde a barra fora da tela não importa
+     quantas linhas o conteúdo quebrar — no mobile ela cresce bastante
+     (flex-wrap), e um deslocamento fixo em px podia deixar um pedaço
+     visível mesmo "escondida". */
+  transform: translate(-50%, calc(100% + 3rem));
   background: var(--cor-texto);
   color: var(--cor-fundo);
   padding: 0.75rem 1.25rem;
@@ -643,11 +649,11 @@ header.topo {
   max-width: calc(100vw - 2rem);
   flex-wrap: wrap;
   justify-content: center;
-  transition: bottom 0.2s ease;
+  transition: transform 0.2s ease;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
-.barra-comparacao.visivel { bottom: 1.5rem; }
+.barra-comparacao.visivel { transform: translate(-50%, 0); }
 
 .barra-comparacao button {
   border: none;
@@ -1772,7 +1778,6 @@ header.topo {
   border-top: 1px solid var(--cor-borda);
   text-align: center;
   color: var(--cor-texto);
-  opacity: 0.75;
   font-size: 0.85rem;
 }
 
@@ -1796,4 +1801,24 @@ header.topo {
 
 .rodape-linha a:hover {
   text-decoration: underline;
+}
+
+/* --cor-favorito fica mais clara no modo escuro (pra ler bem como texto
+   sobre o card escuro) — nesses três casos ela é usada como fundo sólido,
+   então o texto branco padrão perderia contraste; troca pra texto escuro.
+   Precisa ficar no final do arquivo pra vencer o empate de especificidade
+   contra as regras originais (mesma especificidade, ordem decide). */
+@media (prefers-color-scheme: dark) {
+  .btn-favorito.ativo,
+  .badge-menor-preco,
+  .badge-menor-preco-titulo {
+    color: #1a1a1a;
+  }
+
+  /* mesmo problema com --cor-marca: fica clara no escuro (pra texto sobre
+     o card), mas branco em cima dela como fundo sólido perde contraste. */
+  .logo-lupa3d span,
+  .barra-comparacao .principal {
+    color: #1a1a1a;
+  }
 }

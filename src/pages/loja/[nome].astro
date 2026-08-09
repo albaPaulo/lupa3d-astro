@@ -87,15 +87,15 @@ const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
       </nav>
     </div>
     <div class="controles">
-      <select id="filtro-categoria">
+      <select id="filtro-categoria" aria-label="Filtrar por categoria">
         <option value="">Todas as categorias</option>
         {categorias.map((c) => <option value={c}>{c}</option>)}
       </select>
-      <select id="filtro-material">
+      <select id="filtro-material" aria-label="Filtrar por material">
         <option value="">Todos os materiais</option>
         {materiais.map((m) => <option value={m}>{m}</option>)}
       </select>
-      <select id="ordenar">
+      <select id="ordenar" aria-label="Ordenar produtos">
         <option value="">Ordenar: padrão</option>
         <option value="preco_asc">Menor preço</option>
         <option value="preco_desc">Maior preço</option>
