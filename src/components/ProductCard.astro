@@ -9,6 +9,7 @@ const temPix = p.preco_pix != null && Number(p.preco_pix) < Number(p.preco);
 <article
   class="card"
   data-id={p.id}
+  data-href={`/produto/${p.id}/`}
   data-nome={p.nome.toLowerCase()}
   data-categoria={p.categoria || ""}
   data-material={material}

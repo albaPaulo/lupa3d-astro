@@ -218,7 +218,19 @@ header.topo {
 }
 
 @media (max-width: 700px) {
-  .secao-grade { grid-template-columns: repeat(2, 1fr); }
+  /* no mobile, mesmo as seções configuradas como "grade" viram carrossel
+     horizontal — 2 colunas fixas empurra a página inteira pra baixo,
+     enquanto rolar de lado cabe melhor numa tela estreita. */
+  .secao-grade {
+    display: flex;
+    overflow-x: auto;
+    gap: 1rem;
+    padding-bottom: 0.25rem;
+  }
+
+  .secao-grade .card {
+    flex: 0 0 200px;
+  }
 }
 
 .loja-perfil {
@@ -428,10 +440,6 @@ header.topo {
 
 @media (max-width: 900px) {
   .grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 560px) {
-  .grid { grid-template-columns: 1fr; }
 }
 
 .ver-mais-container {

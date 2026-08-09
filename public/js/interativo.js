@@ -127,6 +127,14 @@ function ligarEventosInterativos() {
       return;
     }
 
+    // Card inteiro é clicável (não só o botão "Ver detalhes") — exceto a
+    // área do checkbox de comparar e o próprio link, que já navegam sozinhos.
+    const card = ev.target.closest(".card[data-href]");
+    if (card && !ev.target.closest(".checkbox-comparar, a")) {
+      window.location.href = card.dataset.href;
+      return;
+    }
+
     if (ev.target.closest("#btn-comparar")) {
       abrirModalComparacao();
       return;
