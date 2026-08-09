@@ -190,11 +190,19 @@ function debounce(fn, atraso) {
   };
 }
 
-// Filtra/ordena os cards que já estão no DOM (renderizados no build) — sem
-// buscar nada de novo, só mostra/esconde e reordena os nós existentes.
-function aplicarFiltros() {
+// Mesmo padrão do site atual: mostra só um pedaço dos resultados, com um
+// botão "Ver mais!" pra ir revelando o resto — sem isso a home despeja
+// centenas de cards na tela de uma vez só.
+const INCREMENTO_EXIBICAO = 24;
+let LIMITE_EXIBICAO = INCREMENTO_EXIBICAO;
+
+// Filtra/ordena/limita os cards que já estão no DOM (renderizados no build)
+// — sem buscar nada de novo, só mostra/esconde e reordena os nós existentes.
+function aplicarFiltros(resetarLimite = true) {
   const grid = document.getElementById("grid");
   if (!grid) return;
+
+  if (resetarLimite) LIMITE_EXIBICAO = INCREMENTO_EXIBICAO;
 
   const busca = (document.getElementById("busca")?.value || "").toLowerCase().trim();
   const categoria = document.getElementById("filtro-categoria")?.value || "";
@@ -203,13 +211,15 @@ function aplicarFiltros() {
   const soPix = document.getElementById("filtro-pix")?.checked || false;
 
   const cards = [...grid.querySelectorAll(".card")];
+  const combinam = [];
 
   for (const card of cards) {
     const okBusca = !busca || card.dataset.nome.includes(busca);
     const okCategoria = !categoria || card.dataset.categoria === categoria;
     const okMaterial = !material || card.dataset.material === material;
     const okPix = !soPix || card.dataset.pix === "1";
-    card.classList.toggle("oculto-tela", !(okBusca && okCategoria && okMaterial && okPix));
+    if (okBusca && okCategoria && okMaterial && okPix) combinam.push(card);
+    else card.classList.add("oculto-tela");
   }
 
   const comparadores = {
@@ -219,19 +229,27 @@ function aplicarFiltros() {
     recentes: (a, b) => new Date(b.dataset.criado || 0) - new Date(a.dataset.criado || 0),
   };
   const comparador = comparadores[ordenar];
-  if (comparador) {
-    for (const card of [...cards].sort(comparador)) grid.appendChild(card);
-  }
+  if (comparador) combinam.sort(comparador);
+  for (const card of combinam) grid.appendChild(card);
+
+  combinam.forEach((card, i) => card.classList.toggle("oculto-tela", i >= LIMITE_EXIBICAO));
+
+  document.getElementById("btn-ver-mais")?.classList.toggle("oculto-tela", combinam.length <= LIMITE_EXIBICAO);
 }
 
 function ligarFiltros() {
   const busca = document.getElementById("busca");
-  if (busca) busca.addEventListener("input", debounce(aplicarFiltros, 250));
+  if (busca) busca.addEventListener("input", debounce(() => aplicarFiltros(true), 250));
 
   for (const id of ["filtro-categoria", "filtro-material", "ordenar"]) {
-    document.getElementById(id)?.addEventListener("change", aplicarFiltros);
+    document.getElementById(id)?.addEventListener("change", () => aplicarFiltros(true));
   }
-  document.getElementById("filtro-pix")?.addEventListener("change", aplicarFiltros);
+  document.getElementById("filtro-pix")?.addEventListener("change", () => aplicarFiltros(true));
+
+  document.getElementById("btn-ver-mais")?.addEventListener("click", () => {
+    LIMITE_EXIBICAO += INCREMENTO_EXIBICAO;
+    aplicarFiltros(false);
+  });
 }
 
 // Banner de aviso e modo manutenção precisam ser conferidos ao vivo (não no
@@ -275,4 +293,5 @@ hidratarFavoritos();
 hidratarComparacao();
 ligarEventosInterativos();
 ligarFiltros();
+aplicarFiltros(true);
 verificarConfigSite();
