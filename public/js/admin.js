@@ -383,6 +383,7 @@ async function salvarProduto(tr) {
     });
     if (!resp.ok) throw new Error(await resp.text());
     btn.textContent = "Salvo!";
+    tr.classList.remove("linha-nao-salva");
   } catch (e) {
     btn.textContent = "Erro";
     console.error(e);
@@ -637,6 +638,7 @@ async function salvarLoja(card) {
       ${bannerUrl ? `<img src="${bannerUrl}" class="loja-config-preview-banner" referrerpolicy="no-referrer">` : ""}
     `;
     status.textContent = "Salvo!";
+    card.classList.remove("nao-salvo");
   } catch (e) {
     status.textContent = "Erro ao salvar.";
     console.error(e);
@@ -819,7 +821,17 @@ async function alternarAtivoSecao(id, ativo) {
   }
 }
 
+function contarEdicoesNaoSalvas() {
+  return document.querySelectorAll(".linha-nao-salva, .loja-config-card.nao-salvo").length;
+}
+
 async function publicarAlteracoes() {
+  const pendentes = contarEdicoesNaoSalvas();
+  if (pendentes > 0) {
+    const mensagem = `Você tem ${pendentes} edição(ões) não salva(s) em Produtos/Lojas — elas NÃO serão publicadas até você clicar em "Salvar" em cada uma. Publicar mesmo assim?`;
+    if (!confirm(mensagem)) return;
+  }
+
   admEls.btnPublicar.disabled = true;
   admEls.publicarStatus.textContent = "Publicando...";
   try {
@@ -874,10 +886,27 @@ function ligarEventosAdmin() {
     }
   });
 
+  // Marca a linha como "editada e não salva" pra avisar em publicarAlteracoes()
+  // caso alguém digite em vários campos e esqueça de clicar em "Salvar" antes
+  // de publicar — só o clique em "Salvar" grava a edição no banco.
+  admEls.tbody.addEventListener("input", (ev) => {
+    if (ev.target.matches("[data-campo]")) ev.target.closest("tr").classList.add("linha-nao-salva");
+  });
+  admEls.tbody.addEventListener("change", (ev) => {
+    if (ev.target.matches("[data-campo]")) ev.target.closest("tr").classList.add("linha-nao-salva");
+  });
+
   admEls.lojasLista.addEventListener("click", (ev) => {
     if (ev.target.closest('[data-acao="salvar-loja"]')) {
       salvarLoja(ev.target.closest(".loja-config-card"));
     }
+  });
+
+  admEls.lojasLista.addEventListener("input", (ev) => {
+    if (ev.target.matches("[data-campo]")) ev.target.closest(".loja-config-card").classList.add("nao-salvo");
+  });
+  admEls.lojasLista.addEventListener("change", (ev) => {
+    if (ev.target.matches("[data-campo]")) ev.target.closest(".loja-config-card").classList.add("nao-salvo");
   });
 
   admEls.secaoBuscaProduto.addEventListener("input", buscarProdutoParaFixar);

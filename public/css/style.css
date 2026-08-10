@@ -1546,6 +1546,12 @@ header.topo {
   background: color-mix(in srgb, orange 10%, var(--cor-fundo)) !important;
 }
 
+.linha-nao-salva,
+.loja-config-card.nao-salvo {
+  outline: 2px solid dodgerblue;
+  outline-offset: -2px;
+}
+
 .admin-tabela {
   border-collapse: collapse;
   width: 100%;
