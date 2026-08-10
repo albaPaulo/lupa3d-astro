@@ -7,6 +7,12 @@ function escapeHTML(valor) {
   return String(valor).replace(/[&<>"']/g, (c) => _ESCAPE_HTML_MAPA[c]);
 }
 
+// O site público é gerado estático (Astro) e só lê o Supabase durante o
+// build — fica só nesse arquivo (carregado apenas pelo admin), não em
+// config.js, porque config.js é carregado em toda página pública e esse
+// link deixa qualquer um disparar builds à vontade se ficar exposto lá.
+const NETLIFY_BUILD_HOOK_URL = "https://api.netlify.com/build_hooks/6a7761f4bec0491e620cae52";
+
 let PRODUTOS_ADMIN = [];
 let SECOES = [];
 let PINADOS_ATUAIS = [];
@@ -26,6 +32,8 @@ const admEls = {
   usuarioLogado: document.getElementById("admin-usuario-logado"),
   emailLogado: document.getElementById("admin-email-logado"),
   btnLogout: document.getElementById("btn-logout"),
+  btnPublicar: document.getElementById("btn-publicar"),
+  publicarStatus: document.getElementById("publicar-status"),
   formConfig: document.getElementById("form-config"),
   configTitulo: document.getElementById("config-titulo"),
   configBanner: document.getElementById("config-banner"),
@@ -811,6 +819,22 @@ async function alternarAtivoSecao(id, ativo) {
   }
 }
 
+async function publicarAlteracoes() {
+  admEls.btnPublicar.disabled = true;
+  admEls.publicarStatus.textContent = "Publicando...";
+  try {
+    const resp = await fetch(NETLIFY_BUILD_HOOK_URL, { method: "POST" });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    admEls.publicarStatus.textContent = "Build disparado! O site atualiza em 1-2 min.";
+  } catch (e) {
+    console.error(e);
+    admEls.publicarStatus.textContent = "Erro ao disparar o build.";
+  } finally {
+    admEls.btnPublicar.disabled = false;
+    setTimeout(() => (admEls.publicarStatus.textContent = ""), 6000);
+  }
+}
+
 function ligarEventosAdmin() {
   admEls.formLogin.addEventListener("submit", async (ev) => {
     ev.preventDefault();
@@ -827,6 +851,8 @@ function ligarEventosAdmin() {
     logoutAdmin();
     mostrarTelaLogin();
   });
+
+  admEls.btnPublicar.addEventListener("click", publicarAlteracoes);
 
   admEls.menuItens.forEach((btn) => {
     btn.addEventListener("click", () => {
