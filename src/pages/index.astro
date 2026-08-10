@@ -61,18 +61,38 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
   <header class="topo">
     <div class="topo-linha">
       <h1 class="logo-lupa3d">LUPA<span>3D</span></h1>
-      <div class="busca-grande">
-        <span class="busca-icone" aria-hidden="true">🔍</span>
-        <input type="search" id="busca" placeholder="Pesquisar produto..." aria-label="Buscar produtos" autocomplete="off" />
-        <div id="busca-sugestoes" class="busca-sugestoes oculto-tela"></div>
-      </div>
       <nav class="abas">
         <a href="/favoritos/">Favoritos (<span data-contador-favoritos>0</span>)</a>
         <a href="/lojas/">Lojas</a>
       </nav>
     </div>
+  </header>
+
+  <section class="barra-busca-categoria">
+    <nav class="atalhos-categoria" aria-label="Atalhos de categoria">
+      {categorias.map((c) => (
+        <button type="button" class="atalho-categoria" data-categoria={c}>
+          <span class="atalho-categoria-icone" aria-hidden="true">{EMOJI_CATEGORIA[c] || "📦"}</span>
+          <span class="atalho-categoria-label">{LABEL_CATEGORIA[c] || c}</span>
+        </button>
+      ))}
+    </nav>
+
+    <div class="busca-solo">
+      <div class="busca-grande">
+        <span class="busca-icone" aria-hidden="true">🔍</span>
+        <input type="search" id="busca" placeholder="Pesquisar produto..." aria-label="Buscar produtos" autocomplete="off" />
+        <div id="busca-sugestoes" class="busca-sugestoes oculto-tela"></div>
+      </div>
+    </div>
+
     <div id="filtros-ativos" class="filtros-ativos"></div>
-    <div class="controles">
+
+    <button type="button" id="btn-mais-filtros" class="btn-mais-filtros" aria-expanded="false" aria-controls="controles-avancados">
+      🔍 Mais filtros
+    </button>
+
+    <div class="controles oculto-tela" id="controles-avancados">
       <select id="filtro-categoria" aria-label="Filtrar por categoria">
         <option value="">Todas as categorias</option>
         {categorias.map((c) => <option value={c}>{c}</option>)}
@@ -93,16 +113,7 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
         Só com desconto no Pix
       </label>
     </div>
-  </header>
-
-  <nav class="atalhos-categoria" aria-label="Atalhos de categoria">
-    {categorias.map((c) => (
-      <button type="button" class="atalho-categoria" data-categoria={c}>
-        <span class="atalho-categoria-icone" aria-hidden="true">{EMOJI_CATEGORIA[c] || "📦"}</span>
-        <span class="atalho-categoria-label">{LABEL_CATEGORIA[c] || c}</span>
-      </button>
-    ))}
-  </nav>
+  </section>
 
   <FaixaProvaSocial totalProdutos={produtos.length} totalLojas={totalLojas} />
 

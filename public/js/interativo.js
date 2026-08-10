@@ -302,6 +302,16 @@ function ligarFiltros() {
   }
   document.getElementById("filtro-pix")?.addEventListener("change", () => aplicarFiltros(true));
 
+  // "Mais filtros" só existe na home — material/ordenar/Pix ficam escondidos
+  // até o usuário pedir.
+  const btnMaisFiltros = document.getElementById("btn-mais-filtros");
+  const controlesAvancados = document.getElementById("controles-avancados");
+  btnMaisFiltros?.addEventListener("click", () => {
+    const aberto = controlesAvancados.classList.toggle("oculto-tela") === false;
+    btnMaisFiltros.setAttribute("aria-expanded", String(aberto));
+    btnMaisFiltros.textContent = aberto ? "🔍 Menos filtros" : "🔍 Mais filtros";
+  });
+
   // Atalhos de categoria (ícone grande) só existem na home — reaproveita o
   // mesmo <select> e o mesmo aplicarFiltros() do filtro de categoria normal.
   document.querySelector(".atalhos-categoria")?.addEventListener("click", (ev) => {
