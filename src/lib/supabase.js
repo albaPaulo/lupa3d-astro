@@ -61,6 +61,14 @@ export const REDES_LOJA = [
 
 export const EMOJI_CATEGORIA = { resina: "🧪", filamento: "🧵", acessorio: "🛠️", pigmento: "🎨", impressora: "🖨️" };
 
+export const LABEL_CATEGORIA = {
+  resina: "Resina",
+  filamento: "Filamento",
+  acessorio: "Acessório",
+  pigmento: "Pigmento",
+  impressora: "Impressora",
+};
+
 export function formatarPreco(valor) {
   if (valor == null) return "-";
   return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });

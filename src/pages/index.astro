@@ -4,7 +4,7 @@ import BarraComparacao from "../components/BarraComparacao.astro";
 import SecaoHome from "../components/SecaoHome.astro";
 import Footer from "../components/Footer.astro";
 import FaixaProvaSocial from "../components/FaixaProvaSocial.astro";
-import { fetchProdutos, fetchHistoricoTodos, fetchConfiguracoes, fetchSecoes, buildHistoricoPorProduto, materialEfetivo } from "../lib/supabase.js";
+import { fetchProdutos, fetchHistoricoTodos, fetchConfiguracoes, fetchSecoes, buildHistoricoPorProduto, materialEfetivo, EMOJI_CATEGORIA, LABEL_CATEGORIA } from "../lib/supabase.js";
 import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo, precoAnteriorParaExibicao } from "../lib/badges.js";
 import { computarProdutosDaSecao } from "../lib/secoes.js";
 
@@ -94,6 +94,15 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
       </label>
     </div>
   </header>
+
+  <nav class="atalhos-categoria" aria-label="Atalhos de categoria">
+    {categorias.map((c) => (
+      <button type="button" class="atalho-categoria" data-categoria={c}>
+        <span class="atalho-categoria-icone" aria-hidden="true">{EMOJI_CATEGORIA[c] || "📦"}</span>
+        <span class="atalho-categoria-label">{LABEL_CATEGORIA[c] || c}</span>
+      </button>
+    ))}
+  </nav>
 
   <FaixaProvaSocial totalProdutos={produtos.length} totalLojas={totalLojas} />
 

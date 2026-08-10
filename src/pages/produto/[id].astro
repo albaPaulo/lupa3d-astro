@@ -10,7 +10,7 @@ import {
   produtosParecidos,
   formatarPreco,
 } from "../../lib/supabase.js";
-import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo } from "../../lib/badges.js";
+import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo, precoAnteriorParaExibicao } from "../../lib/badges.js";
 import { desenharGraficoSVG } from "../../lib/grafico.js";
 
 export async function getStaticPaths() {
@@ -33,11 +33,12 @@ export async function getStaticPaths() {
       parecidos: produtosParecidos(produtos, p, faixaPrecoAtiva),
       menorPreco: badgeMenorPreco(p, badgesMenorPreco, historicoPorProduto),
       produtoNovo: badgeProdutoNovo(p, badgesProdutoNovo),
+      precoAnterior: precoAnteriorParaExibicao(p, historicoPorProduto),
     },
   }));
 }
 
-const { produto: p, historico, parecidos, menorPreco, produtoNovo } = Astro.props;
+const { produto: p, historico, parecidos, menorPreco, produtoNovo, precoAnterior } = Astro.props;
 const titulo = `${p.nome} — LUPA3D`;
 const descricao = `${p.nome} por ${formatarPreco(p.preco)} na ${p.loja}. Compare com outras lojas de filamento e resina 3D no LUPA3D.`;
 const graficoSVG = desenharGraficoSVG(historico);
@@ -120,6 +121,7 @@ const graficoSVG = desenharGraficoSVG(historico);
             <h2 class="produto-box-titulo">Vendido por</h2>
             <a href={`/loja/${p.loja}/`} class="card-loja-link">{p.loja} &rarr;</a>
             <div class="card-precos">
+              {precoAnterior && <span class="card-preco-anterior">{formatarPreco(precoAnterior)}</span>}
               <span class="card-preco">{formatarPreco(p.preco)}</span>
               {p.preco_pix && <span class="card-preco-pix">{formatarPreco(p.preco_pix)} no Pix</span>}
             </div>
