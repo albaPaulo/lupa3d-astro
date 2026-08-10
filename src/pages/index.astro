@@ -3,8 +3,9 @@ import ProductCard from "../components/ProductCard.astro";
 import BarraComparacao from "../components/BarraComparacao.astro";
 import SecaoHome from "../components/SecaoHome.astro";
 import Footer from "../components/Footer.astro";
+import FaixaProvaSocial from "../components/FaixaProvaSocial.astro";
 import { fetchProdutos, fetchHistoricoTodos, fetchConfiguracoes, fetchSecoes, buildHistoricoPorProduto, materialEfetivo } from "../lib/supabase.js";
-import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo } from "../lib/badges.js";
+import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo, precoAnteriorParaExibicao } from "../lib/badges.js";
 import { computarProdutosDaSecao } from "../lib/secoes.js";
 
 const [produtos, historicoTodos, config, secoesRaw] = await Promise.all([
@@ -20,7 +21,11 @@ const colunasGrid = Math.min(6, Math.max(2, parseInt(config.colunas_grid, 10) ||
 const badgesPorId = new Map(
   produtos.map((p) => [
     p.id,
-    { menorPreco: badgeMenorPreco(p, badgesMenorPreco, historicoPorProduto), produtoNovo: badgeProdutoNovo(p, badgesProdutoNovo) },
+    {
+      menorPreco: badgeMenorPreco(p, badgesMenorPreco, historicoPorProduto),
+      produtoNovo: badgeProdutoNovo(p, badgesProdutoNovo),
+      precoAnterior: precoAnteriorParaExibicao(p, historicoPorProduto),
+    },
   ])
 );
 
@@ -30,6 +35,7 @@ const secoes = secoesRaw
 
 const categorias = [...new Set(produtos.map((p) => p.categoria).filter(Boolean))].sort();
 const materiais = [...new Set(produtos.map(materialEfetivo).filter(Boolean))].sort();
+const totalLojas = new Set(produtos.map((p) => p.loja)).size;
 
 const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de filamento e resina 3D";
 ---
@@ -89,6 +95,7 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
     </div>
   </header>
 
+  <FaixaProvaSocial totalProdutos={produtos.length} totalLojas={totalLojas} />
 
   {secoes.map(({ secao, produtos: produtosDaSecao, temMais }) => (
     <SecaoHome secao={secao} produtos={produtosDaSecao} temMais={temMais} badgesPorId={badgesPorId} />
@@ -100,7 +107,12 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
 
   <main id="grid" class="grid" style={`--colunas-grid: ${colunasGrid}`}>
     {produtos.map((p) => (
-      <ProductCard p={p} menorPreco={badgesPorId.get(p.id)?.menorPreco} produtoNovo={badgesPorId.get(p.id)?.produtoNovo} />
+      <ProductCard
+        p={p}
+        menorPreco={badgesPorId.get(p.id)?.menorPreco}
+        produtoNovo={badgesPorId.get(p.id)?.produtoNovo}
+        precoAnterior={badgesPorId.get(p.id)?.precoAnterior}
+      />
     ))}
   </main>
 

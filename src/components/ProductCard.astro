@@ -1,7 +1,7 @@
 ---
 import { formatarPreco, materialEfetivo, kitEfetivo, EMOJI_CATEGORIA } from "../lib/supabase.js";
 
-const { p, menorPreco = null, produtoNovo = null } = Astro.props;
+const { p, menorPreco = null, produtoNovo = null, precoAnterior = null } = Astro.props;
 const material = materialEfetivo(p) || "";
 const kit = kitEfetivo(p);
 const temPix = p.preco_pix != null && Number(p.preco_pix) < Number(p.preco);
@@ -33,6 +33,7 @@ const temPix = p.preco_pix != null && Number(p.preco_pix) < Number(p.preco);
   <div class="card-corpo">
     <h3 class="card-nome">{p.nome}</h3>
     <div class="card-precos">
+      {precoAnterior && <span class="card-preco-anterior">{formatarPreco(precoAnterior)}</span>}
       <span class="card-preco">{formatarPreco(p.preco)}</span>
       {p.preco_pix && <span class="card-preco-pix">{formatarPreco(p.preco_pix)} no Pix</span>}
     </div>

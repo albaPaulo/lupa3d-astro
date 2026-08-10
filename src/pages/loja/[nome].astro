@@ -11,7 +11,7 @@ import {
   materialEfetivo,
   REDES_LOJA,
 } from "../../lib/supabase.js";
-import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo } from "../../lib/badges.js";
+import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo, precoAnteriorParaExibicao } from "../../lib/badges.js";
 
 export async function getStaticPaths() {
   const [produtos, lojasConfig, historicoTodos, config] = await Promise.all([
@@ -41,6 +41,7 @@ export async function getStaticPaths() {
           id: p.id,
           menorPreco: badgeMenorPreco(p, badgesMenorPreco, historicoPorProduto),
           produtoNovo: badgeProdutoNovo(p, badgesProdutoNovo),
+          precoAnterior: precoAnteriorParaExibicao(p, historicoPorProduto),
         })),
       },
     };
@@ -137,7 +138,12 @@ const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
 
   <main id="grid" class="grid" style={`--colunas-grid: ${colunasGrid}`}>
     {produtosDaLoja.map((p) => (
-      <ProductCard p={p} menorPreco={badgesPorId.get(p.id)?.menorPreco} produtoNovo={badgesPorId.get(p.id)?.produtoNovo} />
+      <ProductCard
+        p={p}
+        menorPreco={badgesPorId.get(p.id)?.menorPreco}
+        produtoNovo={badgesPorId.get(p.id)?.produtoNovo}
+        precoAnterior={badgesPorId.get(p.id)?.precoAnterior}
+      />
     ))}
   </main>
 

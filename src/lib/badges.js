@@ -48,6 +48,24 @@ export function badgeMenorPreco(p, badgesMenorPreco, historicoPorProduto) {
   return badgesMenorPreco.find((b) => ehMenorPrecoEmDias(p, b.dias, historicoPorProduto)) || null;
 }
 
+// Maior preço que o próprio produto teve nos últimos `dias` — pra mostrar
+// "de/por" no card quando o preço atual é mais baixo que isso. Só retorna
+// valor quando há queda real registrada no histórico (nunca inventa um
+// preço "de" maior do que o produto já teve de fato).
+export function precoAnteriorParaExibicao(p, historicoPorProduto, dias = 30) {
+  const historico = historicoPorProduto.get(p.id);
+  if (!historico || historico.length === 0) return null;
+
+  const desde = Date.now() - dias * 86400000;
+  const precosNoPeriodo = historico
+    .filter((h) => new Date(h.capturado_em).getTime() >= desde)
+    .map((h) => Number(h.preco));
+
+  if (precosNoPeriodo.length === 0) return null;
+  const maior = Math.max(...precosNoPeriodo);
+  return maior > Number(p.preco) ? maior : null;
+}
+
 // badgesProdutoNovo vem ordenado do menor prazo pro maior — ao contrário da
 // de menor preço, aqui o prazo mais curto é o mais forte.
 export function badgeProdutoNovo(p, badgesProdutoNovo) {

@@ -12,7 +12,12 @@ const estiloGrade = grade ? `--secao-colunas: ${secao.colunas || 4};` : "";
   </div>
   <div class={grade ? "secao-grade" : "secao-scroll"}>
     {produtos.map((p) => (
-      <ProductCard p={p} menorPreco={badgesPorId.get(p.id)?.menorPreco} produtoNovo={badgesPorId.get(p.id)?.produtoNovo} />
+      <ProductCard
+        p={p}
+        menorPreco={badgesPorId.get(p.id)?.menorPreco}
+        produtoNovo={badgesPorId.get(p.id)?.produtoNovo}
+        precoAnterior={badgesPorId.get(p.id)?.precoAnterior}
+      />
     ))}
   </div>
 </section>

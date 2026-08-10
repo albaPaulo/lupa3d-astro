@@ -106,6 +106,32 @@ header.topo {
 
 .controles input { flex: 1 1 200px; }
 
+.prova-social {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  padding: 1.25rem 1rem;
+  margin: 1rem 0;
+  background: var(--cor-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: 0.75rem;
+}
+
+.prova-social-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.prova-social-icone { font-size: 1.6rem; }
+
+.prova-social-item div { display: flex; flex-direction: column; line-height: 1.25; }
+
+.prova-social-numero { font-weight: 700; font-size: 1.1rem; color: var(--cor-marca); }
+
+.prova-social-label { font-size: 0.8rem; opacity: 0.75; }
+
 .filtro-pix-linha {
   display: flex;
   align-items: center;
@@ -609,6 +635,7 @@ header.topo {
 }
 
 .card-preco { font-weight: 700; font-size: 1.15rem; color: var(--cor-marca); }
+.card-preco-anterior { font-size: 0.8rem; text-decoration: line-through; opacity: 0.68; }
 .card-preco-pix { color: var(--cor-pix); font-size: 0.8rem; }
 
 .card-vendido-por {

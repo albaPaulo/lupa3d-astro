@@ -1,0 +1,31 @@
+---
+// Números reais, calculados a partir do catálogo carregado no build — nunca
+// inventados. O total de produtos é arredondado pra baixo (múltiplo de 10)
+// pra não parecer uma contagem "viva" que desatualiza a cada produto
+// removido/adicionado.
+const { totalProdutos, totalLojas } = Astro.props;
+const produtosArredondado = Math.floor(totalProdutos / 10) * 10;
+---
+<section class="prova-social">
+  <div class="prova-social-item">
+    <span class="prova-social-icone" aria-hidden="true">📦</span>
+    <div>
+      <span class="prova-social-numero">{produtosArredondado}+</span>
+      <span class="prova-social-label">produtos comparados</span>
+    </div>
+  </div>
+  <div class="prova-social-item">
+    <span class="prova-social-icone" aria-hidden="true">🏬</span>
+    <div>
+      <span class="prova-social-numero">{totalLojas}</span>
+      <span class="prova-social-label">lojas parceiras</span>
+    </div>
+  </div>
+  <div class="prova-social-item">
+    <span class="prova-social-icone" aria-hidden="true">🔄</span>
+    <div>
+      <span class="prova-social-numero">Todo dia</span>
+      <span class="prova-social-label">preços atualizados</span>
+    </div>
+  </div>
+</section>
