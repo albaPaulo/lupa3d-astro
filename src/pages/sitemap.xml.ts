@@ -8,10 +8,15 @@ export async function GET() {
   const SITE_URL = "https://lupa3d.com.br";
   const produtos = await fetchProdutos();
   const lojas = [...new Set(produtos.map((p) => p.loja))].sort();
+  const categorias = [...new Set(produtos.map((p) => p.categoria).filter(Boolean))].sort();
 
   const urls = [
     `  <url>\n    <loc>${SITE_URL}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>`,
     `  <url>\n    <loc>${SITE_URL}/lojas/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>`,
+    ...categorias.map(
+      (categoria) =>
+        `  <url>\n    <loc>${SITE_URL}/categoria/${categoria}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>`
+    ),
     ...lojas.map(
       (nome) =>
         `  <url>\n    <loc>${SITE_URL}/loja/${nome}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.6</priority>\n  </url>`

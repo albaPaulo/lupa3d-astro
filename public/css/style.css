@@ -176,6 +176,7 @@ header.topo {
   cursor: pointer;
   font: inherit;
   color: var(--cor-texto);
+  text-decoration: none;
   transition: border-color 0.15s ease, transform 0.15s ease;
 }
 

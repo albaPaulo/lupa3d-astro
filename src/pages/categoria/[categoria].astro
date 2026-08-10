@@ -1,0 +1,159 @@
+---
+import ProductCard from "../../components/ProductCard.astro";
+import BarraComparacao from "../../components/BarraComparacao.astro";
+import Footer from "../../components/Footer.astro";
+import {
+  fetchProdutos,
+  fetchHistoricoTodos,
+  fetchConfiguracoes,
+  buildHistoricoPorProduto,
+  materialEfetivo,
+  EMOJI_CATEGORIA,
+  LABEL_CATEGORIA,
+} from "../../lib/supabase.js";
+import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo, precoAnteriorParaExibicao } from "../../lib/badges.js";
+
+export async function getStaticPaths() {
+  const [produtos, historicoTodos, config] = await Promise.all([
+    fetchProdutos(),
+    fetchHistoricoTodos(),
+    fetchConfiguracoes(),
+  ]);
+
+  const categorias = [...new Set(produtos.map((p) => p.categoria).filter(Boolean))].sort();
+  const historicoPorProduto = buildHistoricoPorProduto(historicoTodos);
+  const badgesMenorPreco = badgesMenorPrecoDeConfig(config);
+  const badgesProdutoNovo = badgesProdutoNovoDeConfig(config);
+  const colunasGrid = Math.min(6, Math.max(2, parseInt(config.colunas_grid, 10) || 3));
+
+  return categorias.map((categoria) => {
+    const produtosDaCategoria = produtos.filter((p) => p.categoria === categoria);
+    return {
+      params: { categoria },
+      props: {
+        categoria,
+        categorias,
+        produtosDaCategoria,
+        colunasGrid,
+        materiais: [...new Set(produtosDaCategoria.map(materialEfetivo).filter(Boolean))].sort(),
+        badges: produtosDaCategoria.map((p) => ({
+          id: p.id,
+          menorPreco: badgeMenorPreco(p, badgesMenorPreco, historicoPorProduto),
+          produtoNovo: badgeProdutoNovo(p, badgesProdutoNovo),
+          precoAnterior: precoAnteriorParaExibicao(p, historicoPorProduto),
+        })),
+      },
+    };
+  });
+}
+
+const { categoria, categorias, produtosDaCategoria, colunasGrid, materiais, badges } = Astro.props;
+const badgesPorId = new Map(badges.map((b) => [b.id, b]));
+const categoriaLabel = LABEL_CATEGORIA[categoria] || categoria;
+const titulo = `${categoriaLabel} — LUPA3D`;
+const descricao = `Compare preços de ${produtosDaCategoria.length} produtos de ${categoriaLabel.toLowerCase()} entre várias lojas brasileiras no LUPA3D.`;
+---
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{titulo}</title>
+  <meta name="description" content={descricao} />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="LUPA3D" />
+  <meta property="og:title" content={titulo} />
+  <meta property="og:description" content={descricao} />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div id="banner-aviso" class="banner-aviso oculto-tela"></div>
+
+  <header class="topo">
+    <div class="topo-linha">
+      <a href="/" class="logo-lupa3d">LUPA<span>3D</span></a>
+      <nav class="abas">
+        <a href="/favoritos/">Favoritos (<span data-contador-favoritos>0</span>)</a>
+        <a href="/lojas/">Lojas</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="barra-busca-categoria">
+    <h1 class="hero-titulo">Compare preços de {categoriaLabel.toLowerCase()} entre várias lojas.</h1>
+
+    <nav class="atalhos-categoria" aria-label="Atalhos de categoria">
+      {categorias.map((c) => (
+        <a href={`/categoria/${c}/`} class={`atalho-categoria${c === categoria ? " ativo" : ""}`}>
+          <span class="atalho-categoria-icone" aria-hidden="true">{EMOJI_CATEGORIA[c] || "📦"}</span>
+          <span class="atalho-categoria-label">{LABEL_CATEGORIA[c] || c}</span>
+        </a>
+      ))}
+    </nav>
+
+    <div class="busca-solo">
+      <div class="busca-grande">
+        <span class="busca-icone" aria-hidden="true">🔍</span>
+        <input type="search" id="busca" placeholder={`Pesquisar em ${categoriaLabel.toLowerCase()}...`} aria-label="Buscar produtos" autocomplete="off" />
+        <div id="busca-sugestoes" class="busca-sugestoes oculto-tela"></div>
+      </div>
+    </div>
+
+    <p class="hero-subtitulo">Compare modelos, veja o histórico de preço e escolha onde comprar mais barato — sem cadastro.</p>
+
+    <div id="filtros-ativos" class="filtros-ativos"></div>
+
+    <button type="button" id="btn-mais-filtros" class="btn-mais-filtros" aria-expanded="false" aria-controls="controles-avancados">
+      🔍 Mais filtros
+    </button>
+
+    <div class="controles oculto-tela" id="controles-avancados">
+      <select id="filtro-material" aria-label="Filtrar por material">
+        <option value="">Todos os materiais</option>
+        {materiais.map((m) => <option value={m}>{m}</option>)}
+      </select>
+      <select id="ordenar" aria-label="Ordenar produtos">
+        <option value="">Ordenar: padrão</option>
+        <option value="preco_asc">Menor preço</option>
+        <option value="preco_desc">Maior preço</option>
+        <option value="cliques">Mais clicados</option>
+        <option value="recentes">Mais recentes</option>
+      </select>
+      <label class="filtro-pix-linha">
+        <input type="checkbox" id="filtro-pix" />
+        Só com desconto no Pix
+      </label>
+    </div>
+  </section>
+
+  <div class="titulo-secao-grid-linha">
+    <h2 class="titulo-secao-grid">{categoriaLabel} ({produtosDaCategoria.length})</h2>
+  </div>
+
+  <main id="grid" class="grid" style={`--colunas-grid: ${colunasGrid}`}>
+    {produtosDaCategoria.map((p) => (
+      <ProductCard
+        p={p}
+        menorPreco={badgesPorId.get(p.id)?.menorPreco}
+        produtoNovo={badgesPorId.get(p.id)?.produtoNovo}
+        precoAnterior={badgesPorId.get(p.id)?.precoAnterior}
+      />
+    ))}
+  </main>
+
+  <div class="ver-mais-container">
+    <button id="btn-ver-mais" class="btn-ver-mais oculto-tela">Ver mais!</button>
+  </div>
+
+  <Footer />
+
+  <BarraComparacao />
+
+  <script is:inline src="/js/config.js"></script>
+  <script is:inline src="/js/favoritos.js"></script>
+  <script is:inline src="/js/interativo.js"></script>
+</body>
+</html>

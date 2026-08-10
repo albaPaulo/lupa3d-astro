@@ -228,10 +228,6 @@ function aplicarFiltros(resetarLimite = true) {
   const ordenar = document.getElementById("ordenar")?.value || "";
   const soPix = document.getElementById("filtro-pix")?.checked || false;
 
-  document.querySelectorAll(".atalho-categoria").forEach((btn) => {
-    btn.classList.toggle("ativo", btn.dataset.categoria === categoria);
-  });
-
   const cards = [...grid.querySelectorAll(".card")];
   const combinam = [];
 
@@ -322,17 +318,6 @@ function ligarFiltros() {
     btnMaisFiltros.textContent = aberto ? "🔍 Menos filtros" : "🔍 Mais filtros";
   });
 
-  // Atalhos de categoria (ícone grande) só existem na home — reaproveita o
-  // mesmo <select> e o mesmo aplicarFiltros() do filtro de categoria normal.
-  document.querySelector(".atalhos-categoria")?.addEventListener("click", (ev) => {
-    const btn = ev.target.closest(".atalho-categoria");
-    if (!btn) return;
-    const select = document.getElementById("filtro-categoria");
-    if (!select) return;
-    select.value = select.value === btn.dataset.categoria ? "" : btn.dataset.categoria;
-    select.dispatchEvent(new Event("change", { bubbles: true }));
-    document.getElementById("grid")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
 
   document.getElementById("btn-ver-mais")?.addEventListener("click", () => {
     LIMITE_EXIBICAO += INCREMENTO_EXIBICAO;

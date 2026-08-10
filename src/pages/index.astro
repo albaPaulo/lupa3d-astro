@@ -73,10 +73,10 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
 
     <nav class="atalhos-categoria" aria-label="Atalhos de categoria">
       {categorias.map((c) => (
-        <button type="button" class="atalho-categoria" data-categoria={c}>
+        <a href={`/categoria/${c}/`} class="atalho-categoria">
           <span class="atalho-categoria-icone" aria-hidden="true">{EMOJI_CATEGORIA[c] || "📦"}</span>
           <span class="atalho-categoria-label">{LABEL_CATEGORIA[c] || c}</span>
-        </button>
+        </a>
       ))}
     </nav>
 
