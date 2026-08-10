@@ -16,6 +16,17 @@ function formatarPrecoJS(valor) {
   return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+// Tira acento e deixa minúsculo — pra "lavavel" (sem acento, como a maioria
+// digita) achar "Lavável". Mesma lógica de normalizarBusca() em
+// src/lib/supabase.js, duplicada aqui porque esse arquivo roda no navegador
+// (não passa pelo build do Astro).
+function normalizarBuscaJS(texto) {
+  return (texto || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "");
+}
+
 // Busca por palavra, não por frase inteira — "resina stand" precisa achar
 // "Resina Premium Standard" e "Resina 3D Standard 4.0", que têm outras
 // palavras no meio e não bateriam com um simples .includes(frase completa).
@@ -222,11 +233,16 @@ function aplicarFiltros(resetarLimite = true) {
 
   if (resetarLimite) LIMITE_EXIBICAO = INCREMENTO_EXIBICAO;
 
-  const busca = (document.getElementById("busca")?.value || "").toLowerCase().trim();
+  const busca = normalizarBuscaJS(document.getElementById("busca")?.value || "").trim();
   const categoria = document.getElementById("filtro-categoria")?.value || "";
   const material = document.getElementById("filtro-material")?.value || "";
   const ordenar = document.getElementById("ordenar")?.value || "";
+
   const soPix = document.getElementById("filtro-pix")?.checked || false;
+
+  document.querySelectorAll(".tag-material").forEach((tag) => {
+    tag.classList.toggle("ativo", tag.dataset.material === material);
+  });
 
   const cards = [...grid.querySelectorAll(".card")];
   const combinam = [];
@@ -318,6 +334,16 @@ function ligarFiltros() {
     btnMaisFiltros.textContent = aberto ? "🔍 Menos filtros" : "🔍 Mais filtros";
   });
 
+  // Tags de material (categoria/[categoria].astro) — reaproveita o mesmo
+  // <select> e aplicarFiltros() do filtro de material normal.
+  document.querySelector(".tags-material")?.addEventListener("click", (ev) => {
+    const tag = ev.target.closest(".tag-material");
+    if (!tag) return;
+    const select = document.getElementById("filtro-material");
+    if (!select) return;
+    select.value = select.value === tag.dataset.material ? "" : tag.dataset.material;
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+  });
 
   document.getElementById("btn-ver-mais")?.addEventListener("click", () => {
     LIMITE_EXIBICAO += INCREMENTO_EXIBICAO;
@@ -396,13 +422,13 @@ function ligarSugestoesBusca() {
   input.addEventListener(
     "input",
     debounce(() => {
-      const termo = input.value.toLowerCase().trim();
+      const termo = normalizarBuscaJS(input.value).trim();
       renderizarSugestoes(termo ? buscarSugestoes(termo) : []);
     }, 200)
   );
 
   input.addEventListener("focus", () => {
-    const termo = input.value.toLowerCase().trim();
+    const termo = normalizarBuscaJS(input.value).trim();
     if (termo) renderizarSugestoes(buscarSugestoes(termo));
   });
 

@@ -104,6 +104,14 @@ const descricao = `Compare preços de ${produtosDaCategoria.length} produtos de 
 
     <p class="hero-subtitulo">Compare modelos, veja o histórico de preço e escolha onde comprar mais barato — sem cadastro.</p>
 
+    {materiais.length > 0 && (
+      <div class="tags-material" aria-label="Filtrar por material">
+        {materiais.map((m) => (
+          <button type="button" class="tag-material" data-material={m}>{m}</button>
+        ))}
+      </div>
+    )}
+
     <div id="filtros-ativos" class="filtros-ativos"></div>
 
     <button type="button" id="btn-mais-filtros" class="btn-mais-filtros" aria-expanded="false" aria-controls="controles-avancados">

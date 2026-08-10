@@ -12,7 +12,7 @@ function cardHTMLCliente(p) {
     : `<span class="card-imagem-vazia">📦</span>`;
 
   return `
-    <article class="card" data-id="${p.id}" data-nome="${escapeHTMLJS(p.nome.toLowerCase())}" data-categoria="${escapeHTMLJS(p.categoria || "")}" data-material="${escapeHTMLJS(material)}" data-pix="${temPix ? "1" : "0"}" data-preco="${p.preco}" data-cliques="${p.cliques_total || 0}" data-criado="${p.criado_em || ""}">
+    <article class="card" data-id="${p.id}" data-nome="${escapeHTMLJS(normalizarBuscaJS(p.nome))}" data-categoria="${escapeHTMLJS(p.categoria || "")}" data-material="${escapeHTMLJS(material)}" data-pix="${temPix ? "1" : "0"}" data-preco="${p.preco}" data-cliques="${p.cliques_total || 0}" data-criado="${p.criado_em || ""}">
       <button class="btn-favorito" data-id="${p.id}" title="Favoritar" aria-label="Favoritar" aria-pressed="false">☆</button>
       ${p.destaque ? `<span class="badge-destaque">🔥</span>` : ""}
       ${kit ? `<span class="badge-kit">Kit/Combo</span>` : ""}

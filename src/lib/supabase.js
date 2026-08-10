@@ -69,6 +69,17 @@ export const LABEL_CATEGORIA = {
   impressora: "Impressora",
 };
 
+// Tira acento (NFD + remove marcas diacríticas) e deixa minúsculo — pra
+// "lavavel" (sem acento, como a maioria digita) achar "Lavável". Usado tanto
+// aqui no build (atributo data-nome do card) quanto no client-side
+// (interativo.js tem sua própria cópia, já que não roda no navegador).
+export function normalizarBusca(texto) {
+  return (texto || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "");
+}
+
 export function formatarPreco(valor) {
   if (valor == null) return "-";
   return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });

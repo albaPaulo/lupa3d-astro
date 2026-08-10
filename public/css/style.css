@@ -163,6 +163,36 @@ header.topo {
 
 .btn-mais-filtros:hover { border-color: var(--cor-marca); }
 
+.tags-material {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  max-width: 900px;
+  margin: 1rem auto 0;
+}
+
+.tag-material {
+  padding: 0.35rem 0.9rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: 999px;
+  background: var(--cor-card);
+  color: var(--cor-texto);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.tag-material:hover { border-color: var(--cor-marca); }
+
+.tag-material.ativo {
+  border-color: var(--cor-marca);
+  background: color-mix(in srgb, var(--cor-marca) 12%, var(--cor-card));
+  color: var(--cor-marca);
+  font-weight: 600;
+}
+
 .atalho-categoria {
   display: flex;
   flex-direction: column;
