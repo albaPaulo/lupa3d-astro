@@ -1830,3 +1830,110 @@ header.topo {
     color: #1a1a1a;
   }
 }
+
+.busca-sugestoes {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  right: 0;
+  background: var(--cor-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  overflow: hidden;
+  z-index: 30;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.busca-sugestao {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  text-decoration: none;
+  color: var(--cor-texto);
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.busca-sugestao:last-child { border-bottom: none; }
+.busca-sugestao:hover { background: var(--cor-fundo); }
+
+.busca-sugestao-imagem {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.4rem;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--cor-fundo);
+}
+
+.busca-sugestao-texto {
+  min-width: 0;
+  flex: 1;
+}
+
+.busca-sugestao-nome {
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.busca-sugestao-detalhe {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.busca-sugestao-preco {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--cor-marca);
+  white-space: nowrap;
+}
+
+.filtros-ativos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 1200px;
+  margin: 0.6rem auto 0;
+  padding: 0 1.25rem;
+}
+
+.filtro-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--cor-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: 999px;
+  padding: 0.3rem 0.4rem 0.3rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.filtro-chip button {
+  border: none;
+  background: var(--cor-borda);
+  color: var(--cor-texto);
+  border-radius: 999px;
+  width: 1.1rem;
+  height: 1.1rem;
+  font-size: 0.7rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filtro-limpar-todos {
+  background: transparent;
+  border: none;
+  color: var(--cor-marca);
+  font-size: 0.8rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}

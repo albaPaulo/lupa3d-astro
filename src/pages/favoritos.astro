@@ -20,13 +20,15 @@ import Footer from "../components/Footer.astro";
       <a href="/" class="logo-lupa3d">LUPA<span>3D</span></a>
       <div class="busca-grande">
         <span class="busca-icone" aria-hidden="true">🔍</span>
-        <input type="search" id="busca" placeholder="Pesquisar nos favoritos..." aria-label="Buscar nos favoritos" />
+        <input type="search" id="busca" placeholder="Pesquisar nos favoritos..." aria-label="Buscar nos favoritos" autocomplete="off" />
+        <div id="busca-sugestoes" class="busca-sugestoes oculto-tela"></div>
       </div>
       <nav class="abas">
         <a href="/">&larr; Início</a>
         <a href="/lojas/">Lojas</a>
       </nav>
     </div>
+    <div id="filtros-ativos" class="filtros-ativos"></div>
     <div class="controles">
       <select id="filtro-categoria" aria-label="Filtrar por categoria">
         <option value="">Todas as categorias</option>

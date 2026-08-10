@@ -243,6 +243,50 @@ function aplicarFiltros(resetarLimite = true) {
   combinam.forEach((card, i) => card.classList.toggle("oculto-tela", i >= LIMITE_EXIBICAO));
 
   document.getElementById("btn-ver-mais")?.classList.toggle("oculto-tela", combinam.length <= LIMITE_EXIBICAO);
+
+  atualizarChipsFiltros();
+}
+
+// Mostra os filtros ativos (busca/categoria/material/Pix) como pílulas
+// removíveis individualmente — "ordenar" fica de fora, não é bem um filtro.
+function atualizarChipsFiltros() {
+  const container = document.getElementById("filtros-ativos");
+  if (!container) return;
+
+  const busca = document.getElementById("busca");
+  const categoria = document.getElementById("filtro-categoria");
+  const material = document.getElementById("filtro-material");
+  const pix = document.getElementById("filtro-pix");
+
+  const ativos = [];
+  if (busca?.value.trim()) ativos.push({ campo: "busca", texto: `"${busca.value.trim()}"` });
+  if (categoria?.value) ativos.push({ campo: "filtro-categoria", texto: categoria.value });
+  if (material?.value) ativos.push({ campo: "filtro-material", texto: material.value });
+  if (pix?.checked) ativos.push({ campo: "filtro-pix", texto: "Desconto no Pix" });
+
+  if (ativos.length === 0) {
+    container.innerHTML = "";
+    return;
+  }
+
+  container.innerHTML =
+    ativos
+      .map(
+        (f) => `
+      <span class="filtro-chip" data-campo="${f.campo}">
+        ${escapeHTMLJS(f.texto)}
+        <button type="button" aria-label="Remover filtro">✕</button>
+      </span>
+    `
+      )
+      .join("") + `<button type="button" class="filtro-limpar-todos">Limpar todos</button>`;
+}
+
+function limparCampoFiltro(campo) {
+  const el = document.getElementById(campo);
+  if (!el) return;
+  if (campo === "filtro-pix") el.checked = false;
+  else el.value = "";
 }
 
 function ligarFiltros() {
@@ -257,6 +301,97 @@ function ligarFiltros() {
   document.getElementById("btn-ver-mais")?.addEventListener("click", () => {
     LIMITE_EXIBICAO += INCREMENTO_EXIBICAO;
     aplicarFiltros(false);
+  });
+
+  document.getElementById("filtros-ativos")?.addEventListener("click", (ev) => {
+    if (ev.target.closest(".filtro-limpar-todos")) {
+      for (const campo of ["busca", "filtro-categoria", "filtro-material", "filtro-pix"]) {
+        limparCampoFiltro(campo);
+      }
+      aplicarFiltros(true);
+      return;
+    }
+    const chip = ev.target.closest(".filtro-chip");
+    if (chip && ev.target.closest("button")) {
+      limparCampoFiltro(chip.dataset.campo);
+      aplicarFiltros(true);
+    }
+  });
+}
+
+// Sugestões de busca em tempo real — reaproveita os produtos que já estão
+// na página (build-time), sem buscar nada novo. Cobre a home inteira, a
+// loja (só produtos dela) ou favoritos, dependendo de onde a busca está.
+function buscarSugestoes(termo) {
+  const vistos = new Set();
+  const resultados = [];
+  for (const card of document.querySelectorAll(".card[data-nome]")) {
+    if (vistos.has(card.dataset.id)) continue;
+    if (!card.dataset.nome.includes(termo)) continue;
+    vistos.add(card.dataset.id);
+    resultados.push({
+      href: card.dataset.href,
+      nome: card.querySelector(".card-nome")?.textContent || "",
+      preco: card.querySelector(".card-preco")?.textContent || "",
+      loja: (card.querySelector(".card-vendido-por")?.textContent || "").replace(/^Vendido por\s*/, ""),
+      imagem: card.querySelector(".card-imagem img")?.src || "",
+    });
+    if (resultados.length >= 6) break;
+  }
+  return resultados;
+}
+
+function renderizarSugestoes(lista) {
+  const box = document.getElementById("busca-sugestoes");
+  if (!box) return;
+  if (lista.length === 0) {
+    box.classList.add("oculto-tela");
+    box.innerHTML = "";
+    return;
+  }
+  box.innerHTML = lista
+    .map(
+      (p) => `
+      <a href="${escapeHTMLJS(p.href)}" class="busca-sugestao">
+        ${p.imagem
+          ? `<img src="${escapeHTMLJS(p.imagem)}" class="busca-sugestao-imagem" alt="" loading="lazy">`
+          : `<span class="busca-sugestao-imagem"></span>`}
+        <span class="busca-sugestao-texto">
+          <span class="busca-sugestao-nome">${escapeHTMLJS(p.nome)}</span><br>
+          <span class="busca-sugestao-detalhe">${escapeHTMLJS(p.loja)}</span>
+        </span>
+        <span class="busca-sugestao-preco">${escapeHTMLJS(p.preco)}</span>
+      </a>
+    `
+    )
+    .join("");
+  box.classList.remove("oculto-tela");
+}
+
+function ligarSugestoesBusca() {
+  const input = document.getElementById("busca");
+  const box = document.getElementById("busca-sugestoes");
+  if (!input || !box) return;
+
+  input.addEventListener(
+    "input",
+    debounce(() => {
+      const termo = input.value.toLowerCase().trim();
+      renderizarSugestoes(termo ? buscarSugestoes(termo) : []);
+    }, 200)
+  );
+
+  input.addEventListener("focus", () => {
+    const termo = input.value.toLowerCase().trim();
+    if (termo) renderizarSugestoes(buscarSugestoes(termo));
+  });
+
+  document.addEventListener("click", (ev) => {
+    if (!ev.target.closest(".busca-grande")) box.classList.add("oculto-tela");
+  });
+
+  input.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape") box.classList.add("oculto-tela");
   });
 }
 
@@ -301,5 +436,6 @@ hidratarFavoritos();
 hidratarComparacao();
 ligarEventosInterativos();
 ligarFiltros();
+ligarSugestoesBusca();
 aplicarFiltros(true);
 verificarConfigSite();
