@@ -16,6 +16,16 @@ function formatarPrecoJS(valor) {
   return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+// Busca por palavra, não por frase inteira — "resina stand" precisa achar
+// "Resina Premium Standard" e "Resina 3D Standard 4.0", que têm outras
+// palavras no meio e não bateriam com um simples .includes(frase completa).
+function nomeCorrespondeABusca(nomeLowerCase, termoLowerCase) {
+  return termoLowerCase
+    .split(/\s+/)
+    .filter(Boolean)
+    .every((palavra) => nomeLowerCase.includes(palavra));
+}
+
 function atualizarBotaoFavorito(btn) {
   const id = Number(btn.dataset.id);
   const ativo = isFavorito(id);
@@ -226,7 +236,7 @@ function aplicarFiltros(resetarLimite = true) {
   const combinam = [];
 
   for (const card of cards) {
-    const okBusca = !busca || card.dataset.nome.includes(busca);
+    const okBusca = !busca || nomeCorrespondeABusca(card.dataset.nome, busca);
     const okCategoria = !categoria || card.dataset.categoria === categoria;
     const okMaterial = !material || card.dataset.material === material;
     const okPix = !soPix || card.dataset.pix === "1";
@@ -353,7 +363,7 @@ function buscarSugestoes(termo) {
   const resultados = [];
   for (const card of document.querySelectorAll(".card[data-nome]")) {
     if (vistos.has(card.dataset.id)) continue;
-    if (!card.dataset.nome.includes(termo)) continue;
+    if (!nomeCorrespondeABusca(card.dataset.nome, termo)) continue;
     vistos.add(card.dataset.id);
     resultados.push({
       href: card.dataset.href,
@@ -362,7 +372,6 @@ function buscarSugestoes(termo) {
       loja: (card.querySelector(".card-vendido-por")?.textContent || "").replace(/^Vendido por\s*/, ""),
       imagem: card.querySelector(".card-imagem img")?.src || "",
     });
-    if (resultados.length >= 6) break;
   }
   return resultados;
 }

@@ -48,7 +48,27 @@ header.topo {
 }
 
 .barra-busca-categoria {
-  padding: 1rem 1.25rem;
+  max-width: 1200px;
+  margin: 1.25rem auto 0;
+  padding: 2rem 1.5rem;
+  border-radius: 1.5rem;
+  background: color-mix(in srgb, var(--cor-texto) 4%, var(--cor-fundo));
+  text-align: center;
+}
+
+.hero-titulo {
+  max-width: 720px;
+  margin: 0 auto;
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.hero-subtitulo {
+  max-width: 560px;
+  margin: 0.9rem auto 0;
+  opacity: 0.75;
+  font-size: 0.95rem;
 }
 
 .logo-lupa3d {
@@ -117,7 +137,7 @@ header.topo {
   justify-content: center;
   gap: 0.75rem;
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 1.5rem auto 0;
 }
 
 .busca-solo {

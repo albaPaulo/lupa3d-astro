@@ -69,6 +69,8 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
   </header>
 
   <section class="barra-busca-categoria">
+    <h2 class="hero-titulo">Compare preços de filamento e resina 3D entre várias lojas.</h2>
+
     <nav class="atalhos-categoria" aria-label="Atalhos de categoria">
       {categorias.map((c) => (
         <button type="button" class="atalho-categoria" data-categoria={c}>
@@ -85,6 +87,8 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
         <div id="busca-sugestoes" class="busca-sugestoes oculto-tela"></div>
       </div>
     </div>
+
+    <p class="hero-subtitulo">Compare modelos, veja o histórico de preço e escolha onde comprar mais barato — sem cadastro.</p>
 
     <div id="filtros-ativos" class="filtros-ativos"></div>
 
