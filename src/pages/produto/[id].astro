@@ -42,6 +42,36 @@ const { produto: p, historico, parecidos, menorPreco, produtoNovo, precoAnterior
 const titulo = `${p.nome} — LUPA3D`;
 const descricao = `${p.nome} por ${formatarPreco(p.preco)} na ${p.loja}. Compare com outras lojas de filamento e resina 3D no LUPA3D.`;
 const graficoSVG = desenharGraficoSVG(historico);
+
+const urlProduto = `https://lupa3d.com.br/produto/${p.id}/`;
+const textoCompartilhar = `${p.nome} por ${formatarPreco(p.preco)} — comparei no LUPA3D`;
+const linksCompartilhar = [
+  { rede: "WhatsApp", icone: "💬", url: `https://wa.me/?text=${encodeURIComponent(`${textoCompartilhar} ${urlProduto}`)}` },
+  { rede: "Telegram", icone: "✈️", url: `https://t.me/share/url?url=${encodeURIComponent(urlProduto)}&text=${encodeURIComponent(textoCompartilhar)}` },
+  { rede: "Facebook", icone: "📘", url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(urlProduto)}` },
+  { rede: "X", icone: "✖️", url: `https://twitter.com/intent/tweet?url=${encodeURIComponent(urlProduto)}&text=${encodeURIComponent(textoCompartilhar)}` },
+];
+
+// Dados estruturados (schema.org) pra o Google poder mostrar preço/loja
+// direto no resultado de busca. Sem AggregateRating/Review — não temos
+// avaliação real nenhuma, e declarar isso sem dado de verdade viola as
+// diretrizes do Google (e pode gerar penalização manual).
+const produtoJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: p.nome,
+  image: p.imagem_url || undefined,
+  description: p.descricao_manual || p.descricao || undefined,
+  offers: {
+    "@type": "Offer",
+    url: p.url,
+    priceCurrency: "BRL",
+    price: Number(p.preco).toFixed(2),
+    availability: p.disponivel ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+    seller: { "@type": "Organization", name: p.loja },
+  },
+};
+const produtoJsonLdString = JSON.stringify(produtoJsonLd).replace(/</g, "\\u003c");
 ---
 <!doctype html>
 <html lang="pt-BR">
@@ -57,6 +87,8 @@ const graficoSVG = desenharGraficoSVG(historico);
   <meta property="og:description" content={descricao} />
   {p.imagem_url && <meta property="og:image" content={p.imagem_url} />}
   <meta name="twitter:card" content="summary_large_image" />
+
+  <script type="application/ld+json" set:html={produtoJsonLdString}></script>
 
   <link rel="stylesheet" href="/css/style.css" />
 </head>
@@ -130,6 +162,13 @@ const graficoSVG = desenharGraficoSVG(historico);
               Comparar
             </label>
             <a href={p.url} target="_blank" rel="noopener" class="btn-ver-oferta">Ver Oferta!</a>
+
+            <div class="produto-compartilhar">
+              <span class="produto-compartilhar-label">Compartilhar:</span>
+              {linksCompartilhar.map((l) => (
+                <a href={l.url} target="_blank" rel="noopener" class="btn-compartilhar" aria-label={`Compartilhar no ${l.rede}`} title={l.rede}>{l.icone}</a>
+              ))}
+            </div>
           </div>
         </div>
       </div>

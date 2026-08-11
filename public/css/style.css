@@ -257,6 +257,15 @@ header.topo {
 
 .filtro-pix-linha input { flex: 0 0 auto !important; width: auto; }
 
+.filtro-preco-linha {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.filtro-preco-linha input { flex: 1 1 110px !important; width: auto; }
+.filtro-preco-linha span { opacity: 0.6; }
+
 .abas {
   display: flex;
   gap: 0.5rem;
@@ -778,6 +787,32 @@ header.topo {
   font-weight: 600;
   font-size: 0.85rem;
 }
+
+.produto-compartilhar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.produto-compartilhar-label { font-size: 0.8rem; opacity: 0.7; }
+
+.btn-compartilhar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: 50%;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.btn-compartilhar:hover { border-color: var(--cor-marca); transform: translateY(-2px); }
 
 .barra-comparacao {
   position: fixed;

@@ -112,6 +112,11 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
         <option value="cliques">Mais clicados</option>
         <option value="recentes">Mais recentes</option>
       </select>
+      <div class="filtro-preco-linha">
+        <input type="number" id="filtro-preco-min" placeholder="Preço mín." min="0" step="0.01" aria-label="Preço mínimo" />
+        <span aria-hidden="true">—</span>
+        <input type="number" id="filtro-preco-max" placeholder="Preço máx." min="0" step="0.01" aria-label="Preço máximo" />
+      </div>
       <label class="filtro-pix-linha">
         <input type="checkbox" id="filtro-pix" />
         Só com desconto no Pix

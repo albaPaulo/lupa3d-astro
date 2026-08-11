@@ -239,6 +239,10 @@ function aplicarFiltros(resetarLimite = true) {
   const ordenar = document.getElementById("ordenar")?.value || "";
 
   const soPix = document.getElementById("filtro-pix")?.checked || false;
+  const precoMinStr = document.getElementById("filtro-preco-min")?.value || "";
+  const precoMaxStr = document.getElementById("filtro-preco-max")?.value || "";
+  const precoMin = precoMinStr !== "" ? Number(precoMinStr) : null;
+  const precoMax = precoMaxStr !== "" ? Number(precoMaxStr) : null;
 
   document.querySelectorAll(".tag-material").forEach((tag) => {
     tag.classList.toggle("ativo", tag.dataset.material === material);
@@ -248,11 +252,14 @@ function aplicarFiltros(resetarLimite = true) {
   const combinam = [];
 
   for (const card of cards) {
+    const precoCard = Number(card.dataset.preco);
     const okBusca = !busca || nomeCorrespondeABusca(card.dataset.nome, busca);
     const okCategoria = !categoria || card.dataset.categoria === categoria;
     const okMaterial = !material || card.dataset.material === material;
     const okPix = !soPix || card.dataset.pix === "1";
-    if (okBusca && okCategoria && okMaterial && okPix) combinam.push(card);
+    const okPrecoMin = precoMin == null || precoCard >= precoMin;
+    const okPrecoMax = precoMax == null || precoCard <= precoMax;
+    if (okBusca && okCategoria && okMaterial && okPix && okPrecoMin && okPrecoMax) combinam.push(card);
     else card.classList.add("oculto-tela");
   }
 
@@ -283,12 +290,16 @@ function atualizarChipsFiltros() {
   const categoria = document.getElementById("filtro-categoria");
   const material = document.getElementById("filtro-material");
   const pix = document.getElementById("filtro-pix");
+  const precoMin = document.getElementById("filtro-preco-min");
+  const precoMax = document.getElementById("filtro-preco-max");
 
   const ativos = [];
   if (busca?.value.trim()) ativos.push({ campo: "busca", texto: `"${busca.value.trim()}"` });
   if (categoria?.value) ativos.push({ campo: "filtro-categoria", texto: categoria.value });
   if (material?.value) ativos.push({ campo: "filtro-material", texto: material.value });
   if (pix?.checked) ativos.push({ campo: "filtro-pix", texto: "Desconto no Pix" });
+  if (precoMin?.value) ativos.push({ campo: "filtro-preco-min", texto: `Mín. R$ ${precoMin.value}` });
+  if (precoMax?.value) ativos.push({ campo: "filtro-preco-max", texto: `Máx. R$ ${precoMax.value}` });
 
   if (ativos.length === 0) {
     container.innerHTML = "";
@@ -324,6 +335,10 @@ function ligarFiltros() {
   }
   document.getElementById("filtro-pix")?.addEventListener("change", () => aplicarFiltros(true));
 
+  for (const id of ["filtro-preco-min", "filtro-preco-max"]) {
+    document.getElementById(id)?.addEventListener("input", debounce(() => aplicarFiltros(true), 250));
+  }
+
   // "Mais filtros" só existe na home — material/ordenar/Pix ficam escondidos
   // até o usuário pedir.
   const btnMaisFiltros = document.getElementById("btn-mais-filtros");
@@ -352,7 +367,7 @@ function ligarFiltros() {
 
   document.getElementById("filtros-ativos")?.addEventListener("click", (ev) => {
     if (ev.target.closest(".filtro-limpar-todos")) {
-      for (const campo of ["busca", "filtro-categoria", "filtro-material", "filtro-pix"]) {
+      for (const campo of ["busca", "filtro-categoria", "filtro-material", "filtro-pix", "filtro-preco-min", "filtro-preco-max"]) {
         limparCampoFiltro(campo);
       }
       aplicarFiltros(true);
