@@ -136,19 +136,14 @@ const produtoJsonLdString = JSON.stringify(produtoJsonLd).replace(/</g, "\\u003c
           </div>
         </div>
 
-        <div class="produto-box produto-historico-box">
-          <h2 class="produto-box-titulo">Histórico de preço</h2>
-          <div id="grafico-container" set:html={graficoSVG}></div>
+        <div class="produto-box produto-descricao-box">
+          <h2 class="produto-box-titulo">Descrição</h2>
+          <p class="detalhe-descricao">{p.descricao_manual || p.descricao || "Sem descrição disponível para este produto."}</p>
         </div>
       </div>
 
       <div class="produto-col-dir">
         <div class="produto-linha-topo">
-          <div class="produto-box produto-descricao-box">
-            <h2 class="produto-box-titulo">Descrição</h2>
-            <p class="detalhe-descricao">{p.descricao_manual || p.descricao || "Sem descrição disponível para este produto."}</p>
-          </div>
-
           <div class="produto-box produto-vendido-box">
             <h2 class="produto-box-titulo">Vendido por</h2>
             <a href={`/loja/${p.loja}/`} class="card-loja-link">{p.loja} &rarr;</a>
@@ -169,6 +164,11 @@ const produtoJsonLdString = JSON.stringify(produtoJsonLd).replace(/</g, "\\u003c
                 <a href={l.url} target="_blank" rel="noopener" class="btn-compartilhar" aria-label={`Compartilhar no ${l.rede}`} title={l.rede}>{l.icone}</a>
               ))}
             </div>
+          </div>
+
+          <div class="produto-box produto-historico-box">
+            <h2 class="produto-box-titulo">Histórico de preço</h2>
+            <div id="grafico-container" set:html={graficoSVG}></div>
           </div>
         </div>
       </div>
