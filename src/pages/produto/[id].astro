@@ -138,6 +138,11 @@ const produtoJsonLdString = JSON.stringify(produtoJsonLd).replace(/</g, "\\u003c
             )}
           </div>
         </div>
+
+        <div class="produto-box produto-descricao-box">
+          <h2 class="produto-box-titulo">Descrição</h2>
+          <p class="detalhe-descricao">{p.descricao_manual || p.descricao || "Sem descrição disponível para este produto."}</p>
+        </div>
       </div>
 
       <div class="produto-col-dir">
@@ -175,22 +180,15 @@ const produtoJsonLdString = JSON.stringify(produtoJsonLd).replace(/</g, "\\u003c
           </div>
         </div>
 
-        <div class="produto-linha-baixo">
-          <div class="produto-box produto-descricao-box">
-            <h2 class="produto-box-titulo">Descrição</h2>
-            <p class="detalhe-descricao">{p.descricao_manual || p.descricao || "Sem descrição disponível para este produto."}</p>
-          </div>
-
-          <div class="produto-box produto-parecidos-box">
-            <h2 class="produto-box-titulo">Produtos parecidos em outras lojas</h2>
-            {parecidos.length === 0 ? (
-              <p class="grafico-vazio">Nenhum produto parecido encontrado em outras lojas.</p>
-            ) : (
-              <div class="parecidos-lista">
-                {parecidos.map((parecido) => <ParecidoItem p={parecido} />)}
-              </div>
-            )}
-          </div>
+        <div class="produto-box produto-parecidos-box">
+          <h2 class="produto-box-titulo">Produtos parecidos em outras lojas</h2>
+          {parecidos.length === 0 ? (
+            <p class="grafico-vazio">Nenhum produto parecido encontrado em outras lojas.</p>
+          ) : (
+            <div class="parecidos-lista">
+              {parecidos.map((parecido) => <ParecidoItem p={parecido} />)}
+            </div>
+          )}
         </div>
       </div>
     </div>
