@@ -1305,9 +1305,21 @@ header.topo {
   gap: 1.5rem;
 }
 
+.produto-linha-baixo {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* Sem isso o grid usa o min-content da lista de "parecidos" (que tem itens
+   largos) como largura mínima da coluna, ignorando a proporção 2fr/1fr. */
+.produto-linha-baixo > .produto-box { min-width: 0; }
+
 @media (max-width: 700px) {
   .produto-grid { grid-template-columns: 1fr; }
   .produto-linha-topo { grid-template-columns: 1fr; }
+  .produto-linha-baixo { grid-template-columns: 1fr; }
 }
 
 .produto-imagem-box {
@@ -1337,6 +1349,20 @@ header.topo {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.produto-vendido-logo-link {
+  display: block;
+  margin-bottom: 0.6rem;
+}
+
+.produto-vendido-logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--cor-borda);
+  background: var(--cor-card);
 }
 
 .produto-vendido-box .card-loja-link {
