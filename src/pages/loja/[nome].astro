@@ -11,6 +11,8 @@ import {
   buildHistoricoPorProduto,
   materialEfetivo,
   REDES_LOJA,
+  EMOJI_CATEGORIA,
+  LABEL_CATEGORIA,
 } from "../../lib/supabase.js";
 import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo, precoAnteriorParaExibicao } from "../../lib/badges.js";
 
@@ -108,6 +110,17 @@ const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
   </section>
 
   <section class="barra-busca-categoria">
+    {categorias.length > 1 && (
+      <nav class="atalhos-categoria" aria-label="Atalhos de categoria">
+        {categorias.map((c) => (
+          <button type="button" class="atalho-categoria" data-categoria={c}>
+            <span class="atalho-categoria-icone" aria-hidden="true">{EMOJI_CATEGORIA[c] || "📦"}</span>
+            <span class="atalho-categoria-label">{LABEL_CATEGORIA[c] || c}</span>
+          </button>
+        ))}
+      </nav>
+    )}
+
     <div class="busca-solo">
       <div class="busca-grande">
         <span class="busca-icone" aria-hidden="true">🔍</span>

@@ -259,6 +259,13 @@ function aplicarFiltros(resetarLimite = true) {
     tag.classList.toggle("ativo", tag.dataset.material === material);
   });
 
+  // Atalhos de categoria como filtro (loja/[nome].astro) — só os que têm
+  // data-categoria, pra não mexer nos <a> de verdade (home/categoria, que
+  // navegam pra /categoria/X/ em vez de filtrar no lugar).
+  document.querySelectorAll(".atalho-categoria[data-categoria]").forEach((btn) => {
+    btn.classList.toggle("ativo", btn.dataset.categoria === categoria);
+  });
+
   const cards = [...grid.querySelectorAll(".card")];
   const combinam = [];
 
@@ -368,6 +375,18 @@ function ligarFiltros() {
     const select = document.getElementById("filtro-material");
     if (!select) return;
     select.value = select.value === tag.dataset.material ? "" : tag.dataset.material;
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+
+  // Atalhos de categoria como filtro (loja/[nome].astro) — <button>, não
+  // <a>, então não interfere com os de home/categoria (que são link de
+  // navegação de verdade e devem seguir o href normalmente).
+  document.querySelector(".atalhos-categoria")?.addEventListener("click", (ev) => {
+    const btn = ev.target.closest("button.atalho-categoria");
+    if (!btn) return;
+    const select = document.getElementById("filtro-categoria");
+    if (!select) return;
+    select.value = select.value === btn.dataset.categoria ? "" : btn.dataset.categoria;
     select.dispatchEvent(new Event("change", { bubbles: true }));
   });
 
