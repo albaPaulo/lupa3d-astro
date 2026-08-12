@@ -106,7 +106,11 @@ async function carregarFavoritos() {
       headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
     });
     if (!resp.ok) throw new Error("Falha ao buscar favoritos");
-    PRODUTOS_FAVORITOS = await resp.json();
+    const brutos = await resp.json();
+    // categoria_manual (edição no admin) vence a categoria detectada pelo
+    // scraper, igual no site (fetchProdutos em src/lib/supabase.js) — essa
+    // página busca os produtos direto do Supabase, então precisa repetir.
+    PRODUTOS_FAVORITOS = brutos.map((p) => (p.categoria_manual ? { ...p, categoria: p.categoria_manual } : p));
   } catch (e) {
     if (status) status.textContent = "Não foi possível carregar seus favoritos agora.";
     return;

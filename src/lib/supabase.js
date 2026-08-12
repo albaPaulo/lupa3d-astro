@@ -50,7 +50,13 @@ async function fetchProdutosBrutos() {
 export async function fetchProdutos() {
   const [produtos, config] = await Promise.all([fetchProdutosBrutos(), fetchConfiguracoes()]);
   const desativadas = categoriasDesativadasSet(config);
-  return produtos.filter((p) => !desativadas.has(p.categoria));
+  // categoria_manual (edição no admin) vence a categoria detectada pelo
+  // scraper — aplicado aqui, uma vez só, pra todo o site público (home,
+  // /categoria/, /loja/, produto, sitemap) já receber o valor efetivo sem
+  // precisar repetir essa checagem em cada página.
+  return produtos
+    .map((p) => (p.categoria_manual ? { ...p, categoria: p.categoria_manual } : p))
+    .filter((p) => !desativadas.has(p.categoria));
 }
 
 export async function fetchSecoes() {

@@ -13,6 +13,18 @@ function escapeHTML(valor) {
 // link deixa qualquer um disparar builds à vontade se ficar exposto lá.
 const NETLIFY_BUILD_HOOK_URL = "https://api.netlify.com/build_hooks/6a7761f4bec0491e620cae52";
 
+// Mesmo conjunto fixo usado pelo site público (EMOJI_CATEGORIA/LABEL_CATEGORIA
+// em src/lib/supabase.js) — categoria é um valor fechado (define até a URL
+// de /categoria/[categoria]/), então aqui é select, não texto livre como
+// material: digitar algo fora dessa lista quebraria a página da categoria.
+const CATEGORIAS_FIXAS = [
+  { valor: "filamento", label: "Filamento" },
+  { valor: "resina", label: "Resina" },
+  { valor: "impressora", label: "Impressora" },
+  { valor: "acessorio", label: "Acessório" },
+  { valor: "pigmento", label: "Pigmento" },
+];
+
 let PRODUTOS_ADMIN = [];
 let SECOES = [];
 let PINADOS_ATUAIS = [];
@@ -215,7 +227,7 @@ async function carregarConfiguracoes() {
 }
 
 function popularCategoriasToggle() {
-  const categorias = [...new Set(PRODUTOS_ADMIN.map((p) => p.categoria).filter(Boolean))].sort();
+  const categorias = [...new Set(PRODUTOS_ADMIN.map(categoriaEfetivoAdmin).filter(Boolean))].sort();
   const desativadas = new Set(
     (CONFIG_ATUAL.categorias_desativadas || "").split(",").map((c) => c.trim()).filter(Boolean)
   );
@@ -268,13 +280,17 @@ async function salvarConfiguracoes(ev) {
 
 function faltaCategorizar(p) {
   return {
-    semCategoria: !p.categoria,
+    semCategoria: !p.categoria && !p.categoria_manual,
     semSubcategoria: !p.material && !p.material_manual,
   };
 }
 
 function materialEfetivoAdmin(p) {
   return p.material_manual || p.material || "";
+}
+
+function categoriaEfetivoAdmin(p) {
+  return p.categoria_manual || p.categoria || "";
 }
 
 function popularSelect(select, valores) {
@@ -293,7 +309,7 @@ function popularSelect(select, valores) {
 
 function popularFiltrosProdutos() {
   const lojas = [...new Set(PRODUTOS_ADMIN.map((p) => p.loja).filter(Boolean))].sort();
-  const categorias = [...new Set(PRODUTOS_ADMIN.map((p) => p.categoria).filter(Boolean))].sort();
+  const categorias = [...new Set(PRODUTOS_ADMIN.map(categoriaEfetivoAdmin).filter(Boolean))].sort();
   const materiais = [...new Set(PRODUTOS_ADMIN.map(materialEfetivoAdmin).filter(Boolean))].sort();
 
   popularSelect(admEls.filtroLoja, lojas);
@@ -317,7 +333,12 @@ function linhaProdutoHTML(p) {
       <td>${escapeHTML(p.loja)}</td>
       <td>R$ ${Number(p.preco).toFixed(2)}</td>
       <td class="admin-col-check">${p.cliques_total || 0}</td>
-      <td><input type="text" data-campo="categoria" value="${p.categoria || ""}" class="${semCategoria ? "campo-alerta" : ""}"></td>
+      <td>
+        <select data-campo="categoria_manual" class="${semCategoria ? "campo-alerta" : ""}">
+          <option value="">${p.categoria ? `Automático (${escapeHTML(p.categoria)})` : "— selecione —"}</option>
+          ${CATEGORIAS_FIXAS.map((c) => `<option value="${c.valor}" ${p.categoria_manual === c.valor ? "selected" : ""}>${c.label}</option>`).join("")}
+        </select>
+      </td>
       <td><input type="text" data-campo="material_manual" value="${escapeHTML(p.material_manual || "")}" placeholder="${escapeHTML(p.material || "ex: PLA")}" list="admin-lista-materiais" class="${semSubcategoria ? "campo-alerta" : ""}"></td>
       <td><input type="text" data-campo="descricao_manual" value="${escapeHTML(p.descricao_manual || "")}"></td>
       <td class="admin-col-check"><input type="checkbox" data-campo="destaque" ${p.destaque ? "checked" : ""}></td>
@@ -340,7 +361,7 @@ function renderizarTabela() {
     lista = lista.filter((p) => p.nome.toLowerCase().includes(termo) || p.loja.toLowerCase().includes(termo));
   }
   if (loja) lista = lista.filter((p) => p.loja === loja);
-  if (categoria) lista = lista.filter((p) => p.categoria === categoria);
+  if (categoria) lista = lista.filter((p) => categoriaEfetivoAdmin(p) === categoria);
   if (material) lista = lista.filter((p) => materialEfetivoAdmin(p) === material);
   if (soFaltando) {
     lista = lista.filter((p) => {
@@ -404,7 +425,7 @@ async function salvarProduto(tr) {
   const id = tr.dataset.id;
   const btn = tr.querySelector('[data-acao="salvar-produto"]');
   const corpo = {
-    categoria: tr.querySelector('[data-campo="categoria"]').value.trim() || null,
+    categoria_manual: tr.querySelector('[data-campo="categoria_manual"]').value || null,
     material_manual: normalizarMaterialManual(tr.querySelector('[data-campo="material_manual"]').value.trim()) || null,
     descricao_manual: tr.querySelector('[data-campo="descricao_manual"]').value.trim() || null,
     destaque: tr.querySelector('[data-campo="destaque"]').checked,
@@ -690,7 +711,7 @@ async function salvarLoja(card) {
 }
 
 function popularSelectsSecao() {
-  const categorias = [...new Set(PRODUTOS_ADMIN.map((p) => p.categoria).filter(Boolean))].sort();
+  const categorias = [...new Set(PRODUTOS_ADMIN.map(categoriaEfetivoAdmin).filter(Boolean))].sort();
   const lojas = [...new Set(PRODUTOS_ADMIN.map((p) => p.loja))].sort();
 
   admEls.secaoCategoria.innerHTML = `<option value="">Qualquer categoria</option>` +
