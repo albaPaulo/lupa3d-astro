@@ -70,8 +70,7 @@ const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
   {loja?.logo_url && <meta property="og:image" content={loja.logo_url} />}
   <meta name="twitter:card" content="summary_large_image" />
 
-  <link rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-  <noscript><link rel="stylesheet" href="/css/style.css" /></noscript>
+  <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
   <div id="banner-aviso" class="banner-aviso oculto-tela"></div>
@@ -125,7 +124,7 @@ const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
     )}
     <div class="loja-perfil-cabecalho">
       <div class="loja-perfil-logo-wrap">
-        {loja?.logo_url && <img src={loja.logo_url} class="loja-perfil-logo" alt="" referrerpolicy="no-referrer" width="84" height="84" />}
+        {loja?.logo_url && <img src={loja.logo_url} class="loja-perfil-logo" alt="" referrerpolicy="no-referrer" />}
       </div>
       <h1 class="loja-perfil-nome">{nome}</h1>
     </div>

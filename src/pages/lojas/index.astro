@@ -18,8 +18,7 @@ const nomesLojas = [...contagemPorLoja.keys()].sort();
   <title>Lojas — LUPA3D</title>
   <meta name="description" content="Veja todas as lojas de filamento e resina 3D comparadas no LUPA3D." />
   <link rel="canonical" href="https://lupa3d.com.br/lojas/" />
-  <link rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-  <noscript><link rel="stylesheet" href="/css/style.css" /></noscript>
+  <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
   <header class="topo">
@@ -39,7 +38,7 @@ const nomesLojas = [...contagemPorLoja.keys()].sort();
           <a href={`/loja/${nome}/`} class="loja-card">
             <div class="loja-card-logo-wrap">
               {cfg?.logo_url ? (
-                <img src={cfg.logo_url} alt="" class="loja-card-logo" referrerpolicy="no-referrer" width="64" height="64" loading="lazy" />
+                <img src={cfg.logo_url} alt="" class="loja-card-logo" referrerpolicy="no-referrer" />
               ) : (
                 <span class="loja-card-logo-inicial">{nome[0].toUpperCase()}</span>
               )}
