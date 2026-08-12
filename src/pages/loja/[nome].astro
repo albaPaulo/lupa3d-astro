@@ -79,19 +79,56 @@ const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
   <header class="topo">
     <div class="topo-linha">
       <a href="/" class="logo-lupa3d">LUPA<span>3D</span></a>
-      <div class="busca-grande">
-        <span class="busca-icone" aria-hidden="true">🔍</span>
-        <input type="search" id="busca" placeholder="Pesquisar produto nesta loja..." aria-label="Buscar produtos nesta loja" autocomplete="off" />
-        <div id="busca-sugestoes" class="busca-sugestoes oculto-tela"></div>
-      </div>
       <nav class="abas">
         <a href="/">&larr; Todas as lojas</a>
         <a href="/lojas/">Lojas</a>
         <a href="/favoritos/">Favoritos (<span data-contador-favoritos>0</span>)</a>
       </nav>
     </div>
+  </header>
+
+  <section class="loja-perfil">
+    {loja?.banner_url && (
+      <div class="loja-perfil-banner" style={`background-image:url("${loja.banner_url}")`}></div>
+    )}
+    <div class="loja-perfil-cabecalho">
+      <div class="loja-perfil-logo-wrap">
+        {loja?.logo_url && <img src={loja.logo_url} class="loja-perfil-logo" alt="" referrerpolicy="no-referrer" />}
+      </div>
+      <h1 class="loja-perfil-nome">{nome}</h1>
+    </div>
+    {loja?.descricao && <p class="loja-perfil-descricao">{loja.descricao}</p>}
+    {redes.length > 0 && (
+      <div class="loja-perfil-redes">
+        {redes.map((r) => (
+          <a href={loja[r.chave]} target="_blank" rel="noopener" class="loja-perfil-rede-btn">{r.emoji} {r.label}</a>
+        ))}
+      </div>
+    )}
+  </section>
+
+  <section class="barra-busca-categoria">
+    <div class="busca-solo">
+      <div class="busca-grande">
+        <span class="busca-icone" aria-hidden="true">🔍</span>
+        <input type="search" id="busca" placeholder={`Pesquisar produto na ${nome}...`} aria-label="Buscar produtos nesta loja" autocomplete="off" />
+        <div id="busca-sugestoes" class="busca-sugestoes oculto-tela"></div>
+      </div>
+    </div>
+
+    {materiais.length > 0 && (
+      <div class="tags-material" aria-label="Filtrar por material">
+        {materiais.map((m) => <button type="button" class="tag-material" data-material={m}>{m}</button>)}
+      </div>
+    )}
+
     <div id="filtros-ativos" class="filtros-ativos"></div>
-    <div class="controles">
+
+    <button type="button" id="btn-mais-filtros" class="btn-mais-filtros" aria-expanded="false" aria-controls="controles-avancados">
+      🔍 Mais filtros
+    </button>
+
+    <div class="controles oculto-tela" id="controles-avancados">
       <select id="filtro-categoria" aria-label="Filtrar por categoria">
         <option value="">Todas as categorias</option>
         {categorias.map((c) => <option value={c}>{c}</option>)}
@@ -117,26 +154,6 @@ const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
         Só com desconto no Pix
       </label>
     </div>
-  </header>
-
-  <section class="loja-perfil">
-    {loja?.banner_url && (
-      <div class="loja-perfil-banner" style={`background-image:url("${loja.banner_url}")`}></div>
-    )}
-    <div class="loja-perfil-cabecalho">
-      <div class="loja-perfil-logo-wrap">
-        {loja?.logo_url && <img src={loja.logo_url} class="loja-perfil-logo" alt="" referrerpolicy="no-referrer" />}
-      </div>
-      <h1 class="loja-perfil-nome">{nome}</h1>
-    </div>
-    {loja?.descricao && <p class="loja-perfil-descricao">{loja.descricao}</p>}
-    {redes.length > 0 && (
-      <div class="loja-perfil-redes">
-        {redes.map((r) => (
-          <a href={loja[r.chave]} target="_blank" rel="noopener" class="loja-perfil-rede-btn">{r.emoji} {r.label}</a>
-        ))}
-      </div>
-    )}
   </section>
 
   <div class="titulo-secao-grid-linha">
