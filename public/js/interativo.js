@@ -246,7 +246,8 @@ function aplicarFiltros(resetarLimite = true) {
 
   const busca = normalizarBuscaJS(document.getElementById("busca")?.value || "").trim();
   const categoria = document.getElementById("filtro-categoria")?.value || "";
-  const material = document.getElementById("filtro-material")?.value || "";
+  const selectMaterial = document.getElementById("filtro-material");
+  let material = selectMaterial?.value || "";
   const ordenar = document.getElementById("ordenar")?.value || "";
 
   const soPix = document.getElementById("filtro-pix")?.checked || false;
@@ -254,6 +255,25 @@ function aplicarFiltros(resetarLimite = true) {
   const precoMaxStr = document.getElementById("filtro-preco-max")?.value || "";
   const precoMin = precoMinStr !== "" ? Number(precoMinStr) : null;
   const precoMax = precoMaxStr !== "" ? Number(precoMaxStr) : null;
+
+  // Cada tag de material sabe (via data-categorias) em quais categorias ela
+  // aparece de verdade — só relevante quando a página tem os dois filtros
+  // juntos (loja/[nome].astro); nas páginas de categoria/home a tag não tem
+  // esse atributo (ou não tem #filtro-categoria pra mudar), então nada muda.
+  // Se o material escolhido deixa de existir na categoria selecionada, limpa
+  // o filtro de material — senão a grade trava em "0 resultados" sem
+  // explicação nenhuma pra quem está vendo.
+  let materialAindaValido = !material;
+  document.querySelectorAll(".tag-material").forEach((tag) => {
+    const categoriasTag = (tag.dataset.categorias || "").split(",").filter(Boolean);
+    const relevante = !categoria || categoriasTag.length === 0 || categoriasTag.includes(categoria);
+    tag.classList.toggle("oculto-tela", !relevante);
+    if (tag.dataset.material === material && relevante) materialAindaValido = true;
+  });
+  if (!materialAindaValido) {
+    material = "";
+    if (selectMaterial) selectMaterial.value = "";
+  }
 
   document.querySelectorAll(".tag-material").forEach((tag) => {
     tag.classList.toggle("ativo", tag.dataset.material === material);

@@ -31,6 +31,21 @@ export async function getStaticPaths() {
 
   return nomes.map((nome) => {
     const produtosDaLoja = produtos.filter((p) => p.loja === nome);
+
+    // Em quais categorias cada material aparece de verdade nessa loja — usado
+    // pra esconder tag de material que não faz sentido na categoria
+    // selecionada (ex: "Dental" some quando o filtro é "Filamento").
+    const categoriasPorMaterialMap = new Map();
+    for (const p of produtosDaLoja) {
+      const m = materialEfetivo(p);
+      if (!m || !p.categoria) continue;
+      if (!categoriasPorMaterialMap.has(m)) categoriasPorMaterialMap.set(m, new Set());
+      categoriasPorMaterialMap.get(m).add(p.categoria);
+    }
+    const categoriasPorMaterial = Object.fromEntries(
+      [...categoriasPorMaterialMap].map(([m, categoriasSet]) => [m, [...categoriasSet]])
+    );
+
     return {
       params: { nome },
       props: {
@@ -40,6 +55,7 @@ export async function getStaticPaths() {
         loja: lojasConfig.find((l) => l.nome === nome) || null,
         categorias: [...new Set(produtosDaLoja.map((p) => p.categoria).filter(Boolean))].sort(),
         materiais: [...new Set(produtosDaLoja.map(materialEfetivo).filter(Boolean))].sort(),
+        categoriasPorMaterial,
         badges: produtosDaLoja.map((p) => ({
           id: p.id,
           menorPreco: badgeMenorPreco(p, badgesMenorPreco, historicoPorProduto),
@@ -51,7 +67,7 @@ export async function getStaticPaths() {
   });
 }
 
-const { nome, produtosDaLoja, loja, categorias, materiais, badges, colunasGrid } = Astro.props;
+const { nome, produtosDaLoja, loja, categorias, materiais, categoriasPorMaterial, badges, colunasGrid } = Astro.props;
 const badgesPorId = new Map(badges.map((b) => [b.id, b]));
 const titulo = `${nome} — LUPA3D`;
 const descricao = loja?.descricao || `Confira os ${produtosDaLoja.length} produtos e preços da ${nome} no LUPA3D.`;
@@ -131,7 +147,9 @@ const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
 
     {materiais.length > 0 && (
       <div class="tags-material" aria-label="Filtrar por material">
-        {materiais.map((m) => <button type="button" class="tag-material" data-material={m}>{m}</button>)}
+        {materiais.map((m) => (
+          <button type="button" class="tag-material" data-material={m} data-categorias={(categoriasPorMaterial[m] || []).join(",")}>{m}</button>
+        ))}
       </div>
     )}
 
