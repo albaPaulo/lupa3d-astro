@@ -112,7 +112,8 @@ const produtoJsonLdString = JSON.stringify(produtoJsonLd).replace(/</g, "\\u003c
 
   <script type="application/ld+json" set:html={produtoJsonLdString}></script>
 
-  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="/css/style.css" /></noscript>
 </head>
 <body>
   <div id="banner-aviso" class="banner-aviso oculto-tela"></div>
@@ -151,7 +152,7 @@ const produtoJsonLdString = JSON.stringify(produtoJsonLd).replace(/</g, "\\u003c
           <button class="btn-favorito" data-id={p.id} title="Favoritar" aria-label="Favoritar" aria-pressed="false">☆</button>
           <div class="detalhe-imagem">
             {p.imagem_url ? (
-              <img src={p.imagem_url} alt={p.nome} referrerpolicy="no-referrer" />
+              <img src={p.imagem_url} alt={p.nome} referrerpolicy="no-referrer" fetchpriority="high" />
             ) : (
               <span class="card-imagem-vazia">📦</span>
             )}
@@ -170,7 +171,7 @@ const produtoJsonLdString = JSON.stringify(produtoJsonLd).replace(/</g, "\\u003c
             <h2 class="produto-box-titulo">Vendido por</h2>
             {loja?.logo_url && (
               <a href={`/loja/${p.loja}/`} class="produto-vendido-logo-link">
-                <img src={loja.logo_url} alt={`Logotipo da ${p.loja}`} class="produto-vendido-logo" referrerpolicy="no-referrer" />
+                <img src={loja.logo_url} alt={`Logotipo da ${p.loja}`} class="produto-vendido-logo" referrerpolicy="no-referrer" width="64" height="64" loading="lazy" />
               </a>
             )}
             <a href={`/loja/${p.loja}/`} class="card-loja-link">{p.loja} &rarr;</a>

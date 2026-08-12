@@ -54,7 +54,8 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
   <meta property="og:description" content="Compare preços de filamentos e resinas 3D de várias lojas brasileiras num só lugar. Favoritos, comparação e histórico de preço, sem cadastro." />
   <meta name="twitter:card" content="summary_large_image" />
 
-  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="/css/style.css" /></noscript>
 </head>
 <body>
   <div id="banner-aviso" class="banner-aviso oculto-tela"></div>

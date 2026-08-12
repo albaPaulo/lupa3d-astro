@@ -9,7 +9,8 @@ import Footer from "../components/Footer.astro";
   <title>Política de Privacidade — LUPA3D</title>
   <meta name="description" content="Como o LUPA3D trata os dados de quem visita o site." />
   <link rel="canonical" href="https://lupa3d.com.br/privacidade/" />
-  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="/css/style.css" /></noscript>
 </head>
 <body>
   <header class="topo">

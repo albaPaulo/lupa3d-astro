@@ -5,7 +5,7 @@ const { p } = Astro.props;
 ---
 <div class="parecido-item" data-id={p.id} data-href={`/produto/${p.id}/`}>
   {p.imagem_url ? (
-    <img src={p.imagem_url} alt="" class="parecido-imagem" loading="lazy" referrerpolicy="no-referrer" />
+    <img src={p.imagem_url} alt="" class="parecido-imagem" loading="lazy" referrerpolicy="no-referrer" width="40" height="40" />
   ) : (
     <span class="parecido-imagem parecido-imagem-vazia"></span>
   )}
