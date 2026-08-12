@@ -24,16 +24,31 @@ function categoriasDesativadasSet(config) {
 // categorias desativadas no admin, igual o site atual faz (senão o Astro
 // geraria página estática pra um produto que o painel marcou pra não
 // aparecer, e ela ficaria visível mesmo sem estar linkada em lugar nenhum).
-export async function fetchProdutos() {
-  const [resp, config] = await Promise.all([
-    fetch(
+// Busca todos os produtos paginando por Range (igual fetchHistoricoTodos) —
+// sem isso, a API do Supabase corta silenciosamente em 1000 linhas (limite
+// padrão do PostgREST), e como a ordenação é por mais recém-atualizado,
+// lojas inteiras cujos produtos foram salvos mais cedo no scraper somem da
+// listagem sem gerar nenhum erro.
+async function fetchProdutosBrutos() {
+  const TAMANHO_PAGINA = 1000;
+  let offset = 0;
+  const todos = [];
+  while (true) {
+    const resp = await fetch(
       `${SUPABASE_URL}/rest/v1/produtos?select=*&disponivel=eq.true&oculto=eq.false&order=destaque.desc,atualizado_em.desc`,
-      { headers: headers() }
-    ),
-    fetchConfiguracoes(),
-  ]);
-  if (!resp.ok) throw new Error(`Falha ao buscar produtos: ${resp.status}`);
-  const produtos = await resp.json();
+      { headers: { ...headers(), Range: `${offset}-${offset + TAMANHO_PAGINA - 1}` } }
+    );
+    if (!resp.ok) throw new Error(`Falha ao buscar produtos: ${resp.status}`);
+    const lote = await resp.json();
+    todos.push(...lote);
+    if (lote.length < TAMANHO_PAGINA) break;
+    offset += TAMANHO_PAGINA;
+  }
+  return todos;
+}
+
+export async function fetchProdutos() {
+  const [produtos, config] = await Promise.all([fetchProdutosBrutos(), fetchConfiguracoes()]);
   const desativadas = categoriasDesativadasSet(config);
   return produtos.filter((p) => !desativadas.has(p.categoria));
 }

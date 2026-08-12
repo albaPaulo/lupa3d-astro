@@ -353,9 +353,23 @@ function renderizarTabela() {
 }
 
 async function carregarProdutosAdmin() {
-  const resp = await fetchAdmin("/rest/v1/produtos?select=*&order=loja.asc,nome.asc");
-  if (!resp.ok) throw new Error("Falha ao carregar produtos");
-  PRODUTOS_ADMIN = await resp.json();
+  // Busca paginando por Range: acima de 1000 produtos, o Supabase corta a
+  // resposta em silêncio (limite padrão do PostgREST) e lojas inteiras
+  // sumiam da tabela do admin sem nenhum erro aparecer.
+  const TAMANHO_PAGINA = 1000;
+  let offset = 0;
+  const todos = [];
+  while (true) {
+    const resp = await fetchAdmin("/rest/v1/produtos?select=*&order=loja.asc,nome.asc", {
+      headers: { Range: `${offset}-${offset + TAMANHO_PAGINA - 1}` },
+    });
+    if (!resp.ok) throw new Error("Falha ao carregar produtos");
+    const lote = await resp.json();
+    todos.push(...lote);
+    if (lote.length < TAMANHO_PAGINA) break;
+    offset += TAMANHO_PAGINA;
+  }
+  PRODUTOS_ADMIN = todos;
   popularFiltrosProdutos();
   renderizarTabela();
 }
