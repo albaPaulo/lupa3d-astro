@@ -58,6 +58,7 @@ const admEls = {
   filtroLoja: document.getElementById("admin-filtro-loja"),
   filtroCategoria: document.getElementById("admin-filtro-categoria"),
   filtroMaterial: document.getElementById("admin-filtro-material"),
+  listaMateriais: document.getElementById("admin-lista-materiais"),
   tbody: document.getElementById("admin-tbody"),
   secoesLista: document.getElementById("secoes-lista"),
   formSecao: document.getElementById("form-secao"),
@@ -298,6 +299,12 @@ function popularFiltrosProdutos() {
   popularSelect(admEls.filtroLoja, lojas);
   popularSelect(admEls.filtroCategoria, categorias);
   popularSelect(admEls.filtroMaterial, materiais);
+
+  // Sugestões pro campo de material de cada produto (datalist, não select):
+  // evita o erro de digitação criar uma tag nova e quase-idêntica (ex:
+  // "Flexivel" vs "Flexível"), mas sem travar a digitação de um material
+  // genuinamente novo que ainda não existe no catálogo.
+  admEls.listaMateriais.innerHTML = materiais.map((m) => `<option value="${escapeHTML(m)}">`).join("");
 }
 
 function linhaProdutoHTML(p) {
@@ -311,7 +318,7 @@ function linhaProdutoHTML(p) {
       <td>R$ ${Number(p.preco).toFixed(2)}</td>
       <td class="admin-col-check">${p.cliques_total || 0}</td>
       <td><input type="text" data-campo="categoria" value="${p.categoria || ""}" class="${semCategoria ? "campo-alerta" : ""}"></td>
-      <td><input type="text" data-campo="material_manual" value="${escapeHTML(p.material_manual || "")}" placeholder="${escapeHTML(p.material || "ex: PLA")}" class="${semSubcategoria ? "campo-alerta" : ""}"></td>
+      <td><input type="text" data-campo="material_manual" value="${escapeHTML(p.material_manual || "")}" placeholder="${escapeHTML(p.material || "ex: PLA")}" list="admin-lista-materiais" class="${semSubcategoria ? "campo-alerta" : ""}"></td>
       <td><input type="text" data-campo="descricao_manual" value="${escapeHTML(p.descricao_manual || "")}"></td>
       <td class="admin-col-check"><input type="checkbox" data-campo="destaque" ${p.destaque ? "checked" : ""}></td>
       <td class="admin-col-check"><input type="checkbox" data-campo="oculto" ${p.oculto ? "checked" : ""}></td>
@@ -374,12 +381,31 @@ async function carregarProdutosAdmin() {
   renderizarTabela();
 }
 
+// "Standard"/"Padrão"/"Geral"/"General"/"Basic"/"Básica" são o mesmo tipo de
+// resina (a linha de uso genérico) — só muda o idioma/nome que cada loja usa.
+// Normaliza pra não criar uma tag nova de filtro toda vez que alguém digitar
+// um sinônimo diferente no campo manual do admin.
+const _SINONIMOS_MATERIAL = {
+  padrão: "Standard",
+  padrao: "Standard",
+  geral: "Standard",
+  general: "Standard",
+  básica: "Standard",
+  basica: "Standard",
+  basic: "Standard",
+};
+function normalizarMaterialManual(valor) {
+  if (!valor) return valor;
+  const canonico = _SINONIMOS_MATERIAL[valor.trim().toLowerCase()];
+  return canonico || valor;
+}
+
 async function salvarProduto(tr) {
   const id = tr.dataset.id;
   const btn = tr.querySelector('[data-acao="salvar-produto"]');
   const corpo = {
     categoria: tr.querySelector('[data-campo="categoria"]').value.trim() || null,
-    material_manual: tr.querySelector('[data-campo="material_manual"]').value.trim() || null,
+    material_manual: normalizarMaterialManual(tr.querySelector('[data-campo="material_manual"]').value.trim()) || null,
     descricao_manual: tr.querySelector('[data-campo="descricao_manual"]').value.trim() || null,
     destaque: tr.querySelector('[data-campo="destaque"]').checked,
     oculto: tr.querySelector('[data-campo="oculto"]').checked,
