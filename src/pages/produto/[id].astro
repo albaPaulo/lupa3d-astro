@@ -1,6 +1,7 @@
 ---
 import BarraComparacao from "../../components/BarraComparacao.astro";
 import ParecidoItem from "../../components/ParecidoItem.astro";
+import ProductCard from "../../components/ProductCard.astro";
 import Footer from "../../components/Footer.astro";
 import {
   fetchProdutos,
@@ -10,6 +11,7 @@ import {
   buildHistoricoPorProduto,
   produtosParecidos,
   formatarPreco,
+  LABEL_CATEGORIA,
 } from "../../lib/supabase.js";
 import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo, precoAnteriorParaExibicao } from "../../lib/badges.js";
 import { desenharGraficoSVG } from "../../lib/grafico.js";
@@ -27,21 +29,37 @@ export async function getStaticPaths() {
   const badgesProdutoNovo = badgesProdutoNovoDeConfig(config);
   const faixaPrecoAtiva = config.parecidos_faixa_preco_ativa === "true";
 
-  return produtos.map((p) => ({
-    params: { id: String(p.id) },
-    props: {
-      produto: p,
-      loja: lojasConfig.find((l) => l.nome === p.loja) || null,
-      historico: historicoPorProduto.get(p.id) || [],
-      parecidos: produtosParecidos(produtos, p, faixaPrecoAtiva),
-      menorPreco: badgeMenorPreco(p, badgesMenorPreco, historicoPorProduto),
-      produtoNovo: badgeProdutoNovo(p, badgesProdutoNovo),
-      precoAnterior: precoAnteriorParaExibicao(p, historicoPorProduto),
-    },
-  }));
+  return produtos.map((p) => {
+    const parecidos = produtosParecidos(produtos, p, faixaPrecoAtiva);
+    // Seção de navegação/descoberta, separada dos "parecidos" (que são pra
+    // comparar preço do MESMO material em outras lojas) — aqui é qualquer
+    // produto da mesma categoria, material diferente incluso, pra incentivar
+    // continuar explorando o catálogo. Exclui o próprio produto e quem já
+    // apareceu em parecidos, pra não repetir card.
+    const idsExcluidos = new Set([p.id, ...parecidos.map((item) => item.id)]);
+    const maisDaCategoria = produtos
+      .filter((outro) => outro.categoria === p.categoria && !idsExcluidos.has(outro.id))
+      .sort((a, b) => (b.cliques_total || 0) - (a.cliques_total || 0))
+      .slice(0, 12);
+
+    return {
+      params: { id: String(p.id) },
+      props: {
+        produto: p,
+        loja: lojasConfig.find((l) => l.nome === p.loja) || null,
+        historico: historicoPorProduto.get(p.id) || [],
+        parecidos,
+        maisDaCategoria,
+        menorPreco: badgeMenorPreco(p, badgesMenorPreco, historicoPorProduto),
+        produtoNovo: badgeProdutoNovo(p, badgesProdutoNovo),
+        precoAnterior: precoAnteriorParaExibicao(p, historicoPorProduto),
+      },
+    };
+  });
 }
 
-const { produto: p, loja, historico, parecidos, menorPreco, produtoNovo, precoAnterior } = Astro.props;
+const { produto: p, loja, historico, parecidos, maisDaCategoria, menorPreco, produtoNovo, precoAnterior } = Astro.props;
+const categoriaLabel = LABEL_CATEGORIA[p.categoria] || p.categoria;
 const titulo = `${p.nome} — LUPA3D`;
 const descricao = `${p.nome} por ${formatarPreco(p.preco)} na ${p.loja}. Compare com outras lojas de filamento e resina 3D no LUPA3D.`;
 const graficoSVG = desenharGraficoSVG(historico);
@@ -193,6 +211,17 @@ const produtoJsonLdString = JSON.stringify(produtoJsonLd).replace(/</g, "\\u003c
         </div>
       </div>
     </div>
+
+    {maisDaCategoria.length > 0 && (
+      <section class="produto-mais-categoria">
+        <div class="titulo-secao-grid-linha">
+          <h2 class="titulo-secao-grid">Continue explorando {categoriaLabel}</h2>
+        </div>
+        <div class="grid" style="--colunas-grid: 4">
+          {maisDaCategoria.map((item) => <ProductCard p={item} />)}
+        </div>
+      </section>
+    )}
   </main>
 
   <Footer />
