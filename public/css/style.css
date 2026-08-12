@@ -1071,6 +1071,9 @@ header.topo {
   flex-direction: column;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
+  max-height: 185px;
+  overflow-y: auto;
+  padding-right: 0.4rem;
 }
 
 .parecido-item {
