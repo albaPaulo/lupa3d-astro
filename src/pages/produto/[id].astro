@@ -95,6 +95,22 @@ const produtoJsonLd = {
   },
 };
 const produtoJsonLdString = JSON.stringify(produtoJsonLd).replace(/</g, "\\u003c");
+
+// Breadcrumb estruturado — a trilha visual já existe na página (Início ›
+// categoria › loja › produto), isso só expõe a mesma hierarquia como
+// JSON-LD pro Google poder mostrar a trilha direto no resultado de busca.
+// A categoria entra com link pra /categoria/ mesmo não sendo clicável na
+// trilha visual hoje, porque a página de destino existe e é válida.
+const breadcrumbItens = [
+  { "@type": "ListItem", position: 1, name: "Início", item: "https://lupa3d.com.br/" },
+  ...(p.categoria
+    ? [{ "@type": "ListItem", position: 2, name: categoriaLabel, item: `https://lupa3d.com.br/categoria/${p.categoria}/` }]
+    : []),
+  { "@type": "ListItem", position: p.categoria ? 3 : 2, name: p.loja, item: `https://lupa3d.com.br/loja/${p.loja}/` },
+  { "@type": "ListItem", position: p.categoria ? 4 : 3, name: p.nome },
+];
+const breadcrumbJsonLd = { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: breadcrumbItens };
+const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\\u003c");
 ---
 <!doctype html>
 <html lang="pt-BR">
@@ -113,6 +129,7 @@ const produtoJsonLdString = JSON.stringify(produtoJsonLd).replace(/</g, "\\u003c
   <meta name="twitter:card" content="summary_large_image" />
 
   <script type="application/ld+json" set:html={produtoJsonLdString}></script>
+  <script type="application/ld+json" set:html={breadcrumbJsonLdString}></script>
 
   <GlobalStyles />
 </head>
