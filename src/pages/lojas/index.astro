@@ -1,6 +1,7 @@
 ---
 import { fetchProdutos, fetchLojas } from "../../lib/supabase.js";
 import Footer from "../../components/Footer.astro";
+import GlobalStyles from "../../components/GlobalStyles.astro";
 
 const [produtos, lojasConfig] = await Promise.all([fetchProdutos(), fetchLojas()]);
 
@@ -18,7 +19,7 @@ const nomesLojas = [...contagemPorLoja.keys()].sort();
   <title>Lojas — LUPA3D</title>
   <meta name="description" content="Veja todas as lojas de filamento e resina 3D comparadas no LUPA3D." />
   <link rel="canonical" href="https://lupa3d.com.br/lojas/" />
-  <link rel="stylesheet" href="/css/style.css" />
+  <GlobalStyles />
 </head>
 <body>
   <header class="topo">

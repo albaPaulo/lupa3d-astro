@@ -1,0 +1,12 @@
+---
+// CSS global embutido direto no HTML (em vez de <link rel="stylesheet">
+// externo) — remove a requisição de rede que o PageSpeed acusa como
+// "bloqueando a renderização" sem trocar o tipo de carregamento (continua
+// síncrono/na ordem certa), então não causa o flash-sem-estilo/troca de
+// layout que a tentativa anterior com preload+swap causou.
+import fs from "node:fs";
+import path from "node:path";
+
+const css = fs.readFileSync(path.join(process.cwd(), "public/css/style.css"), "utf-8");
+---
+<style set:html={css}></style>

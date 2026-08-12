@@ -1,6 +1,7 @@
 ---
 import BarraComparacao from "../components/BarraComparacao.astro";
 import Footer from "../components/Footer.astro";
+import GlobalStyles from "../components/GlobalStyles.astro";
 ---
 <!doctype html>
 <html lang="pt-BR">
@@ -10,7 +11,7 @@ import Footer from "../components/Footer.astro";
   <meta name="robots" content="noindex, follow" />
   <title>Favoritos — LUPA3D</title>
   <meta name="description" content="Seus produtos favoritos no LUPA3D." />
-  <link rel="stylesheet" href="/css/style.css" />
+  <GlobalStyles />
 </head>
 <body>
   <div id="banner-aviso" class="banner-aviso oculto-tela"></div>
@@ -67,9 +68,9 @@ import Footer from "../components/Footer.astro";
 
   <BarraComparacao />
 
-  <script is:inline src="/js/config.js"></script>
-  <script is:inline src="/js/favoritos.js"></script>
-  <script is:inline src="/js/interativo.js"></script>
-  <script is:inline src="/js/favoritos-pagina.js"></script>
+  <script is:inline defer src="/js/config.js"></script>
+  <script is:inline defer src="/js/favoritos.js"></script>
+  <script is:inline defer src="/js/interativo.js"></script>
+  <script is:inline defer src="/js/favoritos-pagina.js"></script>
 </body>
 </html>

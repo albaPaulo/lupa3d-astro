@@ -3,6 +3,7 @@ import BarraComparacao from "../../components/BarraComparacao.astro";
 import ParecidoItem from "../../components/ParecidoItem.astro";
 import ProductCard from "../../components/ProductCard.astro";
 import Footer from "../../components/Footer.astro";
+import GlobalStyles from "../../components/GlobalStyles.astro";
 import {
   fetchProdutos,
   fetchLojas,
@@ -112,7 +113,7 @@ const produtoJsonLdString = JSON.stringify(produtoJsonLd).replace(/</g, "\\u003c
 
   <script type="application/ld+json" set:html={produtoJsonLdString}></script>
 
-  <link rel="stylesheet" href="/css/style.css" />
+  <GlobalStyles />
 </head>
 <body>
   <div id="banner-aviso" class="banner-aviso oculto-tela"></div>
@@ -228,8 +229,8 @@ const produtoJsonLdString = JSON.stringify(produtoJsonLd).replace(/</g, "\\u003c
 
   <BarraComparacao />
 
-  <script is:inline src="/js/config.js"></script>
-  <script is:inline src="/js/favoritos.js"></script>
-  <script is:inline src="/js/interativo.js"></script>
+  <script is:inline defer src="/js/config.js"></script>
+  <script is:inline defer src="/js/favoritos.js"></script>
+  <script is:inline defer src="/js/interativo.js"></script>
 </body>
 </html>

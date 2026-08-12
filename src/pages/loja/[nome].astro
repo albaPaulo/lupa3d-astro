@@ -2,6 +2,7 @@
 import ProductCard from "../../components/ProductCard.astro";
 import BarraComparacao from "../../components/BarraComparacao.astro";
 import Footer from "../../components/Footer.astro";
+import GlobalStyles from "../../components/GlobalStyles.astro";
 import {
   fetchProdutos,
   fetchLojas,
@@ -70,7 +71,7 @@ const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
   {loja?.logo_url && <meta property="og:image" content={loja.logo_url} />}
   <meta name="twitter:card" content="summary_large_image" />
 
-  <link rel="stylesheet" href="/css/style.css" />
+  <GlobalStyles />
 </head>
 <body>
   <div id="banner-aviso" class="banner-aviso oculto-tela"></div>
@@ -161,8 +162,8 @@ const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
 
   <BarraComparacao />
 
-  <script is:inline src="/js/config.js"></script>
-  <script is:inline src="/js/favoritos.js"></script>
-  <script is:inline src="/js/interativo.js"></script>
+  <script is:inline defer src="/js/config.js"></script>
+  <script is:inline defer src="/js/favoritos.js"></script>
+  <script is:inline defer src="/js/interativo.js"></script>
 </body>
 </html>
