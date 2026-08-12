@@ -1,0 +1,19 @@
+# Libera o Netlify Image CDN (/.netlify/images) pra redimensionar/comprimir
+# as fotos de produto, que vêm hotlinkadas direto do CDN de cada loja (fora
+# do nosso controle de tamanho/formato original). Precisa listar os domínios
+# de origem — só 12 lojas diferentes hospedam todas as imagens do catálogo.
+[images]
+  remote_images = [
+    "https://acdn-us\\.mitiendanube\\.com/.*",
+    "https://cdn\\.awsli\\.com\\.br/.*",
+    "https://imagens\\.3dlab\\.com\\.br/.*",
+    "https://3dprime\\.com\\.br/.*",
+    "https://3dfila\\.com\\.br/.*",
+    "https://3dcure\\.com\\.br/.*",
+    "https://images\\.tcdn\\.com\\.br/.*",
+    "https://cdn\\.shopify\\.com/.*",
+    "https://www\\.smooth3d\\.com\\.br/.*",
+    "https://www\\.madeinheaven3d\\.com/.*",
+    "https://cdnhuawei\\.lojavirtuolpro\\.com/.*",
+    "https://www\\.loja3dma\\.com\\.br/.*",
+  ]

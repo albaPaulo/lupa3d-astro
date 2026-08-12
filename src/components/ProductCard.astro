@@ -1,5 +1,5 @@
 ---
-import { formatarPreco, materialEfetivo, kitEfetivo, EMOJI_CATEGORIA, normalizarBusca } from "../lib/supabase.js";
+import { formatarPreco, materialEfetivo, kitEfetivo, EMOJI_CATEGORIA, normalizarBusca, otimizarImagem } from "../lib/supabase.js";
 
 const { p, menorPreco = null, produtoNovo = null, precoAnterior = null } = Astro.props;
 const material = materialEfetivo(p) || "";
@@ -25,7 +25,7 @@ const temPix = p.preco_pix != null && Number(p.preco_pix) < Number(p.preco);
   {produtoNovo && <span class="badge-produto-novo">{produtoNovo.icone ? `${produtoNovo.icone} ` : ""}{produtoNovo.label || "Novo"}</span>}
   <div class="card-imagem">
     {p.imagem_url ? (
-      <img src={p.imagem_url} alt={p.nome} loading="lazy" referrerpolicy="no-referrer" />
+      <img src={otimizarImagem(p.imagem_url, 400)} alt={p.nome} loading="lazy" referrerpolicy="no-referrer" />
     ) : (
       <span class="card-imagem-vazia">{EMOJI_CATEGORIA[p.categoria] || "📦"}</span>
     )}

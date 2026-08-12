@@ -1,11 +1,11 @@
 ---
-import { formatarPreco } from "../lib/supabase.js";
+import { formatarPreco, otimizarImagem } from "../lib/supabase.js";
 
 const { p } = Astro.props;
 ---
 <div class="parecido-item" data-id={p.id} data-href={`/produto/${p.id}/`}>
   {p.imagem_url ? (
-    <img src={p.imagem_url} alt="" class="parecido-imagem" loading="lazy" referrerpolicy="no-referrer" />
+    <img src={otimizarImagem(p.imagem_url, 80)} alt="" class="parecido-imagem" loading="lazy" referrerpolicy="no-referrer" />
   ) : (
     <span class="parecido-imagem parecido-imagem-vazia"></span>
   )}

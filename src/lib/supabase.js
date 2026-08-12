@@ -73,6 +73,14 @@ export async function fetchLojas() {
   return resp.json();
 }
 
+// Redimensiona/comprime via Netlify Image CDN as fotos de produto, que vêm
+// hotlinkadas direto do CDN de cada loja no tamanho original (às vezes bem
+// maior que o exibido). Domínios de origem liberados em netlify.toml.
+export function otimizarImagem(url, largura) {
+  if (!url) return url;
+  return `/.netlify/images?url=${encodeURIComponent(url)}&w=${largura}&q=75`;
+}
+
 export const REDES_LOJA = [
   { chave: "instagram_url", label: "Instagram", emoji: "📷" },
   { chave: "facebook_url", label: "Facebook", emoji: "📘" },

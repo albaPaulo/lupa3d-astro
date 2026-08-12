@@ -13,6 +13,7 @@ import {
   produtosParecidos,
   formatarPreco,
   LABEL_CATEGORIA,
+  otimizarImagem,
 } from "../../lib/supabase.js";
 import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo, precoAnteriorParaExibicao } from "../../lib/badges.js";
 import { desenharGraficoSVG } from "../../lib/grafico.js";
@@ -152,7 +153,7 @@ const produtoJsonLdString = JSON.stringify(produtoJsonLd).replace(/</g, "\\u003c
           <button class="btn-favorito" data-id={p.id} title="Favoritar" aria-label="Favoritar" aria-pressed="false">☆</button>
           <div class="detalhe-imagem">
             {p.imagem_url ? (
-              <img src={p.imagem_url} alt={p.nome} referrerpolicy="no-referrer" />
+              <img src={otimizarImagem(p.imagem_url, 600)} alt={p.nome} referrerpolicy="no-referrer" />
             ) : (
               <span class="card-imagem-vazia">📦</span>
             )}
