@@ -27,6 +27,17 @@ function normalizarBuscaJS(texto) {
     .replace(/\p{Diacritic}/gu, "");
 }
 
+// "Standard"/"Padrão"/"Geral"/"General"/"Básica"/"Basic" são o mesmo tipo de
+// resina em nomes diferentes (mesma lista de sinônimos usada pra normalizar
+// a tag de material no admin) — sem isso, buscar "resina standard" não
+// achava produtos chamados "Resina Padrão" e vice-versa. Já em minúsculo e
+// sem acento (mesmo tratamento de normalizarBuscaJS).
+const GRUPOS_SINONIMOS_BUSCA = [["standard", "padrao", "geral", "general", "basica", "basic"]];
+
+function palavrasEquivalentes(palavra) {
+  return GRUPOS_SINONIMOS_BUSCA.find((grupo) => grupo.includes(palavra)) || [palavra];
+}
+
 // Busca por palavra, não por frase inteira — "resina stand" precisa achar
 // "Resina Premium Standard" e "Resina 3D Standard 4.0", que têm outras
 // palavras no meio e não bateriam com um simples .includes(frase completa).
@@ -34,7 +45,7 @@ function nomeCorrespondeABusca(nomeLowerCase, termoLowerCase) {
   return termoLowerCase
     .split(/\s+/)
     .filter(Boolean)
-    .every((palavra) => nomeLowerCase.includes(palavra));
+    .every((palavra) => palavrasEquivalentes(palavra).some((sinonimo) => nomeLowerCase.includes(sinonimo)));
 }
 
 function atualizarBotaoFavorito(btn) {
