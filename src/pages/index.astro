@@ -46,6 +46,7 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{tituloPagina}</title>
   <meta name="description" content="Compare preços de filamentos e resinas 3D de várias lojas brasileiras num só lugar. Favoritos, comparação e histórico de preço, sem cadastro." />
+  <link rel="canonical" href="https://lupa3d.com.br/" />
 
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="LUPA3D" />
@@ -60,7 +61,7 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
 
   <header class="topo">
     <div class="topo-linha">
-      <h1 class="logo-lupa3d">LUPA<span>3D</span></h1>
+      <a href="/" class="logo-lupa3d">LUPA<span>3D</span></a>
       <nav class="abas">
         <a href="/favoritos/">Favoritos (<span data-contador-favoritos>0</span>)</a>
         <a href="/lojas/">Lojas</a>
@@ -69,7 +70,7 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
   </header>
 
   <section class="barra-busca-categoria">
-    <h2 class="hero-titulo">Compare preços de filamento e resina 3D entre várias lojas.</h2>
+    <h1 class="hero-titulo">Compare preços de filamento e resina 3D entre várias lojas.</h1>
 
     <nav class="atalhos-categoria" aria-label="Atalhos de categoria">
       {categorias.map((c) => (
