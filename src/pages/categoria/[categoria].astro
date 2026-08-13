@@ -12,7 +12,7 @@ import {
   EMOJI_CATEGORIA,
   LABEL_CATEGORIA,
 } from "../../lib/supabase.js";
-import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo, precoAnteriorParaExibicao } from "../../lib/badges.js";
+import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPrecoEfetivo, badgeProdutoNovo, precoAnteriorParaExibicao } from "../../lib/badges.js";
 
 export async function getStaticPaths() {
   const [produtos, historicoTodos, config] = await Promise.all([
@@ -25,6 +25,7 @@ export async function getStaticPaths() {
   const historicoPorProduto = buildHistoricoPorProduto(historicoTodos);
   const badgesMenorPreco = badgesMenorPrecoDeConfig(config);
   const badgesProdutoNovo = badgesProdutoNovoDeConfig(config);
+  const historicoAtivo = config.menor_preco_historico_ativo !== "false";
   const colunasGrid = Math.min(6, Math.max(2, parseInt(config.colunas_grid, 10) || 3));
 
   return categorias.map((categoria) => {
@@ -39,7 +40,7 @@ export async function getStaticPaths() {
         materiais: [...new Set(produtosDaCategoria.map(materialEfetivo).filter(Boolean))].sort(),
         badges: produtosDaCategoria.map((p) => ({
           id: p.id,
-          menorPreco: badgeMenorPreco(p, badgesMenorPreco, historicoPorProduto),
+          menorPreco: badgeMenorPrecoEfetivo(p, badgesMenorPreco, historicoPorProduto, historicoAtivo),
           produtoNovo: badgeProdutoNovo(p, badgesProdutoNovo),
           precoAnterior: precoAnteriorParaExibicao(p, historicoPorProduto),
         })),

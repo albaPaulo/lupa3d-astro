@@ -48,6 +48,29 @@ export function badgeMenorPreco(p, badgesMenorPreco, historicoPorProduto) {
   return badgesMenorPreco.find((b) => ehMenorPrecoEmDias(p, b.dias, historicoPorProduto)) || null;
 }
 
+// Preço atual é o menor de TODO o histórico já registrado (não só numa
+// janela de dias) — mesma lógica permissiva de ehMenorPrecoEmDias pra
+// produto sem histórico ainda (o preço atual é trivialmente o "menor" que
+// se conhece dele).
+export function ehMenorPrecoHistorico(p, historicoPorProduto) {
+  const historico = historicoPorProduto.get(p.id);
+  if (!historico || historico.length === 0) return true;
+  const precosHistoricos = historico.map((h) => Number(h.preco));
+  return Number(p.preco) <= Math.min(...precosHistoricos);
+}
+
+// "Menor preço histórico" é sempre a claim mais forte possível — se é o
+// menor de todo o histórico, automaticamente também é o menor em qualquer
+// janela de dias, então ele sobrepõe (não soma) os badges configuráveis de
+// N dias. Desativável no admin (menor_preco_historico_ativo) porque, com
+// histórico ainda curto, pode disparar cedo demais pra ser útil.
+export function badgeMenorPrecoEfetivo(p, badgesMenorPreco, historicoPorProduto, historicoAtivo = true) {
+  if (historicoAtivo && ehMenorPrecoHistorico(p, historicoPorProduto)) {
+    return { icone: "🏆", label: "Menor preço histórico!" };
+  }
+  return badgeMenorPreco(p, badgesMenorPreco, historicoPorProduto);
+}
+
 // Maior preço que o próprio produto teve nos últimos `dias` — pra mostrar
 // "de/por" no card quando o preço atual é mais baixo que isso. Só retorna
 // valor quando há queda real registrada no histórico (nunca inventa um

@@ -5,7 +5,7 @@ import Footer from "../components/Footer.astro";
 import FaixaProvaSocial from "../components/FaixaProvaSocial.astro";
 import GlobalStyles from "../components/GlobalStyles.astro";
 import { fetchProdutos, fetchHistoricoTodos, fetchConfiguracoes, fetchSecoes, buildHistoricoPorProduto, EMOJI_CATEGORIA, LABEL_CATEGORIA } from "../lib/supabase.js";
-import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo, precoAnteriorParaExibicao } from "../lib/badges.js";
+import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPrecoEfetivo, badgeProdutoNovo, precoAnteriorParaExibicao } from "../lib/badges.js";
 import { computarProdutosDaSecao } from "../lib/secoes.js";
 
 const [produtos, historicoTodos, config, secoesRaw] = await Promise.all([
@@ -17,11 +17,12 @@ const [produtos, historicoTodos, config, secoesRaw] = await Promise.all([
 const historicoPorProduto = buildHistoricoPorProduto(historicoTodos);
 const badgesMenorPreco = badgesMenorPrecoDeConfig(config);
 const badgesProdutoNovo = badgesProdutoNovoDeConfig(config);
+const historicoAtivo = config.menor_preco_historico_ativo !== "false";
 const badgesPorId = new Map(
   produtos.map((p) => [
     p.id,
     {
-      menorPreco: badgeMenorPreco(p, badgesMenorPreco, historicoPorProduto),
+      menorPreco: badgeMenorPrecoEfetivo(p, badgesMenorPreco, historicoPorProduto, historicoAtivo),
       produtoNovo: badgeProdutoNovo(p, badgesProdutoNovo),
       precoAnterior: precoAnteriorParaExibicao(p, historicoPorProduto),
     },

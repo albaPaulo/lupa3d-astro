@@ -77,6 +77,10 @@
           <input type="checkbox" id="config-parecidos-faixa-preco" checked>
           Em "Produtos parecidos", usar faixa de preço (metade a o dobro) como filtro extra quando não há subcategoria detectada (ex: pigmento) — desmarque se estiver zerando resultados em categorias com poucos produtos
         </label>
+        <label class="checkbox-linha">
+          <input type="checkbox" id="config-menor-preco-historico" checked>
+          Badge "🏆 Menor preço histórico!" quando o preço atual é o menor de todo o histórico já registrado (sobrepõe os badges de "menor preço em N dias" abaixo) — desmarque se estiver disparando cedo demais por falta de histórico
+        </label>
         <div class="config-categorias-campo">
           <span class="config-categorias-titulo">Badges "Menor preço" nos cards — cada uma com seu ícone e prazo (mostra só a mais forte que o produto atingir; lista vazia desativa)</span>
           <div id="config-badges-lista" class="config-badges-lista"></div>

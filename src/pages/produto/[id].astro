@@ -16,7 +16,7 @@ import {
   materialEfetivo,
   otimizarImagem,
 } from "../../lib/supabase.js";
-import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo, precoAnteriorParaExibicao } from "../../lib/badges.js";
+import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPrecoEfetivo, badgeProdutoNovo, precoAnteriorParaExibicao } from "../../lib/badges.js";
 import { desenharGraficoSVG } from "../../lib/grafico.js";
 import { siWhatsapp, siTelegram, siFacebook, siX } from "simple-icons";
 
@@ -31,6 +31,7 @@ export async function getStaticPaths() {
   const historicoPorProduto = buildHistoricoPorProduto(historicoTodos);
   const badgesMenorPreco = badgesMenorPrecoDeConfig(config);
   const badgesProdutoNovo = badgesProdutoNovoDeConfig(config);
+  const historicoAtivo = config.menor_preco_historico_ativo !== "false";
   const faixaPrecoAtiva = config.parecidos_faixa_preco_ativa === "true";
 
   return produtos.map((p) => {
@@ -54,7 +55,7 @@ export async function getStaticPaths() {
         historico: historicoPorProduto.get(p.id) || [],
         parecidos,
         maisDaCategoria,
-        menorPreco: badgeMenorPreco(p, badgesMenorPreco, historicoPorProduto),
+        menorPreco: badgeMenorPrecoEfetivo(p, badgesMenorPreco, historicoPorProduto, historicoAtivo),
         produtoNovo: badgeProdutoNovo(p, badgesProdutoNovo),
         precoAnterior: precoAnteriorParaExibicao(p, historicoPorProduto),
       },
