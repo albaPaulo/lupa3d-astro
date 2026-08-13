@@ -341,13 +341,13 @@ header.topo {
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.22);
   padding: 0.4rem 0.8rem;
   border-radius: 999px;
   transition: background 0.15s;
 }
 
-.secao-ver-mais:hover { background: rgba(255, 255, 255, 0.32); }
+.secao-ver-mais:hover { background: rgba(0, 0, 0, 0.35); }
 
 .secao-scroll {
   max-width: 1200px;
