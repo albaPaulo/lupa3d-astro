@@ -1,11 +1,10 @@
 ---
-import ProductCard from "../components/ProductCard.astro";
 import BarraComparacao from "../components/BarraComparacao.astro";
 import SecaoHome from "../components/SecaoHome.astro";
 import Footer from "../components/Footer.astro";
 import FaixaProvaSocial from "../components/FaixaProvaSocial.astro";
 import GlobalStyles from "../components/GlobalStyles.astro";
-import { fetchProdutos, fetchHistoricoTodos, fetchConfiguracoes, fetchSecoes, buildHistoricoPorProduto, materialEfetivo, EMOJI_CATEGORIA, LABEL_CATEGORIA } from "../lib/supabase.js";
+import { fetchProdutos, fetchHistoricoTodos, fetchConfiguracoes, fetchSecoes, buildHistoricoPorProduto, EMOJI_CATEGORIA, LABEL_CATEGORIA } from "../lib/supabase.js";
 import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo, precoAnteriorParaExibicao } from "../lib/badges.js";
 import { computarProdutosDaSecao } from "../lib/secoes.js";
 
@@ -18,7 +17,6 @@ const [produtos, historicoTodos, config, secoesRaw] = await Promise.all([
 const historicoPorProduto = buildHistoricoPorProduto(historicoTodos);
 const badgesMenorPreco = badgesMenorPrecoDeConfig(config);
 const badgesProdutoNovo = badgesProdutoNovoDeConfig(config);
-const colunasGrid = Math.min(6, Math.max(2, parseInt(config.colunas_grid, 10) || 3));
 const badgesPorId = new Map(
   produtos.map((p) => [
     p.id,
@@ -34,8 +32,37 @@ const secoes = secoesRaw
   .map((secao) => ({ secao, ...computarProdutosDaSecao(secao, produtos, historicoPorProduto) }))
   .filter(({ produtos: p }) => p.length > 0);
 
+// Seções fixas, sempre presentes independente de configuração no admin —
+// diferente da grade completa que a home tinha antes (todo o catálogo
+// despejado no HTML, escondido por CSS até "Ver mais"), aqui só entra no
+// HTML o que realmente aparece na tela. Isso é o que mais pesa no tamanho
+// da página, e só piora conforme o catálogo cresce.
+const LIMITE_SECAO_PADRAO = 12;
+const secoesPadrao = [
+  {
+    nome: "Mais clicados",
+    icone: "🔥",
+    produtos: [...produtos]
+      .filter((p) => (p.cliques_total || 0) > 0)
+      .sort((a, b) => (b.cliques_total || 0) - (a.cliques_total || 0))
+      .slice(0, LIMITE_SECAO_PADRAO),
+  },
+  {
+    nome: "Novidades",
+    icone: "🆕",
+    produtos: [...produtos]
+      .filter((p) => p.criado_em)
+      .sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em))
+      .slice(0, LIMITE_SECAO_PADRAO),
+  },
+  {
+    nome: "Menor preço recente",
+    icone: "💸",
+    produtos: produtos.filter((p) => badgesPorId.get(p.id)?.menorPreco).slice(0, LIMITE_SECAO_PADRAO),
+  },
+].filter((s) => s.produtos.length > 0);
+
 const categorias = [...new Set(produtos.map((p) => p.categoria).filter(Boolean))].sort();
-const materiais = [...new Set(produtos.map(materialEfetivo).filter(Boolean))].sort();
 const totalLojas = new Set(produtos.map((p) => p.loja)).size;
 
 const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de filamento e resina 3D";
@@ -86,71 +113,30 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
     <div class="busca-solo">
       <div class="busca-grande">
         <span class="busca-icone" aria-hidden="true">🔍</span>
-        <input type="search" id="busca" placeholder="Pesquisar produto..." aria-label="Buscar produtos" autocomplete="off" />
+        <input
+          type="search"
+          id="busca"
+          placeholder="Pesquisar produto..."
+          aria-label="Buscar produtos"
+          autocomplete="off"
+          data-busca-destino={categorias.length > 0 ? `/categoria/${categorias[0]}/` : "/categoria/"}
+        />
         <div id="busca-sugestoes" class="busca-sugestoes oculto-tela"></div>
       </div>
     </div>
 
     <p class="hero-subtitulo">Compare modelos, veja o histórico de preço e escolha onde comprar mais barato — sem cadastro.</p>
-
-    <div id="filtros-ativos" class="filtros-ativos"></div>
-
-    <button type="button" id="btn-mais-filtros" class="btn-mais-filtros" aria-expanded="false" aria-controls="controles-avancados">
-      🔍 Mais filtros
-    </button>
-
-    <div class="controles oculto-tela" id="controles-avancados">
-      <select id="filtro-categoria" aria-label="Filtrar por categoria">
-        <option value="">Todas as categorias</option>
-        {categorias.map((c) => <option value={c}>{c}</option>)}
-      </select>
-      <select id="filtro-material" aria-label="Filtrar por material">
-        <option value="">Todos os materiais</option>
-        {materiais.map((m) => <option value={m}>{m}</option>)}
-      </select>
-      <select id="ordenar" aria-label="Ordenar produtos">
-        <option value="">Ordenar: padrão</option>
-        <option value="preco_asc">Menor preço</option>
-        <option value="preco_desc">Maior preço</option>
-        <option value="cliques">Mais clicados</option>
-        <option value="recentes">Mais recentes</option>
-      </select>
-      <div class="filtro-preco-linha">
-        <input type="number" id="filtro-preco-min" placeholder="Preço mín." min="0" step="0.01" aria-label="Preço mínimo" />
-        <span aria-hidden="true">—</span>
-        <input type="number" id="filtro-preco-max" placeholder="Preço máx." min="0" step="0.01" aria-label="Preço máximo" />
-      </div>
-      <label class="filtro-pix-linha">
-        <input type="checkbox" id="filtro-pix" />
-        Só com desconto no Pix
-      </label>
-    </div>
   </section>
 
   <FaixaProvaSocial totalProdutos={produtos.length} totalLojas={totalLojas} />
 
-  {secoes.map(({ secao, produtos: produtosDaSecao, temMais }) => (
-    <SecaoHome secao={secao} produtos={produtosDaSecao} temMais={temMais} badgesPorId={badgesPorId} />
+  {secoesPadrao.map((s) => (
+    <SecaoHome secao={{ nome: s.nome, icone: s.icone, cor: "#2563eb" }} produtos={s.produtos} badgesPorId={badgesPorId} />
   ))}
 
-  <div class="titulo-secao-grid-linha">
-    <h2 class="titulo-secao-grid">Últimas Ofertas!</h2>
-  </div>
-
-  <main id="grid" class="grid" style={`--colunas-grid: ${colunasGrid}`}>
-    {produtos.map((p) => (
-      <ProductCard
-        p={p}
-        menorPreco={badgesPorId.get(p.id)?.menorPreco}
-        produtoNovo={badgesPorId.get(p.id)?.produtoNovo}
-        precoAnterior={badgesPorId.get(p.id)?.precoAnterior}
-      />
-    ))}
-  </main>
-
-  <div class="ver-mais-container">
-    <button id="btn-ver-mais" class="btn-ver-mais oculto-tela">Ver mais!</button>
-  </div>
+  {secoes.map(({ secao, produtos: produtosDaSecao }) => (
+    <SecaoHome secao={secao} produtos={produtosDaSecao} badgesPorId={badgesPorId} />
+  ))}
 
   <Footer />
 

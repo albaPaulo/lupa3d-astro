@@ -218,6 +218,34 @@ function restaurarEstadoDaURL() {
   if (favoritos) {
     adicionarFavoritos(favoritos.split(",").map(Number).filter((n) => !Number.isNaN(n)));
   }
+
+  // Preenche a busca a partir da URL (?busca=...) — usado quando a home
+  // (sem grade própria pra filtrar) redireciona a pesquisa pra uma página
+  // de categoria, que já busca em cima do catálogo dela.
+  const busca = params.get("busca");
+  if (busca) {
+    const inputBusca = document.getElementById("busca");
+    if (inputBusca) inputBusca.value = busca;
+  }
+}
+
+// Páginas sem grade própria (hoje só a home) não têm o que filtrar no
+// lugar — a busca aí redireciona pra uma página de categoria já com o
+// termo preenchido (?busca=...), que faz a busca de verdade.
+function ligarBuscaComRedirecionamento() {
+  const input = document.getElementById("busca");
+  const destino = input?.dataset.buscaDestino;
+  if (!input || !destino) return;
+
+  const irParaDestino = () => {
+    const termo = input.value.trim();
+    window.location.href = termo ? `${destino}?busca=${encodeURIComponent(termo)}` : destino;
+  };
+
+  input.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter") irParaDestino();
+  });
+  document.querySelector(".busca-icone")?.addEventListener("click", irParaDestino);
 }
 
 // Adia a chamada até `atraso`ms sem uma nova chamada — evita refiltrar a
@@ -548,5 +576,6 @@ hidratarComparacao();
 ligarEventosInterativos();
 ligarFiltros();
 ligarSugestoesBusca();
+ligarBuscaComRedirecionamento();
 aplicarFiltros(true);
 verificarConfigSite();
