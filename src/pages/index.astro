@@ -150,17 +150,19 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
 
   <FaixaProvaSocial totalProdutos={produtos.length} totalLojas={totalLojas} />
 
-  {secoesPadrao.map((s) => (
-    <SecaoHome
-      secao={{ nome: s.nome, icone: s.icone, cor: "#2563eb", layout: "grade", colunas: LIMITE_SECAO_PADRAO, verMaisHref: s.verMaisHref }}
-      produtos={s.produtos}
-      badgesPorId={badgesPorId}
-    />
-  ))}
+  <main>
+    {secoesPadrao.map((s) => (
+      <SecaoHome
+        secao={{ nome: s.nome, icone: s.icone, cor: "#2563eb", layout: "grade", colunas: LIMITE_SECAO_PADRAO, verMaisHref: s.verMaisHref }}
+        produtos={s.produtos}
+        badgesPorId={badgesPorId}
+      />
+    ))}
 
-  {secoes.map(({ secao, produtos: produtosDaSecao }) => (
-    <SecaoHome secao={secao} produtos={produtosDaSecao} badgesPorId={badgesPorId} />
-  ))}
+    {secoes.map(({ secao, produtos: produtosDaSecao }) => (
+      <SecaoHome secao={secao} produtos={produtosDaSecao} badgesPorId={badgesPorId} />
+    ))}
+  </main>
 
   <Footer />
 
