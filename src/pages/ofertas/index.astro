@@ -5,73 +5,64 @@ import Footer from "../../components/Footer.astro";
 import GlobalStyles from "../../components/GlobalStyles.astro";
 import {
   fetchProdutos,
-  fetchLojas,
   fetchHistoricoTodos,
   fetchConfiguracoes,
   buildHistoricoPorProduto,
   materialEfetivo,
-  REDES_LOJA,
   EMOJI_CATEGORIA,
   LABEL_CATEGORIA,
 } from "../../lib/supabase.js";
 import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo, precoAnteriorParaExibicao } from "../../lib/badges.js";
 
-export async function getStaticPaths() {
-  const [produtos, lojasConfig, historicoTodos, config] = await Promise.all([
-    fetchProdutos(),
-    fetchLojas(),
-    fetchHistoricoTodos(),
-    fetchConfiguracoes(),
-  ]);
-  const nomes = [...new Set(produtos.map((p) => p.loja))];
-  const historicoPorProduto = buildHistoricoPorProduto(historicoTodos);
-  const badgesMenorPreco = badgesMenorPrecoDeConfig(config);
-  const badgesProdutoNovo = badgesProdutoNovoDeConfig(config);
-  const colunasGrid = Math.min(6, Math.max(2, parseInt(config.colunas_grid, 10) || 3));
+const [produtos, historicoTodos, config] = await Promise.all([
+  fetchProdutos(),
+  fetchHistoricoTodos(),
+  fetchConfiguracoes(),
+]);
+const historicoPorProduto = buildHistoricoPorProduto(historicoTodos);
+const badgesMenorPreco = badgesMenorPrecoDeConfig(config);
+const badgesProdutoNovo = badgesProdutoNovoDeConfig(config);
+const colunasGrid = Math.min(6, Math.max(2, parseInt(config.colunas_grid, 10) || 3));
 
-  return nomes.map((nome) => {
-    const produtosDaLoja = produtos.filter((p) => p.loja === nome);
+// Mesmo critério do feed.xml: só entra quem teve queda de preço REAL
+// registrada no histórico, nunca o badge "menor preço" (que é trivialmente
+// verdadeiro pra produto sem histórico suficiente).
+const produtosComQueda = produtos
+  .map((p) => ({ produto: p, precoAnterior: precoAnteriorParaExibicao(p, historicoPorProduto, 30) }))
+  .filter((item) => item.precoAnterior != null)
+  .sort((a, b) => (1 - Number(b.produto.preco) / b.precoAnterior) - (1 - Number(a.produto.preco) / a.precoAnterior))
+  .map((item) => item.produto);
 
-    // Em quais categorias cada material aparece de verdade nessa loja — usado
-    // pra esconder tag de material que não faz sentido na categoria
-    // selecionada (ex: "Dental" some quando o filtro é "Filamento").
-    const categoriasPorMaterialMap = new Map();
-    for (const p of produtosDaLoja) {
-      const m = materialEfetivo(p);
-      if (!m || !p.categoria) continue;
-      if (!categoriasPorMaterialMap.has(m)) categoriasPorMaterialMap.set(m, new Set());
-      categoriasPorMaterialMap.get(m).add(p.categoria);
-    }
-    const categoriasPorMaterial = Object.fromEntries(
-      [...categoriasPorMaterialMap].map(([m, categoriasSet]) => [m, [...categoriasSet]])
-    );
+const categorias = [...new Set(produtosComQueda.map((p) => p.categoria).filter(Boolean))].sort();
+const materiais = [...new Set(produtosComQueda.map(materialEfetivo).filter(Boolean))].sort();
 
-    return {
-      params: { nome },
-      props: {
-        nome,
-        produtosDaLoja,
-        colunasGrid,
-        loja: lojasConfig.find((l) => l.nome === nome) || null,
-        categorias: [...new Set(produtosDaLoja.map((p) => p.categoria).filter(Boolean))].sort(),
-        materiais: [...new Set(produtosDaLoja.map(materialEfetivo).filter(Boolean))].sort(),
-        categoriasPorMaterial,
-        badges: produtosDaLoja.map((p) => ({
-          id: p.id,
-          menorPreco: badgeMenorPreco(p, badgesMenorPreco, historicoPorProduto),
-          produtoNovo: badgeProdutoNovo(p, badgesProdutoNovo),
-          precoAnterior: precoAnteriorParaExibicao(p, historicoPorProduto),
-        })),
-      },
-    };
-  });
+// Em quais categorias cada material aparece de verdade entre os produtos em
+// queda — mesmo padrão de loja/[nome].astro, pra esconder tag irrelevante
+// quando uma categoria é selecionada.
+const categoriasPorMaterialMap = new Map();
+for (const p of produtosComQueda) {
+  const m = materialEfetivo(p);
+  if (!m || !p.categoria) continue;
+  if (!categoriasPorMaterialMap.has(m)) categoriasPorMaterialMap.set(m, new Set());
+  categoriasPorMaterialMap.get(m).add(p.categoria);
 }
+const categoriasPorMaterial = Object.fromEntries(
+  [...categoriasPorMaterialMap].map(([m, categoriasSet]) => [m, [...categoriasSet]])
+);
 
-const { nome, produtosDaLoja, loja, categorias, materiais, categoriasPorMaterial, badges, colunasGrid } = Astro.props;
-const badgesPorId = new Map(badges.map((b) => [b.id, b]));
-const titulo = `${nome} — LUPA3D`;
-const descricao = loja?.descricao || `Confira os ${produtosDaLoja.length} produtos e preços da ${nome} no LUPA3D.`;
-const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
+const badgesPorId = new Map(
+  produtosComQueda.map((p) => [
+    p.id,
+    {
+      menorPreco: badgeMenorPreco(p, badgesMenorPreco, historicoPorProduto),
+      produtoNovo: badgeProdutoNovo(p, badgesProdutoNovo),
+      precoAnterior: precoAnteriorParaExibicao(p, historicoPorProduto),
+    },
+  ])
+);
+
+const titulo = "Ofertas — quedas de preço reais — LUPA3D";
+const descricao = `Confira ${produtosComQueda.length} produtos com queda de preço real registrada nos últimos 30 dias, comparados entre várias lojas brasileiras.`;
 ---
 <!doctype html>
 <html lang="pt-BR">
@@ -80,13 +71,12 @@ const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{titulo}</title>
   <meta name="description" content={descricao} />
-  <link rel="canonical" href={`https://lupa3d.com.br/loja/${nome}/`} />
+  <link rel="canonical" href="https://lupa3d.com.br/ofertas/" />
 
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="LUPA3D" />
   <meta property="og:title" content={titulo} />
   <meta property="og:description" content={descricao} />
-  {loja?.logo_url && <meta property="og:image" content={loja.logo_url} />}
   <meta name="twitter:card" content="summary_large_image" />
 
   <GlobalStyles />
@@ -98,35 +88,16 @@ const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
     <div class="topo-linha">
       <a href="/" class="logo-lupa3d">LUPA<span>3D</span></a>
       <nav class="abas">
-        <a href="/">&larr; Todas as lojas</a>
         <a href="/ofertas/">🔥 Ofertas</a>
-        <a href="/lojas/">Lojas</a>
         <a href="/favoritos/">Favoritos (<span data-contador-favoritos>0</span>)</a>
+        <a href="/lojas/">Lojas</a>
       </nav>
     </div>
   </header>
 
-  <section class="loja-perfil">
-    {loja?.banner_url && (
-      <div class="loja-perfil-banner" style={`background-image:url("${loja.banner_url}")`}></div>
-    )}
-    <div class="loja-perfil-cabecalho">
-      <div class="loja-perfil-logo-wrap">
-        {loja?.logo_url && <img src={loja.logo_url} class="loja-perfil-logo" alt="" referrerpolicy="no-referrer" />}
-      </div>
-      <h1 class="loja-perfil-nome">{nome}</h1>
-    </div>
-    {loja?.descricao && <p class="loja-perfil-descricao">{loja.descricao}</p>}
-    {redes.length > 0 && (
-      <div class="loja-perfil-redes">
-        {redes.map((r) => (
-          <a href={loja[r.chave]} target="_blank" rel="noopener" class="loja-perfil-rede-btn">{r.emoji} {r.label}</a>
-        ))}
-      </div>
-    )}
-  </section>
-
   <section class="barra-busca-categoria">
+    <h1 class="hero-titulo">Ofertas com queda de preço real.</h1>
+
     {categorias.length > 1 && (
       <nav class="atalhos-categoria" aria-label="Atalhos de categoria">
         {categorias.map((c) => (
@@ -141,10 +112,12 @@ const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
     <div class="busca-solo">
       <div class="busca-grande">
         <span class="busca-icone" aria-hidden="true">🔍</span>
-        <input type="search" id="busca" placeholder={`Pesquisar produto na ${nome}...`} aria-label="Buscar produtos nesta loja" autocomplete="off" />
+        <input type="search" id="busca" placeholder="Pesquisar nas ofertas..." aria-label="Buscar produtos" autocomplete="off" />
         <div id="busca-sugestoes" class="busca-sugestoes oculto-tela"></div>
       </div>
     </div>
+
+    <p class="hero-subtitulo">Produtos que baixaram de preço de verdade nos últimos 30 dias — sem desconto inventado.</p>
 
     {materiais.length > 0 && (
       <div class="tags-material" aria-label="Filtrar por material">
@@ -163,14 +136,14 @@ const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
     <div class="controles oculto-tela" id="controles-avancados">
       <select id="filtro-categoria" aria-label="Filtrar por categoria">
         <option value="">Todas as categorias</option>
-        {categorias.map((c) => <option value={c}>{c}</option>)}
+        {categorias.map((c) => <option value={c}>{LABEL_CATEGORIA[c] || c}</option>)}
       </select>
       <select id="filtro-material" aria-label="Filtrar por material">
         <option value="">Todos os materiais</option>
         {materiais.map((m) => <option value={m}>{m}</option>)}
       </select>
       <select id="ordenar" aria-label="Ordenar produtos">
-        <option value="">Ordenar: padrão</option>
+        <option value="">Ordenar: maior desconto</option>
         <option value="preco_asc">Menor preço</option>
         <option value="preco_desc">Maior preço</option>
         <option value="cliques">Mais clicados</option>
@@ -189,11 +162,11 @@ const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
   </section>
 
   <div class="titulo-secao-grid-linha">
-    <h2 class="titulo-secao-grid">Produtos ({produtosDaLoja.length})</h2>
+    <h2 class="titulo-secao-grid">Ofertas ({produtosComQueda.length})</h2>
   </div>
 
   <main id="grid" class="grid" style={`--colunas-grid: ${colunasGrid}`}>
-    {produtosDaLoja.map((p) => (
+    {produtosComQueda.map((p) => (
       <ProductCard
         p={p}
         menorPreco={badgesPorId.get(p.id)?.menorPreco}

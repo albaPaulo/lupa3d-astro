@@ -37,7 +37,7 @@ const secoes = secoesRaw
 // despejado no HTML, escondido por CSS até "Ver mais"), aqui só entra no
 // HTML o que realmente aparece na tela. Isso é o que mais pesa no tamanho
 // da página, e só piora conforme o catálogo cresce.
-const LIMITE_SECAO_PADRAO = 12;
+const LIMITE_SECAO_PADRAO = 5;
 const secoesPadrao = [
   {
     nome: "Mais clicados",
@@ -45,6 +45,20 @@ const secoesPadrao = [
     produtos: [...produtos]
       .filter((p) => (p.cliques_total || 0) > 0)
       .sort((a, b) => (b.cliques_total || 0) - (a.cliques_total || 0))
+      .slice(0, LIMITE_SECAO_PADRAO),
+  },
+  {
+    nome: "Maiores quedas de preço",
+    icone: "📉",
+    // Mesmo cálculo do feed.xml (percentual sobre precoAnterior real, não o
+    // badge "menor preço" que é trivialmente verdadeiro sem histórico).
+    produtos: produtos
+      .filter((p) => badgesPorId.get(p.id)?.precoAnterior != null)
+      .sort((a, b) => {
+        const descontoA = 1 - Number(a.preco) / badgesPorId.get(a.id).precoAnterior;
+        const descontoB = 1 - Number(b.preco) / badgesPorId.get(b.id).precoAnterior;
+        return descontoB - descontoA;
+      })
       .slice(0, LIMITE_SECAO_PADRAO),
   },
   {
@@ -92,6 +106,7 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
     <div class="topo-linha">
       <a href="/" class="logo-lupa3d">LUPA<span>3D</span></a>
       <nav class="abas">
+        <a href="/ofertas/">🔥 Ofertas</a>
         <a href="/favoritos/">Favoritos (<span data-contador-favoritos>0</span>)</a>
         <a href="/lojas/">Lojas</a>
       </nav>
@@ -131,7 +146,11 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
   <FaixaProvaSocial totalProdutos={produtos.length} totalLojas={totalLojas} />
 
   {secoesPadrao.map((s) => (
-    <SecaoHome secao={{ nome: s.nome, icone: s.icone, cor: "#2563eb" }} produtos={s.produtos} badgesPorId={badgesPorId} />
+    <SecaoHome
+      secao={{ nome: s.nome, icone: s.icone, cor: "#2563eb", layout: "grade", colunas: LIMITE_SECAO_PADRAO }}
+      produtos={s.produtos}
+      badgesPorId={badgesPorId}
+    />
   ))}
 
   {secoes.map(({ secao, produtos: produtosDaSecao }) => (
