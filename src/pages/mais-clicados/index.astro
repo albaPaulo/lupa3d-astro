@@ -1,0 +1,182 @@
+---
+import ProductCard from "../../components/ProductCard.astro";
+import BarraComparacao from "../../components/BarraComparacao.astro";
+import Footer from "../../components/Footer.astro";
+import GlobalStyles from "../../components/GlobalStyles.astro";
+import {
+  fetchProdutos,
+  fetchHistoricoTodos,
+  fetchConfiguracoes,
+  buildHistoricoPorProduto,
+  materialEfetivo,
+  EMOJI_CATEGORIA,
+  LABEL_CATEGORIA,
+} from "../../lib/supabase.js";
+import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo, precoAnteriorParaExibicao } from "../../lib/badges.js";
+
+const [produtos, historicoTodos, config] = await Promise.all([
+  fetchProdutos(),
+  fetchHistoricoTodos(),
+  fetchConfiguracoes(),
+]);
+const historicoPorProduto = buildHistoricoPorProduto(historicoTodos);
+const badgesMenorPreco = badgesMenorPrecoDeConfig(config);
+const badgesProdutoNovo = badgesProdutoNovoDeConfig(config);
+const colunasGrid = Math.min(6, Math.max(2, parseInt(config.colunas_grid, 10) || 3));
+
+const maisClicados = [...produtos]
+  .filter((p) => (p.cliques_total || 0) > 0)
+  .sort((a, b) => (b.cliques_total || 0) - (a.cliques_total || 0));
+
+const categorias = [...new Set(maisClicados.map((p) => p.categoria).filter(Boolean))].sort();
+const materiais = [...new Set(maisClicados.map(materialEfetivo).filter(Boolean))].sort();
+
+const categoriasPorMaterialMap = new Map();
+for (const p of maisClicados) {
+  const m = materialEfetivo(p);
+  if (!m || !p.categoria) continue;
+  if (!categoriasPorMaterialMap.has(m)) categoriasPorMaterialMap.set(m, new Set());
+  categoriasPorMaterialMap.get(m).add(p.categoria);
+}
+const categoriasPorMaterial = Object.fromEntries(
+  [...categoriasPorMaterialMap].map(([m, categoriasSet]) => [m, [...categoriasSet]])
+);
+
+const badgesPorId = new Map(
+  maisClicados.map((p) => [
+    p.id,
+    {
+      menorPreco: badgeMenorPreco(p, badgesMenorPreco, historicoPorProduto),
+      produtoNovo: badgeProdutoNovo(p, badgesProdutoNovo),
+      precoAnterior: precoAnteriorParaExibicao(p, historicoPorProduto),
+    },
+  ])
+);
+
+const titulo = "Mais clicados — LUPA3D";
+const descricao = `Os ${maisClicados.length} produtos mais clicados no LUPA3D, comparados entre várias lojas brasileiras.`;
+---
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{titulo}</title>
+  <meta name="description" content={descricao} />
+  <link rel="canonical" href="https://lupa3d.com.br/mais-clicados/" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="LUPA3D" />
+  <meta property="og:title" content={titulo} />
+  <meta property="og:description" content={descricao} />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <GlobalStyles />
+</head>
+<body>
+  <div id="banner-aviso" class="banner-aviso oculto-tela"></div>
+
+  <header class="topo">
+    <div class="topo-linha">
+      <a href="/" class="logo-lupa3d">LUPA<span>3D</span></a>
+      <nav class="abas">
+        <a href="/ofertas/">🔥 Ofertas</a>
+        <a href="/favoritos/">Favoritos (<span data-contador-favoritos>0</span>)</a>
+        <a href="/lojas/">Lojas</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="barra-busca-categoria">
+    <h1 class="hero-titulo">Os produtos mais clicados do LUPA3D.</h1>
+
+    {categorias.length > 1 && (
+      <nav class="atalhos-categoria" aria-label="Atalhos de categoria">
+        {categorias.map((c) => (
+          <button type="button" class="atalho-categoria" data-categoria={c}>
+            <span class="atalho-categoria-icone" aria-hidden="true">{EMOJI_CATEGORIA[c] || "📦"}</span>
+            <span class="atalho-categoria-label">{LABEL_CATEGORIA[c] || c}</span>
+          </button>
+        ))}
+      </nav>
+    )}
+
+    <div class="busca-solo">
+      <div class="busca-grande">
+        <span class="busca-icone" aria-hidden="true">🔍</span>
+        <input type="search" id="busca" placeholder="Pesquisar nos mais clicados..." aria-label="Buscar produtos" autocomplete="off" />
+        <div id="busca-sugestoes" class="busca-sugestoes oculto-tela"></div>
+      </div>
+    </div>
+
+    <p class="hero-subtitulo">Ordenado pelo que mais gente clicou em "Ver detalhes" no LUPA3D.</p>
+
+    {materiais.length > 0 && (
+      <div class="tags-material" aria-label="Filtrar por material">
+        {materiais.map((m) => (
+          <button type="button" class="tag-material" data-material={m} data-categorias={(categoriasPorMaterial[m] || []).join(",")}>{m}</button>
+        ))}
+      </div>
+    )}
+
+    <div id="filtros-ativos" class="filtros-ativos"></div>
+
+    <button type="button" id="btn-mais-filtros" class="btn-mais-filtros" aria-expanded="false" aria-controls="controles-avancados">
+      🔍 Mais filtros
+    </button>
+
+    <div class="controles oculto-tela" id="controles-avancados">
+      <select id="filtro-categoria" aria-label="Filtrar por categoria">
+        <option value="">Todas as categorias</option>
+        {categorias.map((c) => <option value={c}>{LABEL_CATEGORIA[c] || c}</option>)}
+      </select>
+      <select id="filtro-material" aria-label="Filtrar por material">
+        <option value="">Todos os materiais</option>
+        {materiais.map((m) => <option value={m}>{m}</option>)}
+      </select>
+      <select id="ordenar" aria-label="Ordenar produtos">
+        <option value="">Ordenar: mais clicados</option>
+        <option value="preco_asc">Menor preço</option>
+        <option value="preco_desc">Maior preço</option>
+        <option value="recentes">Mais recentes</option>
+      </select>
+      <div class="filtro-preco-linha">
+        <input type="number" id="filtro-preco-min" placeholder="Preço mín." min="0" step="0.01" aria-label="Preço mínimo" />
+        <span aria-hidden="true">—</span>
+        <input type="number" id="filtro-preco-max" placeholder="Preço máx." min="0" step="0.01" aria-label="Preço máximo" />
+      </div>
+      <label class="filtro-pix-linha">
+        <input type="checkbox" id="filtro-pix" />
+        Só com desconto no Pix
+      </label>
+    </div>
+  </section>
+
+  <div class="titulo-secao-grid-linha">
+    <h2 class="titulo-secao-grid">Mais clicados ({maisClicados.length})</h2>
+  </div>
+
+  <main id="grid" class="grid" style={`--colunas-grid: ${colunasGrid}`}>
+    {maisClicados.map((p) => (
+      <ProductCard
+        p={p}
+        menorPreco={badgesPorId.get(p.id)?.menorPreco}
+        produtoNovo={badgesPorId.get(p.id)?.produtoNovo}
+        precoAnterior={badgesPorId.get(p.id)?.precoAnterior}
+      />
+    ))}
+  </main>
+
+  <div class="ver-mais-container">
+    <button id="btn-ver-mais" class="btn-ver-mais oculto-tela">Ver mais!</button>
+  </div>
+
+  <Footer />
+
+  <BarraComparacao />
+
+  <script is:inline defer src="/js/config.js"></script>
+  <script is:inline defer src="/js/favoritos.js"></script>
+  <script is:inline defer src="/js/interativo.js"></script>
+</body>
+</html>

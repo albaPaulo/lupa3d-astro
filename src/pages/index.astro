@@ -42,6 +42,7 @@ const secoesPadrao = [
   {
     nome: "Mais clicados",
     icone: "🔥",
+    verMaisHref: "/mais-clicados/",
     produtos: [...produtos]
       .filter((p) => (p.cliques_total || 0) > 0)
       .sort((a, b) => (b.cliques_total || 0) - (a.cliques_total || 0))
@@ -50,6 +51,7 @@ const secoesPadrao = [
   {
     nome: "Maiores quedas de preço",
     icone: "📉",
+    verMaisHref: "/ofertas/",
     // Mesmo cálculo do feed.xml (percentual sobre precoAnterior real, não o
     // badge "menor preço" que é trivialmente verdadeiro sem histórico).
     produtos: produtos
@@ -64,6 +66,7 @@ const secoesPadrao = [
   {
     nome: "Novidades",
     icone: "🆕",
+    verMaisHref: "/novidades/",
     produtos: [...produtos]
       .filter((p) => p.criado_em)
       .sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em))
@@ -147,7 +150,7 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
 
   {secoesPadrao.map((s) => (
     <SecaoHome
-      secao={{ nome: s.nome, icone: s.icone, cor: "#2563eb", layout: "grade", colunas: LIMITE_SECAO_PADRAO }}
+      secao={{ nome: s.nome, icone: s.icone, cor: "#2563eb", layout: "grade", colunas: LIMITE_SECAO_PADRAO, verMaisHref: s.verMaisHref }}
       produtos={s.produtos}
       badgesPorId={badgesPorId}
     />

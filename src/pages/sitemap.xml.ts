@@ -14,6 +14,8 @@ export async function GET() {
     `  <url>\n    <loc>${SITE_URL}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>`,
     `  <url>\n    <loc>${SITE_URL}/lojas/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>`,
     `  <url>\n    <loc>${SITE_URL}/ofertas/</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>`,
+    `  <url>\n    <loc>${SITE_URL}/mais-clicados/</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.6</priority>\n  </url>`,
+    `  <url>\n    <loc>${SITE_URL}/novidades/</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.6</priority>\n  </url>`,
     ...categorias.map(
       (categoria) =>
         `  <url>\n    <loc>${SITE_URL}/categoria/${categoria}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>`
