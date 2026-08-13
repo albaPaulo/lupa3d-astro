@@ -13,6 +13,7 @@ import {
   produtosParecidos,
   formatarPreco,
   LABEL_CATEGORIA,
+  materialEfetivo,
   otimizarImagem,
 } from "../../lib/supabase.js";
 import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPreco, badgeProdutoNovo, precoAnteriorParaExibicao } from "../../lib/badges.js";
@@ -63,6 +64,11 @@ export async function getStaticPaths() {
 
 const { produto: p, loja, historico, parecidos, maisDaCategoria, menorPreco, produtoNovo, precoAnterior } = Astro.props;
 const categoriaLabel = LABEL_CATEGORIA[p.categoria] || p.categoria;
+// "parecidos" já é filtrado por mesma categoria + mesmo material (quando
+// detectado) em produtosParecidos() — o título reflete exatamente esse
+// filtro, tipo "Resina Lavável à Água em outras lojas", em vez do genérico
+// "Produtos parecidos" de antes.
+const tituloParecidos = `${categoriaLabel}${materialEfetivo(p) ? ` ${materialEfetivo(p)}` : ""} em outras lojas`;
 const titulo = `${p.nome} — LUPA3D`;
 const descricao = `${p.nome} por ${formatarPreco(p.preco)} na ${p.loja}. Compare com outras lojas de filamento e resina 3D no LUPA3D.`;
 const graficoSVG = desenharGraficoSVG(historico);
@@ -239,7 +245,7 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
         </div>
 
         <div class="produto-box produto-parecidos-box">
-          <h2 class="produto-box-titulo">Produtos parecidos em outras lojas</h2>
+          <h2 class="produto-box-titulo">{tituloParecidos}</h2>
           {parecidos.length === 0 ? (
             <p class="grafico-vazio">Nenhum produto parecido encontrado em outras lojas.</p>
           ) : (
