@@ -13,6 +13,7 @@ const temPix = p.preco_pix != null && Number(p.preco_pix) < Number(p.preco);
   data-nome={normalizarBusca(p.nome)}
   data-categoria={p.categoria || ""}
   data-material={material}
+  data-loja={p.loja}
   data-pix={temPix ? "1" : "0"}
   data-preco={p.preco}
   data-cliques={p.cliques_total || 0}

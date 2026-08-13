@@ -402,18 +402,52 @@ async function carregarProdutosAdmin() {
   renderizarTabela();
 }
 
-// "Standard"/"Padrão"/"Geral"/"General"/"Basic"/"Básica" são o mesmo tipo de
-// resina (a linha de uso genérico) — só muda o idioma/nome que cada loja usa.
-// Normaliza pra não criar uma tag nova de filtro toda vez que alguém digitar
-// um sinônimo diferente no campo manual do admin.
+// Mesmo material, nome diferente por loja — só muda o idioma/termo que cada
+// uma usa. Normaliza pra não criar uma tag nova de filtro toda vez que
+// alguém digitar um sinônimo diferente no campo manual do admin. Mesmos
+// grupos usados na detecção automática do scraper e na busca do site.
 const _SINONIMOS_MATERIAL = {
   padrão: "Standard",
   padrao: "Standard",
   geral: "Standard",
   general: "Standard",
+  "uso geral": "Standard",
   básica: "Standard",
   basica: "Standard",
   basic: "Standard",
+
+  "abs like": "ABS-Like",
+  iron: "ABS-Like",
+  resistente: "ABS-Like",
+  resistência: "ABS-Like",
+  resistencia: "ABS-Like",
+  rígida: "ABS-Like",
+  rigida: "ABS-Like",
+
+  translúcida: "Cristal",
+  translucida: "Cristal",
+  transparente: "Cristal",
+  clear: "Cristal",
+  incolor: "Cristal",
+
+  "alta velocidade": "High Speed",
+  rápida: "High Speed",
+  rapida: "High Speed",
+
+  flex: "Flexível",
+  rubber: "Flexível",
+  "rubber like": "Flexível",
+
+  lavável: "Lavável à Água",
+  lavavel: "Lavável à Água",
+  "lavável a água": "Lavável à Água",
+  "lavavel a agua": "Lavável à Água",
+  "lavável em água": "Lavável à Água",
+  "lavavel em agua": "Lavável à Água",
+  poseidon: "Lavável à Água",
+  wash: "Lavável à Água",
+  water: "Lavável à Água",
+  "wash water": "Lavável à Água",
 };
 function normalizarMaterialManual(valor) {
   if (!valor) return valor;

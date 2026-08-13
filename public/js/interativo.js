@@ -27,25 +27,73 @@ function normalizarBuscaJS(texto) {
     .replace(/\p{Diacritic}/gu, "");
 }
 
-// "Standard"/"Padrão"/"Geral"/"General"/"Básica"/"Basic" são o mesmo tipo de
-// resina em nomes diferentes (mesma lista de sinônimos usada pra normalizar
-// a tag de material no admin) — sem isso, buscar "resina standard" não
-// achava produtos chamados "Resina Padrão" e vice-versa. Já em minúsculo e
-// sem acento (mesmo tratamento de normalizarBuscaJS).
-const GRUPOS_SINONIMOS_BUSCA = [["standard", "padrao", "geral", "general", "basica", "basic"]];
+// Sinônimos de material (mesma resina/filamento, nome diferente por loja) —
+// mesmos grupos usados pra normalizar a tag manual no admin e detectar
+// material no scraper. Grupo pode ter frase de mais de uma palavra ("uso
+// geral", "abs like", "rubber like"), por isso a normalização troca a frase
+// inteira ANTES de separar por palavra — checar palavra por palavra não
+// funcionaria pra sinônimo de duas palavras. Primeiro item de cada grupo é a
+// forma canônica; o resto é variante. Já em minúsculo/sem acento (mesmo
+// tratamento de normalizarBuscaJS).
+const GRUPOS_SINONIMOS_BUSCA = [
+  ["resina", "resina 3d"],
+  ["abs-like", "abs like", "iron", "resistente", "resistencia", "rigida"],
+  ["standard", "padrao", "basic", "basica", "general", "geral", "uso geral"],
+  ["cristal", "translucida", "transparente", "clear", "incolor"],
+  ["high speed", "alta velocidade", "rapida"],
+  ["flexivel", "flex", "rubber like", "rubber"],
+  ["lavavel", "lavavel a agua", "lavavel em agua", "poseidon", "wash water", "wash", "water"],
+];
 
-function palavrasEquivalentes(palavra) {
-  return GRUPOS_SINONIMOS_BUSCA.find((grupo) => grupo.includes(palavra)) || [palavra];
+// Frases mais longas primeiro na alternância do regex: sem isso "rubber"
+// (mais curto) venceria a alternativa "rubber like" na mesma posição.
+// Um regex de UM PASSE SÓ (em vez de trocar variante por variante em loop,
+// string após string) evita autocorrupção — trocar "rubber like" por
+// "flexivel" e DEPOIS trocar "flex" por "flexivel" de novo faria o already-
+// canonicalizado "flexivel" virar "flexivelivel", porque "flex" é prefixo
+// dele. \b (borda de palavra) também evita que "flex" case dentro da
+// palavra "flexivel" quando ela já aparece assim no texto original.
+function escapeRegExpJS(texto) {
+  return texto.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+const _SUBSTITUICOES_SINONIMOS = GRUPOS_SINONIMOS_BUSCA.flatMap((grupo) =>
+  grupo.slice(1).map((variante) => [variante, grupo[0]])
+).sort((a, b) => b[0].length - a[0].length);
+
+const _MAPA_SINONIMOS = new Map(_SUBSTITUICOES_SINONIMOS);
+const _REGEX_SINONIMOS = new RegExp(
+  "\\b(?:" + _SUBSTITUICOES_SINONIMOS.map(([variante]) => escapeRegExpJS(variante)).join("|") + ")\\b",
+  "g"
+);
+
+function canonicalizarSinonimos(texto) {
+  return texto.replace(_REGEX_SINONIMOS, (match) => _MAPA_SINONIMOS.get(match) || match);
 }
 
 // Busca por palavra, não por frase inteira — "resina stand" precisa achar
 // "Resina Premium Standard" e "Resina 3D Standard 4.0", que têm outras
 // palavras no meio e não bateriam com um simples .includes(frase completa).
 function nomeCorrespondeABusca(nomeLowerCase, termoLowerCase) {
-  return termoLowerCase
+  const nome = canonicalizarSinonimos(nomeLowerCase);
+  const termo = canonicalizarSinonimos(termoLowerCase);
+  return termo
     .split(/\s+/)
     .filter(Boolean)
-    .every((palavra) => palavrasEquivalentes(palavra).some((sinonimo) => nomeLowerCase.includes(sinonimo)));
+    .every((palavra) => nome.includes(palavra));
+}
+
+// Texto completo pesquisável de um card — nome, loja, categoria e material,
+// não só o nome. Sem isso, buscar "resistente" (sinônimo de ABS-Like) só
+// achava produto que tivesse essa palavra no NOME, e não todo produto cujo
+// material já detectado é ABS-Like.
+function haystackDoCard(card) {
+  return [
+    card.dataset.nome,
+    normalizarBuscaJS(card.dataset.loja || ""),
+    card.dataset.categoria || "",
+    normalizarBuscaJS(card.dataset.material || ""),
+  ].join(" ");
 }
 
 function atualizarBotaoFavorito(btn) {
@@ -319,7 +367,7 @@ function aplicarFiltros(resetarLimite = true) {
 
   for (const card of cards) {
     const precoCard = Number(card.dataset.preco);
-    const okBusca = !busca || nomeCorrespondeABusca(card.dataset.nome, busca);
+    const okBusca = !busca || nomeCorrespondeABusca(haystackDoCard(card), busca);
     const okCategoria = !categoria || card.dataset.categoria === categoria;
     const okMaterial = !material || card.dataset.material === material;
     const okPix = !soPix || card.dataset.pix === "1";
@@ -470,15 +518,13 @@ function buscarSugestoes(termo, limite = 8) {
   for (const card of document.querySelectorAll(".card[data-nome]")) {
     if (resultados.length >= limite) break;
     if (vistos.has(card.dataset.id)) continue;
-    const loja = (card.querySelector(".card-vendido-por")?.textContent || "").replace(/^Vendido por\s*/, "");
-    const combinado = `${card.dataset.nome} ${normalizarBuscaJS(loja)} ${card.dataset.categoria || ""}`;
-    if (!nomeCorrespondeABusca(combinado, termo)) continue;
+    if (!nomeCorrespondeABusca(haystackDoCard(card), termo)) continue;
     vistos.add(card.dataset.id);
     resultados.push({
       href: card.dataset.href,
       nome: card.querySelector(".card-nome")?.textContent || "",
       preco: card.querySelector(".card-preco")?.textContent || "",
-      loja,
+      loja: card.dataset.loja || "",
       imagem: card.querySelector(".card-imagem img")?.src || "",
     });
   }
@@ -489,21 +535,23 @@ function buscarSugestoes(termo, limite = 8) {
 // produtos) — busca local não acha o catálogo inteiro lá. Pra manter a
 // sugestão funcionando com todo o catálogo mesmo assim, busca direto na
 // Supabase (mesma anon key pública já usada pra comparação/config), casando
-// nome OU loja com cada palavra digitada.
+// nome, loja OU material (efetivo/manual) com cada palavra digitada. O termo
+// passa pelos mesmos sinônimos de material da busca local antes de virar
+// filtro, pra "resistente" também achar produto marcado como ABS-Like mesmo
+// sem essa palavra no nome.
 async function buscarSugestoesRemoto(termo, limite = 8) {
   const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.LUPA3D_CONFIG;
-  const palavras = termo
+  const palavras = canonicalizarSinonimos(termo)
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 3)
     .map((p) => p.replace(/[%,()]/g, ""));
   if (palavras.length === 0) return [];
 
-  const filtroNome = palavras.map((p) => `nome.ilike.*${encodeURIComponent(p)}*`).join(",");
-  const filtroLoja = palavras.map((p) => `loja.ilike.*${encodeURIComponent(p)}*`).join(",");
+  const filtroCampo = (campo) => palavras.map((p) => `${campo}.ilike.*${encodeURIComponent(p)}*`).join(",");
   const url =
     `${SUPABASE_URL}/rest/v1/produtos?select=id,nome,preco,loja,imagem_url` +
-    `&or=(and(${filtroNome}),and(${filtroLoja}))` +
+    `&or=(and(${filtroCampo("nome")}),and(${filtroCampo("loja")}),and(${filtroCampo("material_manual")}),and(${filtroCampo("material")}))` +
     `&order=cliques_total.desc.nullslast&limit=${limite}`;
 
   try {
