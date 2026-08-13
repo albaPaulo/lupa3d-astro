@@ -460,24 +460,66 @@ function ligarFiltros() {
 }
 
 // Sugestões de busca em tempo real — reaproveita os produtos que já estão
-// na página (build-time), sem buscar nada novo. Cobre a home inteira, a
-// loja (só produtos dela) ou favoritos, dependendo de onde a busca está.
-function buscarSugestoes(termo) {
+// na página (build-time), sem buscar nada novo. Cobre a loja (só produtos
+// dela), categoria, ofertas e favoritos, dependendo de onde a busca está.
+// Casa com nome, loja OU categoria — "resina" ou o nome de uma loja também
+// sugerem produto, não só o nome do produto em si.
+function buscarSugestoes(termo, limite = 8) {
   const vistos = new Set();
   const resultados = [];
   for (const card of document.querySelectorAll(".card[data-nome]")) {
+    if (resultados.length >= limite) break;
     if (vistos.has(card.dataset.id)) continue;
-    if (!nomeCorrespondeABusca(card.dataset.nome, termo)) continue;
+    const loja = (card.querySelector(".card-vendido-por")?.textContent || "").replace(/^Vendido por\s*/, "");
+    const combinado = `${card.dataset.nome} ${normalizarBuscaJS(loja)} ${card.dataset.categoria || ""}`;
+    if (!nomeCorrespondeABusca(combinado, termo)) continue;
     vistos.add(card.dataset.id);
     resultados.push({
       href: card.dataset.href,
       nome: card.querySelector(".card-nome")?.textContent || "",
       preco: card.querySelector(".card-preco")?.textContent || "",
-      loja: (card.querySelector(".card-vendido-por")?.textContent || "").replace(/^Vendido por\s*/, ""),
+      loja,
       imagem: card.querySelector(".card-imagem img")?.src || "",
     });
   }
   return resultados;
+}
+
+// A home não tem mais grade completa no HTML (só as seções fixas, uns 15-20
+// produtos) — busca local não acha o catálogo inteiro lá. Pra manter a
+// sugestão funcionando com todo o catálogo mesmo assim, busca direto na
+// Supabase (mesma anon key pública já usada pra comparação/config), casando
+// nome OU loja com cada palavra digitada.
+async function buscarSugestoesRemoto(termo, limite = 8) {
+  const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.LUPA3D_CONFIG;
+  const palavras = termo
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 3)
+    .map((p) => p.replace(/[%,()]/g, ""));
+  if (palavras.length === 0) return [];
+
+  const filtroNome = palavras.map((p) => `nome.ilike.*${encodeURIComponent(p)}*`).join(",");
+  const filtroLoja = palavras.map((p) => `loja.ilike.*${encodeURIComponent(p)}*`).join(",");
+  const url =
+    `${SUPABASE_URL}/rest/v1/produtos?select=id,nome,preco,loja,imagem_url` +
+    `&or=(and(${filtroNome}),and(${filtroLoja}))` +
+    `&order=cliques_total.desc.nullslast&limit=${limite}`;
+
+  try {
+    const resp = await fetch(url, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } });
+    if (!resp.ok) return [];
+    const linhas = await resp.json();
+    return linhas.map((p) => ({
+      href: `/produto/${p.id}/`,
+      nome: p.nome,
+      preco: formatarPrecoJS(p.preco),
+      loja: p.loja,
+      imagem: p.imagem_url ? `/.netlify/images?url=${encodeURIComponent(p.imagem_url)}&w=80&q=75` : "",
+    }));
+  } catch {
+    return [];
+  }
 }
 
 function renderizarSugestoes(lista) {
@@ -512,17 +554,33 @@ function ligarSugestoesBusca() {
   const box = document.getElementById("busca-sugestoes");
   if (!input || !box) return;
 
+  const temGradeLocal = !!document.getElementById("grid");
+  // Descarta resposta de uma busca remota que já não é mais a mais recente
+  // (usuário continuou digitando enquanto o fetch anterior ainda voltava).
+  let ultimaConsulta = 0;
+
+  async function buscarEExibir(termo) {
+    if (!termo) {
+      renderizarSugestoes([]);
+      return;
+    }
+    if (temGradeLocal) {
+      renderizarSugestoes(buscarSugestoes(termo));
+      return;
+    }
+    const consultaAtual = ++ultimaConsulta;
+    const resultados = await buscarSugestoesRemoto(termo);
+    if (consultaAtual === ultimaConsulta) renderizarSugestoes(resultados);
+  }
+
   input.addEventListener(
     "input",
-    debounce(() => {
-      const termo = normalizarBuscaJS(input.value).trim();
-      renderizarSugestoes(termo ? buscarSugestoes(termo) : []);
-    }, 200)
+    debounce(() => buscarEExibir(normalizarBuscaJS(input.value).trim()), 200)
   );
 
   input.addEventListener("focus", () => {
     const termo = normalizarBuscaJS(input.value).trim();
-    if (termo) renderizarSugestoes(buscarSugestoes(termo));
+    if (termo) buscarEExibir(termo);
   });
 
   document.addEventListener("click", (ev) => {
