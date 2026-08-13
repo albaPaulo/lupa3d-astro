@@ -77,7 +77,9 @@ const secoesPadrao = [
     icone: "💸",
     produtos: produtos.filter((p) => badgesPorId.get(p.id)?.menorPreco).slice(0, LIMITE_SECAO_PADRAO),
   },
-].filter((s) => s.produtos.length > 0);
+  // Seção incompleta (menos de 5 produtos) fica torta na grade de 5 colunas —
+  // melhor sumir do que mostrar 1-2 cards soltos.
+].filter((s) => s.produtos.length >= LIMITE_SECAO_PADRAO);
 
 const categorias = [...new Set(produtos.map((p) => p.categoria).filter(Boolean))].sort();
 const totalLojas = new Set(produtos.map((p) => p.loja)).size;
