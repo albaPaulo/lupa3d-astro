@@ -539,6 +539,21 @@ function buscarSugestoes(termo, limite = 8) {
 // passa pelos mesmos sinônimos de material da busca local antes de virar
 // filtro, pra "resistente" também achar produto marcado como ABS-Like mesmo
 // sem essa palavra no nome.
+// A palavra já chega sem acento (normalizarBuscaJS já rodou antes), mas o
+// nome guardado no banco tem acento de verdade ("Prático", "Água") — ilike
+// sozinho não ignora acento, só maiúscula/minúscula. Troca cada vogal/"c" da
+// palavra por uma classe de regex com todas as variações acentuadas, e busca
+// via imatch (~* — regex case-insensitive) em vez de ilike simples.
+const _CLASSES_ACENTO = { a: "aàáâãä", e: "eèéêë", i: "iìíîï", o: "oòóôõö", u: "uùúûü", c: "cç" };
+
+function escapeRegexPostgres(texto) {
+  return texto.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function paraPadraoSemAcento(palavra) {
+  return escapeRegexPostgres(palavra).replace(/[aeiouc]/g, (c) => `[${_CLASSES_ACENTO[c]}]`);
+}
+
 async function buscarSugestoesRemoto(termo, limite = 8) {
   const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.LUPA3D_CONFIG;
   const palavras = canonicalizarSinonimos(termo)
@@ -548,7 +563,7 @@ async function buscarSugestoesRemoto(termo, limite = 8) {
     .map((p) => p.replace(/[%,()]/g, ""));
   if (palavras.length === 0) return [];
 
-  const filtroCampo = (campo) => palavras.map((p) => `${campo}.ilike.*${encodeURIComponent(p)}*`).join(",");
+  const filtroCampo = (campo) => palavras.map((p) => `${campo}.imatch.${encodeURIComponent(paraPadraoSemAcento(p))}`).join(",");
   const url =
     `${SUPABASE_URL}/rest/v1/produtos?select=id,nome,preco,loja,imagem_url` +
     `&or=(and(${filtroCampo("nome")}),and(${filtroCampo("loja")}),and(${filtroCampo("material_manual")}),and(${filtroCampo("material")}))` +
