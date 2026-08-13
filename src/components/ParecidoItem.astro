@@ -12,9 +12,6 @@ const { p } = Astro.props;
   <span class="parecido-loja">{p.loja}</span>
   <span class="parecido-nome">{p.nome}</span>
   <span class="parecido-preco">{formatarPreco(p.preco)}</span>
-  <label class="checkbox-comparar" title="Adicionar à comparação">
-    <input type="checkbox" data-id={p.id} />
-    Comparar
-  </label>
+  <button type="button" class="btn-comparar-toggle" data-id={p.id} title="Comparar" aria-label="Comparar" aria-pressed="false">⇄</button>
   <span class="parecido-seta">&rarr;</span>
 </div>

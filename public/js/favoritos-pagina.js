@@ -24,11 +24,10 @@ function cardHTMLCliente(p) {
           ${p.preco_pix ? `<span class="card-preco-pix">${formatarPrecoJS(p.preco_pix)} no Pix</span>` : ""}
         </div>
         <span class="card-vendido-por">Vendido por ${escapeHTMLJS(p.loja)}</span>
-        <label class="checkbox-comparar">
-          <input type="checkbox" data-id="${p.id}" />
-          Comparar
-        </label>
-        <a href="/produto/${p.id}/" class="btn-ver-oferta">Ver detalhes</a>
+        <div class="card-acoes">
+          <a href="/produto/${p.id}/" class="btn-ver-oferta">Ver detalhes</a>
+          <button type="button" class="btn-comparar-toggle" data-id="${p.id}" title="Comparar" aria-label="Comparar" aria-pressed="false">⇄</button>
+        </div>
       </div>
     </article>
   `;

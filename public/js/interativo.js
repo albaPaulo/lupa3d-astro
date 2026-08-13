@@ -124,11 +124,19 @@ function atualizarBarraComparacao() {
   barra.classList.toggle("visivel", n >= 2);
 }
 
+function atualizarBotaoComparar(btn) {
+  const id = Number(btn.dataset.id);
+  const ativo = isNaComparacao(id);
+  btn.classList.toggle("ativo", ativo);
+  btn.setAttribute("aria-pressed", String(ativo));
+  btn.textContent = ativo ? "✓" : "⇄";
+  const rotulo = ativo ? "Remover da comparação" : "Comparar";
+  btn.title = rotulo;
+  btn.setAttribute("aria-label", rotulo);
+}
+
 function hidratarComparacao() {
-  const selecionados = getComparacao();
-  document.querySelectorAll(".checkbox-comparar input[data-id]").forEach((input) => {
-    input.checked = selecionados.includes(Number(input.dataset.id));
-  });
+  document.querySelectorAll(".btn-comparar-toggle[data-id]").forEach(atualizarBotaoComparar);
   atualizarBarraComparacao();
 }
 
@@ -201,16 +209,28 @@ function ligarEventosInterativos() {
       return;
     }
 
+    const btnComparar = ev.target.closest(".btn-comparar-toggle[data-id]");
+    if (btnComparar) {
+      const resultado = toggleComparacao(Number(btnComparar.dataset.id));
+      if (resultado.cheio && !resultado.adicionado) {
+        alert("Você já selecionou o máximo de 4 produtos pra comparar.");
+        return;
+      }
+      atualizarBotaoComparar(btnComparar);
+      atualizarBarraComparacao();
+      return;
+    }
+
     const parecidoItem = ev.target.closest(".parecido-item[data-href]");
-    if (parecidoItem && !ev.target.closest(".checkbox-comparar")) {
+    if (parecidoItem && !ev.target.closest(".btn-comparar-toggle")) {
       window.location.href = parecidoItem.dataset.href;
       return;
     }
 
-    // Card inteiro é clicável (não só o botão "Ver detalhes") — exceto a
-    // área do checkbox de comparar e o próprio link, que já navegam sozinhos.
+    // Card inteiro é clicável (não só o botão "Ver detalhes") — exceto o
+    // botão de comparar e o próprio link, que já navegam/agem sozinhos.
     const card = ev.target.closest(".card[data-href]");
-    if (card && !ev.target.closest(".checkbox-comparar, a")) {
+    if (card && !ev.target.closest(".btn-comparar-toggle, a")) {
       window.location.href = card.dataset.href;
       return;
     }
@@ -235,18 +255,6 @@ function ligarEventosInterativos() {
       fecharModalComparacao();
       return;
     }
-  });
-
-  document.addEventListener("change", (ev) => {
-    const input = ev.target.closest(".checkbox-comparar input[data-id]");
-    if (!input) return;
-    const resultado = toggleComparacao(Number(input.dataset.id));
-    if (resultado.cheio && !resultado.adicionado) {
-      input.checked = false;
-      alert("Você já selecionou o máximo de 4 produtos pra comparar.");
-      return;
-    }
-    atualizarBarraComparacao();
   });
 
   document.addEventListener("keydown", (ev) => {

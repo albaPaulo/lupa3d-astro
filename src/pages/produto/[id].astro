@@ -224,11 +224,10 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
               <span class="card-preco">{formatarPreco(p.preco)}</span>
               {p.preco_pix && <span class="card-preco-pix">{formatarPreco(p.preco_pix)} no Pix</span>}
             </div>
-            <label class="checkbox-comparar">
-              <input type="checkbox" data-id={p.id} />
-              Comparar
-            </label>
-            <a href={p.url} target="_blank" rel="noopener" class="btn-ver-oferta">Ver Oferta!</a>
+            <div class="card-acoes">
+              <a href={p.url} target="_blank" rel="noopener" class="btn-ver-oferta">Ver Oferta!</a>
+              <button type="button" class="btn-comparar-toggle" data-id={p.id} title="Comparar" aria-label="Comparar" aria-pressed="false">⇄</button>
+            </div>
 
             <div class="produto-compartilhar">
               <span class="produto-compartilhar-label">Compartilhar:</span>
