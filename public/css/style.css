@@ -349,6 +349,27 @@ header.topo {
 
 .secao-ver-mais:hover { background: rgba(0, 0, 0, 0.35); }
 
+/* Seções fixas do sistema (Mais clicados, Quedas de preço, Novidades) não
+   usam fundo colorido — isso é reservado pra seção manual do admin, com
+   cor de marca escolhida de propósito. Sem isso, o azul de destaque vira
+   fundo de bloco inteiro repetido na home, ocupando bem mais que os 10%
+   que a cor de destaque deveria ter na página. */
+.secao-home--neutro {
+  background: none;
+  padding: 1.25rem 1.25rem 0;
+}
+
+.secao-home--neutro .secao-titulo { color: var(--cor-texto); }
+
+.secao-home--neutro .secao-ver-mais {
+  color: white;
+  background: var(--cor-marca);
+}
+
+.secao-home--neutro .secao-ver-mais:hover {
+  background: color-mix(in srgb, var(--cor-marca) 85%, black);
+}
+
 .secao-scroll {
   max-width: 1200px;
   margin: 0 auto;

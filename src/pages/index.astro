@@ -153,7 +153,7 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
   <main>
     {secoesPadrao.map((s) => (
       <SecaoHome
-        secao={{ nome: s.nome, icone: s.icone, cor: "#2563eb", layout: "grade", colunas: LIMITE_SECAO_PADRAO, verMaisHref: s.verMaisHref }}
+        secao={{ nome: s.nome, icone: s.icone, neutro: true, layout: "grade", colunas: LIMITE_SECAO_PADRAO, verMaisHref: s.verMaisHref }}
         produtos={s.produtos}
         badgesPorId={badgesPorId}
       />
