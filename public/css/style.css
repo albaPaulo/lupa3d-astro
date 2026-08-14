@@ -1006,6 +1006,7 @@ header.topo {
 
 .card-acoes .btn-comparar-toggle {
   width: auto;
+  max-width: 2.4rem;
 }
 
 .btn-ver-oferta {
@@ -1015,10 +1016,13 @@ header.topo {
   color: white;
   text-decoration: none;
   text-align: center;
-  padding: 0.6rem;
+  padding: 0.6rem 0.4rem;
   border-radius: 0.65rem;
   font-weight: 700;
   font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .produto-compartilhar {
