@@ -207,6 +207,22 @@ header.topo {
   font-weight: 600;
 }
 
+.descricao-material {
+  max-width: 900px;
+  margin: 0.6rem auto 0;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: 0.75rem;
+  background: var(--cor-card);
+  font-size: 0.82rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.descricao-material strong {
+  color: var(--cor-marca);
+}
+
 .atalho-categoria {
   display: flex;
   flex-direction: column;

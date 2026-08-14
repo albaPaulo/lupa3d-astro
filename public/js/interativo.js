@@ -333,6 +333,53 @@ function debounce(fn, atraso) {
 const INCREMENTO_EXIBICAO = 24;
 let LIMITE_EXIBICAO = INCREMENTO_EXIBICAO;
 
+// Resumo das propriedades físicas de cada material — mostrado na caixa
+// entre as tags e o botão "Mais filtros" quando o usuário seleciona uma tag.
+const DESCRICAO_MATERIAL = {
+  "PLA": "Biodegradável e fácil de imprimir, mas menos resistente a calor e impacto — ótimo para peças decorativas e protótipos.",
+  "ABS": "Resistente a impacto e calor, mas encolhe ao esfriar e solta odor durante a impressão — recomendado em ambiente ventilado.",
+  "PETG": "Bom equilíbrio entre resistência e facilidade de impressão, resiste bem à umidade — menos rígido que o ABS.",
+  "TPU": "Flexível e elástico, com alta resistência à abrasão — usado em peças que precisam dobrar ou amortecer impacto.",
+  "ASA": "Parecido com o ABS, mas com alta resistência a raios UV e intempéries — indicado para peças de uso externo.",
+  "Nylon": "Muito resistente a desgaste e impacto, com boa flexibilidade — absorve umidade do ar, exige armazenamento seco.",
+  "Tritan": "Resistente a impacto e com boa transparência, atóxico — usado em peças que exigem durabilidade e segurança alimentar.",
+  "Standard": "Resina de uso geral, boa definição de detalhes — mais rígida e menos resistente a impacto que as resinas especiais.",
+  "Dental": "Biocompatível, formulada para moldes, guias e modelos odontológicos — atende normas específicas da área.",
+  "Lavável à Água": "Dispensa álcool isopropílico na limpeza pós-impressão — lava direto com água, facilitando o pós-processamento.",
+  "Flexível": "Elástica e resistente a dobras — ideal para peças que precisam ceder sem quebrar.",
+  "Semi-flexível": "Meio-termo entre resina rígida e flexível — cede um pouco sob pressão sem perder tanto detalhe.",
+  "ABS-Like": "Simula a resistência mecânica do ABS — peças mais duráveis a impacto do que a resina padrão.",
+  "Alta Temperatura": "Suporta temperaturas mais altas sem deformar — usada em moldes e peças funcionais expostas a calor.",
+  "Elástica": "Alta elasticidade e resiliência, volta à forma original após deformar — parecida com borracha.",
+  "High Speed": "Formulada pra curar mais rápido sob luz UV, reduzindo o tempo de impressão camada a camada.",
+  "Cristal": "Translúcida/transparente — usada quando o efeito visual de transparência importa na peça final.",
+  "Fluorescente": "Brilha sob luz UV/negra — usada mais pelo efeito visual do que pela resistência mecânica.",
+  "Calcinável": "Queima sem deixar resíduos — feita para fundição de metais, comum em joalheria e odontologia.",
+  "Termocrômica": "Muda de cor conforme a temperatura — efeito decorativo/sensorial.",
+  "Condutiva": "Conduz eletricidade — usada em aplicações que exigem contato elétrico na peça impressa.",
+};
+
+// Mostra/esconde a caixa de descrição conforme o material selecionado no
+// momento (via tag ou via <select>) — chamado sempre que os filtros mudam,
+// pra ficar em sincronia mesmo quando o material é limpo por outro caminho
+// (chip removido, "Limpar todos", categoria que invalida o material).
+function atualizarDescricaoMaterial() {
+  const caixa = document.getElementById("descricao-material");
+  if (!caixa) return;
+
+  const material = document.getElementById("filtro-material")?.value || "";
+  const descricao = DESCRICAO_MATERIAL[material];
+
+  if (!material || !descricao) {
+    caixa.classList.add("oculto-tela");
+    caixa.innerHTML = "";
+    return;
+  }
+
+  caixa.innerHTML = `<strong>${escapeHTMLJS(material)}</strong> — ${escapeHTMLJS(descricao)}`;
+  caixa.classList.remove("oculto-tela");
+}
+
 // Filtra/ordena/limita os cards que já estão no DOM (renderizados no build)
 // — sem buscar nada de novo, só mostra/esconde e reordena os nós existentes.
 function aplicarFiltros(resetarLimite = true) {
@@ -413,6 +460,7 @@ function aplicarFiltros(resetarLimite = true) {
   document.getElementById("btn-ver-mais")?.classList.toggle("oculto-tela", combinam.length <= LIMITE_EXIBICAO);
 
   atualizarChipsFiltros();
+  atualizarDescricaoMaterial();
 }
 
 // Mostra os filtros ativos (busca/categoria/material/Pix) como pílulas
