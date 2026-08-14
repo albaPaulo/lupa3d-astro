@@ -1265,7 +1265,9 @@ header.topo {
 
 .grafico-legendas {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
+  gap: 0.4rem;
   font-size: 0.75rem;
   opacity: 0.7;
   margin-top: 0.25rem;
@@ -1572,7 +1574,7 @@ header.topo {
 
 .produto-linha-topo {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
   gap: 1.5rem;
 }
 
