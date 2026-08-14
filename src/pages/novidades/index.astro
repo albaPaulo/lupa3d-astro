@@ -1,5 +1,6 @@
 ---
 import ProductCard from "../../components/ProductCard.astro";
+import IconeFilamento from "../../components/IconeFilamento.astro";
 import BarraComparacao from "../../components/BarraComparacao.astro";
 import Footer from "../../components/Footer.astro";
 import GlobalStyles from "../../components/GlobalStyles.astro";
@@ -116,7 +117,10 @@ const descricao = `Os ${novidades.length} produtos mais recentes adicionados ao 
     {materiais.length > 0 && (
       <div class="tags-material" aria-label="Filtrar por material">
         {materiais.map((m) => (
-          <button type="button" class="tag-material" data-material={m} data-categorias={(categoriasPorMaterial[m] || []).join(",")}>{m}</button>
+          <button type="button" class="tag-material" data-material={m} data-categorias={(categoriasPorMaterial[m] || []).join(",")}>
+            {(categoriasPorMaterial[m] || []).includes("filamento") && <IconeFilamento id={m} class="icone-filamento" />}
+            {m}
+          </button>
         ))}
       </div>
     )}

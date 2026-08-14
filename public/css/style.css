@@ -187,25 +187,75 @@ header.topo {
 }
 
 .tag-material {
-  padding: 0.35rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  width: 4.75rem;
+  padding: 0.65rem 0.4rem 0.55rem;
   border: 1px solid var(--cor-borda);
-  border-radius: 999px;
+  border-radius: 0.75rem;
   background: var(--cor-card);
   color: var(--cor-texto);
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.72rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+  --cor-tag: var(--cor-marca);
 }
 
-.tag-material:hover { border-color: var(--cor-marca); }
+.icone-filamento {
+  width: 2.3rem;
+  height: 2.3rem;
+  color: var(--cor-tag);
+}
+
+/* Resina vem em frasco, não em carretel — mesma lógica de cor por
+   material (--cor-tag), só que via ::before em vez de SVG próprio. */
+.tag-material[data-categorias*="resina"]::before {
+  content: "";
+  display: block;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 0.2rem 0.2rem 0.3rem 0.3rem;
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--cor-tag) 55%, black 25%);
+  background: linear-gradient(to bottom, var(--cor-borda) 0 28%, var(--cor-tag) 28%);
+  clip-path: polygon(38% 0%, 62% 0%, 62% 16%, 82% 34%, 82% 100%, 18% 100%, 18% 34%, 38% 16%);
+}
+
+.tag-material:hover { border-color: var(--cor-marca); transform: translateY(-2px); }
 
 .tag-material.ativo {
   border-color: var(--cor-marca);
   background: color-mix(in srgb, var(--cor-marca) 12%, var(--cor-card));
   color: var(--cor-marca);
-  font-weight: 600;
 }
+
+/* Cor de referência por material — não representa a cor real do produto
+   (cada material existe em várias cores no catálogo), só diferencia as
+   tags visualmente, como no mockup de redesign. */
+.tag-material[data-material="PLA"] { --cor-tag: #22c55e; }
+.tag-material[data-material="ABS"] { --cor-tag: #3b82f6; }
+.tag-material[data-material="PETG"] { --cor-tag: #a855f7; }
+.tag-material[data-material="TPU"] { --cor-tag: #1f2937; }
+.tag-material[data-material="ASA"] { --cor-tag: #94a3b8; }
+.tag-material[data-material="Nylon"] { --cor-tag: #f97316; }
+.tag-material[data-material="Tritan"] { --cor-tag: #06b6d4; }
+.tag-material[data-material="Standard"] { --cor-tag: #64748b; }
+.tag-material[data-material="Dental"] { --cor-tag: #f43f5e; }
+.tag-material[data-material="Lavável à Água"] { --cor-tag: #0ea5e9; }
+.tag-material[data-material="Flexível"] { --cor-tag: #eab308; }
+.tag-material[data-material="Semi-flexível"] { --cor-tag: #ca8a04; }
+.tag-material[data-material="ABS-Like"] { --cor-tag: #3b82f6; }
+.tag-material[data-material="Alta Temperatura"] { --cor-tag: #dc2626; }
+.tag-material[data-material="Elástica"] { --cor-tag: #f59e0b; }
+.tag-material[data-material="High Speed"] { --cor-tag: #0891b2; }
+.tag-material[data-material="Cristal"] { --cor-tag: #a5b4fc; }
+.tag-material[data-material="Fluorescente"] { --cor-tag: #84cc16; }
+.tag-material[data-material="Calcinável"] { --cor-tag: #78716c; }
+.tag-material[data-material="Termocrômica"] { --cor-tag: #ec4899; }
+.tag-material[data-material="Condutiva"] { --cor-tag: #334155; }
 
 .descricao-material {
   max-width: 900px;
