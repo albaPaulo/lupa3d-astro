@@ -141,6 +141,7 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
           aria-label="Buscar produtos"
           autocomplete="off"
           data-busca-destino={categorias.length > 0 ? `/categoria/${categorias[0]}/` : "/categoria/"}
+          data-categorias={categorias.join(",")}
         />
         <div id="busca-sugestoes" class="busca-sugestoes oculto-tela"></div>
       </div>

@@ -293,9 +293,22 @@ function ligarBuscaComRedirecionamento() {
   const destino = input?.dataset.buscaDestino;
   if (!input || !destino) return;
 
+  const categoriasDisponiveis = (input.dataset.categorias || "").split(",").filter(Boolean);
+
+  // Se o termo digitado já menciona uma categoria pelo nome ("resina
+  // padrao"), manda pra ela em vez de sempre cair na categoria padrão (a
+  // primeira em ordem alfabética) — sem isso, buscar algo de resina na home
+  // podia jogar a pessoa em /categoria/filamento/ só por "filamento" vir
+  // antes na lista.
+  function destinoParaTermo(termo) {
+    const normalizado = normalizarBuscaJS(termo);
+    const categoriaMencionada = categoriasDisponiveis.find((c) => new RegExp(`\\b${c}\\b`).test(normalizado));
+    return categoriaMencionada ? `/categoria/${categoriaMencionada}/` : destino;
+  }
+
   const irParaDestino = () => {
     const termo = input.value.trim();
-    window.location.href = termo ? `${destino}?busca=${encodeURIComponent(termo)}` : destino;
+    window.location.href = termo ? `${destinoParaTermo(termo)}?busca=${encodeURIComponent(termo)}` : destino;
   };
 
   input.addEventListener("keydown", (ev) => {
