@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "astro": "^7.2.0",
+    "html-to-image": "^1.11.13",
     "simple-icons": "^16.28.0"
   }
 }

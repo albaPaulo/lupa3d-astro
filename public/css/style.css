@@ -1163,6 +1163,22 @@ header.topo {
 
 .tabela-comparacao thead th { background: var(--cor-fundo); }
 
+.btn-print-comparacao {
+  display: block;
+  margin: 1.25rem auto 0;
+  background: var(--cor-marca);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.1rem;
+  border-radius: 0.65rem;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btn-print-comparacao:disabled { opacity: 0.6; cursor: default; }
+
 .detalhe {
   display: grid;
   grid-template-columns: 240px 1fr;

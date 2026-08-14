@@ -9,5 +9,39 @@
   <div class="modal-caixa">
     <button id="modal-fechar" class="modal-fechar" aria-label="Fechar">✕</button>
     <div id="modal-comparacao-conteudo"></div>
+    <button id="btn-print-comparacao" type="button" class="btn-print-comparacao">📷 Salvar imagem</button>
   </div>
 </div>
+
+<script>
+  import { toPng } from "html-to-image";
+
+  // Componente único compartilhado por ~10 páginas — o listener fica aqui
+  // (em vez de centralizado no interativo.js, como o resto da interação do
+  // site) porque só ele precisa da lib html-to-image; assim ela só entra no
+  // bundle de quem realmente usa o botão, não em todo o JS do site.
+  document.getElementById("btn-print-comparacao")?.addEventListener("click", async (ev) => {
+    const btn = ev.currentTarget;
+    const alvo = document.getElementById("modal-comparacao-conteudo");
+    if (!alvo) return;
+
+    const textoOriginal = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Gerando imagem...";
+
+    try {
+      const corFundo = getComputedStyle(document.documentElement).getPropertyValue("--cor-card").trim() || "#ffffff";
+      const dataUrl = await toPng(alvo, { backgroundColor: corFundo, pixelRatio: 2 });
+      const link = document.createElement("a");
+      link.download = "comparacao-lupa3d.png";
+      link.href = dataUrl;
+      link.click();
+    } catch (e) {
+      console.error("Falha ao gerar imagem da comparação:", e);
+      alert("Não foi possível gerar a imagem agora — tente de novo em alguns segundos.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = textoOriginal;
+    }
+  });
+</script>
