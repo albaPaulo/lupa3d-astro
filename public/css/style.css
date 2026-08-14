@@ -1708,6 +1708,11 @@ header.topo {
 .produto-vendido-box .card-preco-pix { font-size: 0.9rem; }
 .produto-vendido-box .btn-comprar { width: 100%; }
 
+.produto-vendido-box .btn-ver-oferta {
+  padding: 0.9rem 1.1rem;
+  font-size: 1rem;
+}
+
 .produto-atualizado {
   margin: 0.5rem 0 0;
   font-size: 0.75rem;
