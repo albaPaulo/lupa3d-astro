@@ -766,6 +766,26 @@ function ligarBotaoTema() {
   container.appendChild(btn);
 }
 
+// Botão flutuante "voltar ao topo" — existia no site antigo (frontend/js/
+// shared.js) mas não tinha sido portado pra essa versão em Astro. Injetado
+// via JS (não precisa de marcação em cada página), só aparece depois de
+// rolar 400px.
+function ligarBotaoTopo() {
+  if (document.querySelector(".btn-topo")) return;
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "btn-topo oculto-tela";
+  btn.title = "Voltar ao topo";
+  btn.setAttribute("aria-label", "Voltar ao topo");
+  btn.textContent = "↑";
+  document.body.appendChild(btn);
+
+  window.addEventListener("scroll", () => {
+    btn.classList.toggle("oculto-tela", window.scrollY < 400);
+  });
+  btn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+}
+
 restaurarEstadoDaURL();
 hidratarFavoritos();
 hidratarComparacao();
@@ -774,5 +794,6 @@ ligarFiltros();
 ligarSugestoesBusca();
 ligarBuscaComRedirecionamento();
 ligarBotaoTema();
+ligarBotaoTopo();
 aplicarFiltros(true);
 verificarConfigSite();

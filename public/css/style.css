@@ -311,6 +311,26 @@ header.topo {
   color: inherit;
 }
 
+.btn-topo {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 50;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--cor-borda);
+  background: var(--cor-card);
+  color: var(--cor-texto);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .abas button.ativa {
   background: var(--cor-marca);
   color: white;
