@@ -1699,6 +1699,13 @@ header.topo {
 }
 
 .produto-vendido-box .card-precos { margin-bottom: 1rem; }
+
+/* Aqui o preço é a informação principal da página (não um card pequeno de
+   grade), então ganha um tamanho de destaque próprio em vez do 1.25rem
+   compartilhado com os cards do catálogo. */
+.produto-vendido-box .card-preco { font-size: 2rem; }
+.produto-vendido-box .card-preco-anterior { font-size: 0.95rem; }
+.produto-vendido-box .card-preco-pix { font-size: 0.9rem; }
 .produto-vendido-box .btn-comprar { width: 100%; }
 
 .produto-atualizado {
