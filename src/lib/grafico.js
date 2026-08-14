@@ -79,7 +79,16 @@ export function desenharGraficoSVG(pontos) {
     : `
       <div class="grafico-legendas">
         <span>${dataInicial}</span>
-        <span>${formatarPreco(minNormal)} — ${formatarPreco(maxNormal)}</span>
+        <div class="grafico-legenda-precos">
+          <div class="grafico-stat grafico-stat-menor">
+            <span class="grafico-stat-label">Menor preço</span>
+            <span class="grafico-stat-valor">${formatarPreco(minNormal)}</span>
+          </div>
+          <div class="grafico-stat grafico-stat-maior">
+            <span class="grafico-stat-label">Maior preço</span>
+            <span class="grafico-stat-valor">${formatarPreco(maxNormal)}</span>
+          </div>
+        </div>
         <span>${dataFinal}</span>
       </div>
     `;

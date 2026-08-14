@@ -73,6 +73,10 @@ const tituloParecidos = `${categoriaLabel}${materialEfetivo(p) ? ` ${materialEfe
 const titulo = `${p.nome} — LUPA3D`;
 const descricao = `${p.nome} por ${formatarPreco(p.preco)} na ${p.loja}. Compare com outras lojas de filamento e resina 3D no LUPA3D.`;
 const graficoSVG = desenharGraficoSVG(historico);
+const precoMaximoHistorico = historico.length > 0 ? Math.max(...historico.map((h) => h.preco)) : null;
+const quedaPercentual = precoMaximoHistorico && precoMaximoHistorico > p.preco
+  ? Math.round(((precoMaximoHistorico - p.preco) / precoMaximoHistorico) * 100)
+  : null;
 
 const urlProduto = `https://lupa3d.com.br/produto/${p.id}/`;
 const textoCompartilhar = `${p.nome} por ${formatarPreco(p.preco)} — comparei no LUPA3D`;
@@ -245,6 +249,17 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
 
           <div class="produto-box produto-historico-box">
             <h2 class="produto-box-titulo">Histórico de preço</h2>
+            {historico.length >= 2 && (
+              <div class="historico-resumo">
+                <div class="historico-resumo-atual">
+                  <span class="historico-resumo-label">Preço atual</span>
+                  <span class="historico-resumo-valor">{formatarPreco(p.preco)}</span>
+                </div>
+                {quedaPercentual != null && (
+                  <span class="historico-resumo-queda">▼ {quedaPercentual}% desde o preço mais alto</span>
+                )}
+              </div>
+            )}
             <div id="grafico-container" set:html={graficoSVG}></div>
           </div>
         </div>

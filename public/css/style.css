@@ -1273,6 +1273,30 @@ header.topo {
 
 .grafico-legendas-unica { justify-content: center; }
 
+.grafico-legenda-precos {
+  display: flex;
+  gap: 0.5rem;
+  opacity: 1;
+}
+
+.grafico-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.3rem 0.7rem;
+  border-radius: 0.6rem;
+  background: var(--cor-fundo);
+}
+
+.grafico-stat-label {
+  font-size: 0.68rem;
+  opacity: 0.65;
+}
+
+.grafico-stat-valor { font-weight: 700; font-size: 0.85rem; }
+
+.grafico-stat-menor .grafico-stat-valor { color: var(--cor-favorito); }
+
 .grafico-legenda-series {
   display: flex;
   justify-content: center;
@@ -1473,7 +1497,7 @@ header.topo {
 .produto-box {
   background: var(--cor-card);
   border: 1px solid var(--cor-borda);
-  border-radius: 0.75rem;
+  border-radius: 1rem;
   padding: 1.25rem;
 }
 
@@ -1617,6 +1641,40 @@ header.topo {
 .produto-atualizado-alerta {
   color: orange;
   opacity: 1;
+}
+
+.historico-resumo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.historico-resumo-atual {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.historico-resumo-label {
+  font-size: 0.75rem;
+  opacity: 0.65;
+}
+
+.historico-resumo-valor {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.historico-resumo-queda {
+  background: color-mix(in srgb, var(--cor-pix) 14%, var(--cor-card));
+  color: var(--cor-pix);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  white-space: nowrap;
 }
 
 .produto-historico-box #grafico-container { width: 100%; }
