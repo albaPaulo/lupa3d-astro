@@ -9,4 +9,14 @@ import path from "node:path";
 
 const css = fs.readFileSync(path.join(process.cwd(), "public/css/style.css"), "utf-8");
 ---
+<script is:inline>
+  // Roda antes do CSS pintar a tela — evita o "flash" de tema errado que
+  // aconteceria se essa troca só acontecesse depois, num script com defer.
+  (function () {
+    try {
+      var tema = localStorage.getItem("lupa3d_tema");
+      if (tema === "claro" || tema === "escuro") document.documentElement.dataset.tema = tema;
+    } catch {}
+  })();
+</script>
 <style set:html={css}></style>

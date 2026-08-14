@@ -8,8 +8,13 @@
   --cor-favorito: #b45309;
 }
 
+/* [data-tema] no <html> vem do botão de tema (claro/escuro/automático,
+   persistido em localStorage) e tem prioridade sobre a preferência do
+   sistema — :not([data-tema="claro"]) garante que forçar "claro" também
+   funciona em quem tem o sistema no escuro. Sem [data-tema] (automático),
+   só a media query decide, como sempre foi. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-tema="claro"]) {
     --cor-fundo: #121214;
     --cor-texto: #f0f0f0;
     --cor-card: #1c1c1f;
@@ -17,6 +22,15 @@
     --cor-marca: #60a5fa;
     --cor-favorito: #fbbf24;
   }
+}
+
+:root[data-tema="escuro"] {
+  --cor-fundo: #121214;
+  --cor-texto: #f0f0f0;
+  --cor-card: #1c1c1f;
+  --cor-borda: #2e2e33;
+  --cor-marca: #60a5fa;
+  --cor-favorito: #fbbf24;
 }
 
 * { box-sizing: border-box; }
@@ -282,6 +296,19 @@ header.topo {
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+}
+
+/* Fallback pra quando o botão de tema é injetado fora de .abas (ex: página
+   de lojas, que não tem essa nav) — dentro de .abas, a regra ".abas button"
+   acima vence por especificidade e dá o mesmo visual em pílula dos links. */
+.btn-tema {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0.3rem;
+  color: inherit;
 }
 
 .abas button.ativa {
@@ -2082,18 +2109,26 @@ header.topo {
    Precisa ficar no final do arquivo pra vencer o empate de especificidade
    contra as regras originais (mesma especificidade, ordem decide). */
 @media (prefers-color-scheme: dark) {
-  .btn-favorito.ativo,
-  .badge-menor-preco,
-  .badge-menor-preco-titulo {
+  :root:not([data-tema="claro"]) .btn-favorito.ativo,
+  :root:not([data-tema="claro"]) .badge-menor-preco,
+  :root:not([data-tema="claro"]) .badge-menor-preco-titulo {
     color: #1a1a1a;
   }
 
   /* mesmo problema com --cor-marca: fica clara no escuro (pra texto sobre
      o card), mas branco em cima dela como fundo sólido perde contraste. */
-  .logo-lupa3d span,
-  .barra-comparacao .principal {
+  :root:not([data-tema="claro"]) .logo-lupa3d span,
+  :root:not([data-tema="claro"]) .barra-comparacao .principal {
     color: #1a1a1a;
   }
+}
+
+:root[data-tema="escuro"] .btn-favorito.ativo,
+:root[data-tema="escuro"] .badge-menor-preco,
+:root[data-tema="escuro"] .badge-menor-preco-titulo,
+:root[data-tema="escuro"] .logo-lupa3d span,
+:root[data-tema="escuro"] .barra-comparacao .principal {
+  color: #1a1a1a;
 }
 
 .busca-sugestoes {

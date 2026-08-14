@@ -712,6 +712,60 @@ async function verificarConfigSite() {
   }
 }
 
+// Claro/escuro/automático, nessa ordem de ciclo — o valor já foi aplicado
+// mais cedo (script inline em GlobalStyles.astro, antes do CSS pintar) pra
+// não ter flash; aqui só cria o botão e liga o clique.
+const CHAVE_TEMA = "lupa3d_tema";
+
+function temaSalvo() {
+  try {
+    return localStorage.getItem(CHAVE_TEMA);
+  } catch {
+    return null;
+  }
+}
+
+function aplicarTema(tema) {
+  try {
+    if (tema) {
+      document.documentElement.dataset.tema = tema;
+      localStorage.setItem(CHAVE_TEMA, tema);
+    } else {
+      delete document.documentElement.dataset.tema;
+      localStorage.removeItem(CHAVE_TEMA);
+    }
+  } catch {}
+}
+
+function proximoTema(atual) {
+  if (atual === "claro") return "escuro";
+  if (atual === "escuro") return null;
+  return "claro";
+}
+
+function atualizarBotaoTema(btn) {
+  const tema = temaSalvo();
+  const rotulo = tema === "claro" ? "Tema: claro" : tema === "escuro" ? "Tema: escuro" : "Tema: automático";
+  btn.textContent = tema === "claro" ? "☀️" : tema === "escuro" ? "🌙" : "🌓";
+  btn.title = `${rotulo} — clique para trocar`;
+  btn.setAttribute("aria-label", btn.title);
+}
+
+function ligarBotaoTema() {
+  const container = document.querySelector(".topo-linha nav.abas") || document.querySelector(".topo-linha");
+  if (!container || document.querySelector(".btn-tema")) return;
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "btn-tema";
+  atualizarBotaoTema(btn);
+  btn.addEventListener("click", () => {
+    aplicarTema(proximoTema(temaSalvo()));
+    atualizarBotaoTema(btn);
+  });
+  container.appendChild(btn);
+}
+
 restaurarEstadoDaURL();
 hidratarFavoritos();
 hidratarComparacao();
@@ -719,5 +773,6 @@ ligarEventosInterativos();
 ligarFiltros();
 ligarSugestoesBusca();
 ligarBuscaComRedirecionamento();
+ligarBotaoTema();
 aplicarFiltros(true);
 verificarConfigSite();
