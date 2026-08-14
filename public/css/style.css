@@ -1537,14 +1537,14 @@ header.topo {
   background: var(--cor-card);
   border: 1px solid var(--cor-borda);
   border-radius: 1rem;
-  padding: 1.25rem;
+  padding: 1rem;
 }
 
 .produto-box-titulo {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin: 0 0 1rem;
+  margin: 0 0 0.75rem;
   font-size: 1rem;
   color: var(--cor-marca);
 }
@@ -1558,7 +1558,7 @@ header.topo {
 
 .produto-titulo-box {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .produto-titulo-box h1 {
@@ -1599,20 +1599,20 @@ header.topo {
 .produto-grid {
   display: grid;
   grid-template-columns: 300px 1fr;
-  gap: 1.5rem;
+  gap: 1.1rem;
   align-items: start;
 }
 
 .produto-col-esq, .produto-col-dir {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.1rem;
 }
 
 .produto-linha-topo {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-  gap: 1.5rem;
+  gap: 1.1rem;
 }
 
 @media (max-width: 700px) {
