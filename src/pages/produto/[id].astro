@@ -186,9 +186,6 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
     </nav>
 
     <div class="produto-box produto-titulo-box">
-      {menorPreco && (
-        <span class="badge-menor-preco-titulo">{menorPreco.icone ? `${menorPreco.icone} ` : ""}{menorPreco.label || `Menor preço em ${menorPreco.dias} dias`}</span>
-      )}
       {produtoNovo && (
         <span class="badge-produto-novo-titulo">{produtoNovo.icone ? `${produtoNovo.icone} ` : ""}{produtoNovo.label || "Novo"}</span>
       )}
@@ -224,6 +221,9 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
               </a>
             )}
             <a href={`/loja/${p.loja}/`} class="card-loja-link">{p.loja} &rarr;</a>
+            {menorPreco && (
+              <span class="produto-vendido-menor-preco">{menorPreco.icone ? `${menorPreco.icone} ` : "👍 "}{menorPreco.label || `Menor preço em ${menorPreco.dias} dias`}</span>
+            )}
             <div class="card-precos">
               {precoAnterior && <span class="card-preco-anterior">{formatarPreco(precoAnterior)}</span>}
               <span class="card-preco">{formatarPreco(p.preco)}</span>

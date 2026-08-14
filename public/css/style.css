@@ -1613,6 +1613,7 @@ header.topo {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
   gap: 1.1rem;
+  align-items: start;
 }
 
 @media (max-width: 700px) {
@@ -1665,6 +1666,19 @@ header.topo {
 
 .produto-vendido-box .card-loja-link {
   font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.produto-vendido-menor-preco {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: color-mix(in srgb, var(--cor-favorito) 15%, var(--cor-card));
+  color: var(--cor-favorito);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
   margin-bottom: 0.75rem;
 }
 
