@@ -26,7 +26,7 @@ const historicoAtivo = config.menor_preco_historico_ativo !== "false";
 const colunasGrid = Math.min(6, Math.max(2, parseInt(config.colunas_grid, 10) || 3));
 
 const maisClicados = [...produtos]
-  .filter((p) => (p.cliques_total || 0) > 0)
+  .filter((p) => !p.afiliado && (p.cliques_total || 0) > 0)
   .sort((a, b) => (b.cliques_total || 0) - (a.cliques_total || 0));
 
 const categorias = [...new Set(maisClicados.map((p) => p.categoria).filter(Boolean))].sort();

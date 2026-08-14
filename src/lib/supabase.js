@@ -50,13 +50,17 @@ async function fetchProdutosBrutos() {
 export async function fetchProdutos() {
   const [produtos, config] = await Promise.all([fetchProdutosBrutos(), fetchConfiguracoes()]);
   const desativadas = categoriasDesativadasSet(config);
+  const afiliadosAtivos = config.mostrar_produtos_afiliados !== "false";
   // categoria_manual (edição no admin) vence a categoria detectada pelo
   // scraper — aplicado aqui, uma vez só, pra todo o site público (home,
   // /categoria/, /loja/, produto, sitemap) já receber o valor efetivo sem
-  // precisar repetir essa checagem em cada página.
+  // precisar repetir essa checagem em cada página. Produto de afiliado some
+  // do site inteiro quando o toggle está desligado — kill switch rápido sem
+  // precisar reverter código.
   return produtos
     .map((p) => (p.categoria_manual ? { ...p, categoria: p.categoria_manual } : p))
-    .filter((p) => !desativadas.has(p.categoria));
+    .filter((p) => !desativadas.has(p.categoria))
+    .filter((p) => afiliadosAtivos || !p.afiliado);
 }
 
 export async function fetchSecoes() {
@@ -154,7 +158,12 @@ export function buildHistoricoPorProduto(historicoTodos) {
 
 // Mesma heurística do site atual: mesma categoria, loja diferente, mesmo
 // kit/não-kit, mesmo material quando detectado — no máximo 1 produto por
-// loja (o mais barato dela), até 6 no total.
+// loja (o mais barato dela), até 6 no total. Também exige mesmo "canal"
+// (afiliado ou não) — produto de marketplace/afiliado só compara com outro
+// de marketplace, nunca com loja direta. Sem essa trava, o preço mais alto
+// de uma listagem de afiliado (comissão embutida) apareceria competindo
+// com a loja direta, criando conflito de interesse (a comissão incentivaria
+// promover justamente a oferta que NÃO é a mais barata).
 export function produtosParecidos(produtos, p, faixaPrecoAtiva) {
   const material = materialEfetivo(p);
   const kitAtual = kitEfetivo(p);
@@ -164,6 +173,7 @@ export function produtosParecidos(produtos, p, faixaPrecoAtiva) {
       outro.id !== p.id &&
       outro.categoria === p.categoria &&
       outro.loja !== p.loja &&
+      Boolean(outro.afiliado) === Boolean(p.afiliado) &&
       kitEfetivo(outro) === kitAtual &&
       (material ? materialEfetivo(outro) === material : true)
   );

@@ -39,12 +39,17 @@ const secoes = secoesRaw
 // HTML o que realmente aparece na tela. Isso é o que mais pesa no tamanho
 // da página, e só piora conforme o catálogo cresce.
 const LIMITE_SECAO_PADRAO = 5;
+// Produto de afiliado/marketplace fica de fora das seções curadas — misturar
+// desconto de flash sale de marketplace com queda de preço real de loja
+// direta no mesmo ranking compara coisas diferentes. Ele continua aparecendo
+// normal em /categoria/, só não disputa essas vitrines.
+const produtosDiretos = produtos.filter((p) => !p.afiliado);
 const secoesPadrao = [
   {
     nome: "Mais clicados",
     icone: "🔥",
     verMaisHref: "/mais-clicados/",
-    produtos: [...produtos]
+    produtos: [...produtosDiretos]
       .filter((p) => (p.cliques_total || 0) > 0)
       .sort((a, b) => (b.cliques_total || 0) - (a.cliques_total || 0))
       .slice(0, LIMITE_SECAO_PADRAO),
@@ -55,7 +60,7 @@ const secoesPadrao = [
     verMaisHref: "/ofertas/",
     // Mesmo cálculo do feed.xml (percentual sobre precoAnterior real, não o
     // badge "menor preço" que é trivialmente verdadeiro sem histórico).
-    produtos: produtos
+    produtos: produtosDiretos
       .filter((p) => badgesPorId.get(p.id)?.precoAnterior != null)
       .sort((a, b) => {
         const descontoA = 1 - Number(a.preco) / badgesPorId.get(a.id).precoAnterior;
@@ -68,7 +73,7 @@ const secoesPadrao = [
     nome: "Novidades",
     icone: "🆕",
     verMaisHref: "/novidades/",
-    produtos: [...produtos]
+    produtos: [...produtosDiretos]
       .filter((p) => p.criado_em)
       .sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em))
       .slice(0, LIMITE_SECAO_PADRAO),
@@ -76,7 +81,7 @@ const secoesPadrao = [
   {
     nome: "Menor preço recente",
     icone: "💸",
-    produtos: produtos.filter((p) => badgesPorId.get(p.id)?.menorPreco).slice(0, LIMITE_SECAO_PADRAO),
+    produtos: produtosDiretos.filter((p) => badgesPorId.get(p.id)?.menorPreco).slice(0, LIMITE_SECAO_PADRAO),
   },
   // Seção incompleta (menos de 5 produtos) fica torta na grade de 5 colunas —
   // melhor sumir do que mostrar 1-2 cards soltos.

@@ -756,6 +756,21 @@ header.topo {
   white-space: nowrap;
 }
 
+.badge-afiliado {
+  position: absolute;
+  top: 4.9rem;
+  left: 0.5rem;
+  z-index: 1;
+  background: var(--cor-marca);
+  border: 1px solid var(--cor-marca);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+}
+
 .badge-produto-novo {
   position: absolute;
   top: 4.9rem;
@@ -911,6 +926,13 @@ header.topo {
 }
 
 .produto-compartilhar-label { font-size: 0.8rem; opacity: 0.7; }
+
+.produto-aviso-afiliado {
+  font-size: 0.75rem;
+  opacity: 0.75;
+  text-align: center;
+  margin: 0.6rem 0 0;
+}
 
 .btn-compartilhar {
   display: inline-flex;

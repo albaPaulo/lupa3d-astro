@@ -27,8 +27,11 @@ const colunasGrid = Math.min(6, Math.max(2, parseInt(config.colunas_grid, 10) ||
 
 // Mesmo critério do feed.xml: só entra quem teve queda de preço REAL
 // registrada no histórico, nunca o badge "menor preço" (que é trivialmente
-// verdadeiro pra produto sem histórico suficiente).
+// verdadeiro pra produto sem histórico suficiente). Produto de afiliado
+// fica de fora — desconto de marketplace não é comparável a queda de preço
+// real de loja direta.
 const produtosComQueda = produtos
+  .filter((p) => !p.afiliado)
   .map((p) => ({ produto: p, precoAnterior: precoAnteriorParaExibicao(p, historicoPorProduto, 30) }))
   .filter((item) => item.precoAnterior != null)
   .sort((a, b) => (1 - Number(b.produto.preco) / b.precoAnterior) - (1 - Number(a.produto.preco) / a.precoAnterior))

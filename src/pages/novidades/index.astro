@@ -26,7 +26,7 @@ const historicoAtivo = config.menor_preco_historico_ativo !== "false";
 const colunasGrid = Math.min(6, Math.max(2, parseInt(config.colunas_grid, 10) || 3));
 
 const novidades = [...produtos]
-  .filter((p) => p.criado_em)
+  .filter((p) => !p.afiliado && p.criado_em)
   .sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em));
 
 const categorias = [...new Set(novidades.map((p) => p.categoria).filter(Boolean))].sort();

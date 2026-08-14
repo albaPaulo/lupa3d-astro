@@ -53,6 +53,7 @@ const admEls = {
   configColunas: document.getElementById("config-colunas"),
   configParecidosFaixaPreco: document.getElementById("config-parecidos-faixa-preco"),
   configMenorPrecoHistorico: document.getElementById("config-menor-preco-historico"),
+  configProdutosAfiliados: document.getElementById("config-produtos-afiliados"),
   badgesLista: document.getElementById("config-badges-lista"),
   badgeNovoIcone: document.getElementById("badge-novo-icone"),
   badgeNovoDias: document.getElementById("badge-novo-dias"),
@@ -212,6 +213,7 @@ async function carregarConfiguracoes() {
   admEls.configColunas.value = CONFIG_ATUAL.colunas_grid || "3";
   admEls.configParecidosFaixaPreco.checked = CONFIG_ATUAL.parecidos_faixa_preco_ativa !== "false";
   admEls.configMenorPrecoHistorico.checked = CONFIG_ATUAL.menor_preco_historico_ativo !== "false";
+  admEls.configProdutosAfiliados.checked = CONFIG_ATUAL.mostrar_produtos_afiliados !== "false";
 
   try {
     MENOR_PRECO_BADGES_ATUAL = JSON.parse(CONFIG_ATUAL.menor_preco_badges || "[]");
@@ -262,6 +264,7 @@ async function salvarConfiguracoes(ev) {
     { chave: "categorias_desativadas", valor: categoriasDesativadas.join(",") },
     { chave: "parecidos_faixa_preco_ativa", valor: admEls.configParecidosFaixaPreco.checked ? "true" : "false" },
     { chave: "menor_preco_historico_ativo", valor: admEls.configMenorPrecoHistorico.checked ? "true" : "false" },
+    { chave: "mostrar_produtos_afiliados", valor: admEls.configProdutosAfiliados.checked ? "true" : "false" },
     { chave: "menor_preco_badges", valor: JSON.stringify(MENOR_PRECO_BADGES_ATUAL) },
     { chave: "produto_novo_badges", valor: JSON.stringify(PRODUTO_NOVO_BADGES_ATUAL) },
   ];
