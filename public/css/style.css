@@ -1713,6 +1713,17 @@ header.topo {
   font-size: 1rem;
 }
 
+/* O botão de comparar é 1:1 e estica junto com "Ver Oferta!" (que ficou
+   mais alto aqui) — sem o max-width da grade, ele acompanha e vira um
+   quadrado de verdade em vez de uma pílula fina com o ícone sumido. */
+.produto-vendido-box .btn-comparar-toggle {
+  width: 3.2rem;
+  height: 3.2rem;
+  max-width: none;
+  align-self: center;
+  font-size: 1.3rem;
+}
+
 .produto-atualizado {
   margin: 0.5rem 0 0;
   font-size: 0.75rem;
