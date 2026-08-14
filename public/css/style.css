@@ -497,7 +497,7 @@ header.topo {
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(var(--secao-colunas, 4), 1fr);
-  gap: 1rem;
+  gap: 0.7rem;
 }
 
 @media (max-width: 700px) {
@@ -715,7 +715,7 @@ header.topo {
 .grid {
   display: grid;
   grid-template-columns: repeat(var(--colunas-grid, 3), 1fr);
-  gap: 1rem;
+  gap: 0.7rem;
   padding: 1.25rem;
   max-width: 1200px;
   margin: 0 auto;
