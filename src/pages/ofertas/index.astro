@@ -1,6 +1,7 @@
 ---
 import ProductCard from "../../components/ProductCard.astro";
 import IconeFilamento from "../../components/IconeFilamento.astro";
+import IconeResina from "../../components/IconeResina.astro";
 import BarraComparacao from "../../components/BarraComparacao.astro";
 import Footer from "../../components/Footer.astro";
 import GlobalStyles from "../../components/GlobalStyles.astro";
@@ -130,6 +131,7 @@ const descricao = `Confira ${produtosComQueda.length} produtos com queda de preÃ
         {materiais.map((m) => (
           <button type="button" class="tag-material" data-material={m} data-categorias={(categoriasPorMaterial[m] || []).join(",")}>
             {(categoriasPorMaterial[m] || []).includes("filamento") && <IconeFilamento id={m} class="icone-filamento" />}
+            {(categoriasPorMaterial[m] || []).includes("resina") && <IconeResina id={m} class="icone-resina" />}
             {m}
           </button>
         ))}
