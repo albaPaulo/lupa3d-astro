@@ -298,6 +298,7 @@ header.topo {
 
 .abas {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
 }
 
@@ -312,6 +313,8 @@ header.topo {
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 /* Fallback pra quando o botão de tema é injetado fora de .abas (ex: página
