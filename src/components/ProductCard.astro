@@ -39,7 +39,10 @@ const temPix = p.preco_pix != null && Number(p.preco_pix) < Number(p.preco);
       <span class="card-preco">{formatarPreco(p.preco)}</span>
       {p.preco_pix && <span class="card-preco-pix">{formatarPreco(p.preco_pix)} no Pix</span>}
     </div>
-    <span class="card-vendido-por">Vendido por {p.loja}</span>
+    <div class="card-loja-linha">
+      <span class="card-loja-monograma" aria-hidden="true">{(p.loja || "?").charAt(0).toUpperCase()}</span>
+      <span class="card-loja-nome">{p.loja}</span>
+    </div>
     <div class="card-acoes">
       <a href={`/produto/${p.id}/`} class="btn-ver-oferta">Ver detalhes</a>
       <button type="button" class="btn-comparar-toggle" data-id={p.id} title="Comparar" aria-label="Comparar" aria-pressed="false">⇄</button>
