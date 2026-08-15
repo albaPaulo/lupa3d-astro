@@ -14,12 +14,10 @@
 </div>
 
 <script>
-  import { toPng } from "html-to-image";
-
-  // Componente único compartilhado por ~10 páginas — o listener fica aqui
-  // (em vez de centralizado no interativo.js, como o resto da interação do
-  // site) porque só ele precisa da lib html-to-image; assim ela só entra no
-  // bundle de quem realmente usa o botão, não em todo o JS do site.
+  // Componente único compartilhado por ~10 páginas. A lib html-to-image só é
+  // buscada (import dinâmico) quando o botão é clicado — assim ela nunca
+  // entra na cadeia de carregamento crítico da página, só quem usa a função
+  // paga o custo dela.
   document.getElementById("btn-print-comparacao")?.addEventListener("click", async (ev) => {
     const btn = ev.currentTarget;
     const alvo = document.getElementById("modal-comparacao-conteudo");
@@ -30,6 +28,7 @@
     btn.textContent = "Gerando imagem...";
 
     try {
+      const { toPng } = await import("html-to-image");
       const corFundo = getComputedStyle(document.documentElement).getPropertyValue("--cor-card").trim() || "#ffffff";
       const dataUrl = await toPng(alvo, { backgroundColor: corFundo, pixelRatio: 2 });
       const link = document.createElement("a");
