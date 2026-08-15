@@ -1344,7 +1344,12 @@ header.topo {
 }
 
 .grafico-historico {
-  width: 100%;
+  flex: 1 1 0;
+  /* SVG é "replaced element": sem isso, alguns navegadores ignoram o
+     flex-basis:0 e usam a largura intrínseca do viewBox (560px), estourando
+     o card quando o eixo Y também está presente ocupando espaço ao lado. */
+  width: 0;
+  min-width: 0;
   height: 260px;
   overflow: visible;
 }
