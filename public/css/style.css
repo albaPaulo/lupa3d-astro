@@ -52,6 +52,7 @@ header.topo {
 }
 
 .topo-linha {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -59,6 +60,53 @@ header.topo {
   max-width: 1200px;
   margin: 0 auto;
   flex-wrap: wrap;
+}
+
+.btn-menu-mobile {
+  display: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--cor-borda);
+  border-radius: 0.5rem;
+  background: var(--cor-card);
+  color: var(--cor-texto);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* Menu hambúrguer: em vez de deixar as pílulas de Início/Ofertas/Favoritos/
+   Lojas/tema quebrarem linha (o que já corrigimos uma vez, mas ainda fica
+   apertado), esconde tudo atrás de um botão e mostra como painel solto
+   abaixo do cabeçalho quando aberto. */
+@media (max-width: 700px) {
+  .btn-menu-mobile { display: flex; }
+
+  .topo-linha nav.abas {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.75rem);
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    background: var(--cor-card);
+    border: 1px solid var(--cor-borda);
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    z-index: 39;
+  }
+
+  .topo-linha nav.abas.aberto { display: flex; }
+
+  .topo-linha nav.abas a,
+  .topo-linha nav.abas button {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .barra-busca-categoria {

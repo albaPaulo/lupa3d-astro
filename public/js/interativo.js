@@ -814,6 +814,41 @@ function ligarBotaoTema() {
   container.appendChild(btn);
 }
 
+// Menu hambúrguer mobile — injetado do mesmo jeito que o botão de tema
+// (sem precisar editar as ~10 páginas que têm cabeçalho), alterna a classe
+// "aberto" no próprio nav.abas; o CSS (@media max-width:700px) decide como
+// isso aparece.
+function ligarMenuMobile() {
+  const nav = document.querySelector(".topo-linha nav.abas");
+  const linha = document.querySelector(".topo-linha");
+  if (!nav || !linha || document.querySelector(".btn-menu-mobile")) return;
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "btn-menu-mobile";
+  btn.setAttribute("aria-label", "Abrir menu");
+  btn.setAttribute("aria-expanded", "false");
+  btn.textContent = "☰";
+  btn.addEventListener("click", () => {
+    const aberto = nav.classList.toggle("aberto");
+    btn.textContent = aberto ? "✕" : "☰";
+    btn.setAttribute("aria-label", aberto ? "Fechar menu" : "Abrir menu");
+    btn.setAttribute("aria-expanded", String(aberto));
+  });
+  linha.appendChild(btn);
+
+  // Evita ficar com o painel "aberto" grudado se a pessoa girar o celular
+  // ou redimensionar a janela pra além do ponto de quebra do hambúrguer.
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 700 && nav.classList.contains("aberto")) {
+      nav.classList.remove("aberto");
+      btn.textContent = "☰";
+      btn.setAttribute("aria-label", "Abrir menu");
+      btn.setAttribute("aria-expanded", "false");
+    }
+  });
+}
+
 // Botão flutuante "voltar ao topo" — existia no site antigo (frontend/js/
 // shared.js) mas não tinha sido portado pra essa versão em Astro. Injetado
 // via JS (não precisa de marcação em cada página), só aparece depois de
@@ -842,6 +877,7 @@ ligarFiltros();
 ligarSugestoesBusca();
 ligarBuscaComRedirecionamento();
 ligarBotaoTema();
+ligarMenuMobile();
 ligarBotaoTopo();
 aplicarFiltros(true);
 verificarConfigSite();
