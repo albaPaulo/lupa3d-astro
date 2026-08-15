@@ -107,6 +107,10 @@ header.topo {
     width: 100%;
     justify-content: center;
   }
+
+  /* Só na página de produto: ".link-voltar" some o texto e sobra a seta,
+     senão ele disputa largura com o logo + botão hambúrguer e quebra linha. */
+  .link-voltar-texto { display: none; }
 }
 
 .barra-busca-categoria {
