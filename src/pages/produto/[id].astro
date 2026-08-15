@@ -109,6 +109,10 @@ const linksCompartilhar = [
 // direto no resultado de busca. Sem AggregateRating/Review — não temos
 // avaliação real nenhuma, e declarar isso sem dado de verdade viola as
 // diretrizes do Google (e pode gerar penalização manual).
+// priceValidUntil: o scraper roda 1x/dia, então declara validade de só 2
+// dias a partir do build (com folga pra atraso de build/rebuild) — nunca
+// promete um preço "válido" além do que realmente conseguimos garantir.
+const precoValidoAte = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 const produtoJsonLd = {
   "@context": "https://schema.org",
   "@type": "Product",
@@ -120,6 +124,7 @@ const produtoJsonLd = {
     url: p.url,
     priceCurrency: "BRL",
     price: Number(p.preco).toFixed(2),
+    priceValidUntil: precoValidoAte,
     availability: p.disponivel ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
     seller: { "@type": "Organization", name: p.loja },
   },
