@@ -142,6 +142,7 @@ export function desenharGraficoSVG(pontos) {
     : "";
 
   const dataInicial = new Date(pontos[0].capturado_em).toLocaleDateString("pt-BR");
+  const mediaNormal = precosNormais.reduce((soma, v) => soma + v, 0) / precosNormais.length;
 
   const legenda = minNormal === maxNormal
     ? `<div class="grafico-legendas grafico-legendas-unica"><span>Acompanhando desde ${dataInicial} — sem variação de preço ainda</span></div>`
@@ -154,6 +155,10 @@ export function desenharGraficoSVG(pontos) {
         <div class="grafico-stat grafico-stat-maior">
           <span class="grafico-stat-label">Maior preço</span>
           <span class="grafico-stat-valor">${formatarPreco(maxNormal)}</span>
+        </div>
+        <div class="grafico-stat grafico-stat-media">
+          <span class="grafico-stat-label">Preço médio</span>
+          <span class="grafico-stat-valor">${formatarPreco(mediaNormal)}</span>
         </div>
       </div>
     `;

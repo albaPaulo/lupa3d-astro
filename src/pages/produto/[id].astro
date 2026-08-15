@@ -77,6 +77,12 @@ const precoMaximoHistorico = historico.length > 0 ? Math.max(...historico.map((h
 const quedaPercentual = precoMaximoHistorico && precoMaximoHistorico > p.preco
   ? Math.round(((precoMaximoHistorico - p.preco) / precoMaximoHistorico) * 100)
   : null;
+const economiaValor = precoMaximoHistorico && precoMaximoHistorico > p.preco
+  ? precoMaximoHistorico - p.preco
+  : null;
+const descontoPercentual = precoAnterior && precoAnterior > p.preco
+  ? Math.round(((precoAnterior - p.preco) / precoAnterior) * 100)
+  : null;
 
 const urlProduto = `https://lupa3d.com.br/produto/${p.id}/`;
 const textoCompartilhar = `${p.nome} por ${formatarPreco(p.preco)} — comparei no LUPA3D`;
@@ -230,10 +236,24 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
               <span class="produto-vendido-menor-preco">{menorPreco.icone ? `${menorPreco.icone} ` : "👍 "}{menorPreco.label || `Menor preço em ${menorPreco.dias} dias`}</span>
             )}
             <div class="card-precos">
-              {precoAnterior && <span class="card-preco-anterior">{formatarPreco(precoAnterior)}</span>}
+              {precoAnterior && (
+                <div class="card-preco-linha-anterior">
+                  <span class="card-preco-anterior">{formatarPreco(precoAnterior)}</span>
+                  {descontoPercentual && <span class="card-desconto">-{descontoPercentual}%</span>}
+                </div>
+              )}
               <span class="card-preco">{formatarPreco(p.preco)}</span>
               {p.preco_pix && <span class="card-preco-pix">{formatarPreco(p.preco_pix)} no Pix</span>}
             </div>
+            {economiaValor != null && (
+              <div class="produto-vendido-economia">
+                <span class="produto-vendido-economia-icone" aria-hidden="true">🏆</span>
+                <div>
+                  <span class="produto-vendido-economia-titulo">Você está economizando</span>
+                  <span class="produto-vendido-economia-valor">{formatarPreco(economiaValor)} em relação ao maior preço já registrado</span>
+                </div>
+              </div>
+            )}
             <div class="card-acoes">
               <a href={p.url} target="_blank" rel={p.afiliado ? "noopener sponsored" : "noopener"} class="btn-ver-oferta">Ver Oferta!</a>
               <button type="button" class="btn-comparar-toggle" data-id={p.id} title="Comparar" aria-label="Comparar" aria-pressed="false">⇄</button>

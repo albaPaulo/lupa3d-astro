@@ -1760,6 +1760,44 @@ header.topo {
   margin-bottom: 0.75rem;
 }
 
+.card-preco-linha-anterior {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.card-desconto {
+  background: color-mix(in srgb, #dc2626 14%, var(--cor-card));
+  color: #dc2626;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+}
+
+.produto-vendido-economia {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: color-mix(in srgb, var(--cor-pix) 10%, var(--cor-card));
+  border: 1px solid color-mix(in srgb, var(--cor-pix) 30%, var(--cor-borda));
+  border-radius: 0.65rem;
+  padding: 0.5rem 0.7rem;
+  margin-bottom: 0.75rem;
+  text-align: left;
+}
+
+.produto-vendido-economia-icone { font-size: 1.2rem; }
+
+.produto-vendido-economia-titulo,
+.produto-vendido-economia-valor {
+  display: block;
+  font-size: 0.75rem;
+}
+
+.produto-vendido-economia-titulo { font-weight: 700; color: var(--cor-pix); }
+.produto-vendido-economia-valor { opacity: 0.85; }
+
 .produto-vendido-box .card-precos { margin-bottom: 1rem; }
 
 /* Aqui o preço é a informação principal da página (não um card pequeno de
