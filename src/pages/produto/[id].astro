@@ -257,7 +257,7 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
                 </div>
               )}
               <span class="card-preco">{formatarPreco(p.preco)}</span>
-              {p.preco_pix && <span class="card-preco-pix">{formatarPreco(p.preco_pix)} no Pix</span>}
+              {p.preco_pix != null && Number(p.preco_pix) < Number(p.preco) && <span class="card-preco-pix">{formatarPreco(p.preco_pix)} no Pix</span>}
             </div>
             {economiaValor != null && (
               <div class="produto-vendido-economia">
