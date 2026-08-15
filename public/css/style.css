@@ -1456,14 +1456,11 @@ header.topo {
   flex-direction: column;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
-  max-height: 185px;
-  overflow-y: auto;
-  padding-right: 0.4rem;
 }
 
 .parecido-item {
   display: grid;
-  grid-template-columns: auto minmax(0, auto) 1fr auto auto auto;
+  grid-template-columns: auto minmax(0, auto) 1fr auto auto;
   align-items: center;
   gap: 0.75rem;
   width: 100%;
@@ -1510,8 +1507,6 @@ header.topo {
 }
 
 .parecido-preco { font-weight: 700; color: var(--cor-marca); white-space: nowrap; }
-.parecido-seta { opacity: 0.5; }
-
 .link-voltar {
   color: var(--cor-texto);
   text-decoration: none;
