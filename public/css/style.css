@@ -1802,6 +1802,77 @@ header.topo {
   font-size: 0.75rem;
 }
 
+.produto-preco-alvo { margin-bottom: 0.75rem; }
+
+.btn-preco-alvo-toggle {
+  width: 100%;
+  background: transparent;
+  border: 1px dashed var(--cor-borda);
+  border-radius: 0.65rem;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.8rem;
+  color: var(--cor-texto);
+  opacity: 0.75;
+  cursor: pointer;
+}
+
+.btn-preco-alvo-toggle:hover { opacity: 1; border-color: var(--cor-marca); }
+
+.produto-preco-alvo-form {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.produto-preco-alvo-form .input-preco-alvo {
+  flex: 1;
+  min-width: 0;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: 0.5rem;
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  font-size: 0.85rem;
+}
+
+.btn-preco-alvo-salvar {
+  background: var(--cor-marca);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.produto-preco-alvo-ativo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  background: color-mix(in srgb, var(--cor-marca) 10%, var(--cor-card));
+  border: 1px solid color-mix(in srgb, var(--cor-marca) 30%, var(--cor-borda));
+  border-radius: 0.65rem;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--cor-marca);
+}
+
+.btn-preco-alvo-remover {
+  background: transparent;
+  border: none;
+  color: inherit;
+  opacity: 0.7;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0.1rem 0.2rem;
+}
+
+.btn-preco-alvo-remover:hover { opacity: 1; }
+
 .produto-vendido-economia-titulo { font-weight: 700; color: var(--cor-pix); }
 .produto-vendido-economia-valor { opacity: 0.85; }
 
@@ -2486,6 +2557,12 @@ header.topo {
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--cor-pix);
+}
+
+.favoritos-alerta-alvo {
+  background: color-mix(in srgb, var(--cor-marca) 10%, var(--cor-card));
+  border-color: color-mix(in srgb, var(--cor-marca) 30%, var(--cor-borda));
+  color: var(--cor-marca);
 }
 
 .banner-aviso {

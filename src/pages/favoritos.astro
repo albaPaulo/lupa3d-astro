@@ -2,6 +2,13 @@
 import BarraComparacao from "../components/BarraComparacao.astro";
 import Footer from "../components/Footer.astro";
 import GlobalStyles from "../components/GlobalStyles.astro";
+import { ICONES_COMPARTILHAR } from "../lib/compartilhar.js";
+
+// Os ícones em si são estáticos (não dependem de dado nenhum), mas a URL de
+// cada rede depende de quem está favoritado — só existe no navegador de
+// quem está vendo a página. Renderiza os ícones aqui (build) com href
+// provisório; favoritos-pagina.js preenche o href de verdade no cliente.
+const redesCompartilhar = Object.entries(ICONES_COMPARTILHAR).map(([rede, icone]) => ({ rede, icone }));
 ---
 <!doctype html>
 <html lang="pt-BR">
@@ -55,9 +62,16 @@ import GlobalStyles from "../components/GlobalStyles.astro";
 
   <div class="titulo-secao-grid-linha">
     <h1 class="titulo-secao-grid">Favoritos</h1>
-    <button id="btn-compartilhar-favoritos" class="btn-limpar-secao oculto-tela">🔗 Compartilhar favoritos</button>
+    <div id="favoritos-compartilhar" class="produto-compartilhar oculto-tela">
+      <span class="produto-compartilhar-label">Compartilhar:</span>
+      {redesCompartilhar.map((r) => (
+        <a href="#" data-rede={r.rede} target="_blank" rel="noopener" class="btn-compartilhar" aria-label={`Compartilhar no ${r.rede}`} title={r.rede} set:html={r.icone} />
+      ))}
+      <button type="button" id="btn-compartilhar-favoritos" class="btn-compartilhar" aria-label="Copiar link" title="Copiar link">🔗</button>
+    </div>
   </div>
 
+  <div id="favoritos-alerta-alvo" class="favoritos-alerta-queda favoritos-alerta-alvo oculto-tela"></div>
   <div id="favoritos-alerta-queda" class="favoritos-alerta-queda oculto-tela"></div>
 
   <p id="status" class="status-carregando">Carregando favoritos...</p>

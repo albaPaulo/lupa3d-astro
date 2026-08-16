@@ -18,7 +18,7 @@ import {
 } from "../../lib/supabase.js";
 import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPrecoEfetivo, badgeProdutoNovo, precoAnteriorParaExibicao } from "../../lib/badges.js";
 import { desenharGraficoSVG } from "../../lib/grafico.js";
-import { siWhatsapp, siTelegram, siFacebook, siX } from "simple-icons";
+import { linksCompartilhar } from "../../lib/compartilhar.js";
 
 export async function getStaticPaths() {
   const [produtos, lojasConfig, historicoTodos, config] = await Promise.all([
@@ -100,30 +100,7 @@ const descontoPercentual = precoAnterior && precoAnterior > p.preco
 
 const urlProduto = `https://lupa3d.com.br/produto/${p.id}/`;
 const textoCompartilhar = `${p.nome} por ${formatarPreco(p.preco)} — comparei no LUPA3D`;
-
-// Ícones de marca reais (SVG inline, sem depender de biblioteca externa) em
-// vez do emoji genérico que tínhamos antes — cada um usa a cor oficial da
-// rede pra ficar reconhecível de cara.
-// Ícones oficiais via pacote simple-icons (open-source, mantido
-// especificamente pra replicar marca com precisão) — em vez de um SVG
-// escrito à mão, que arrisca ficar desatualizado ou impreciso.
-function svgMarca(icone) {
-  return `<svg viewBox="0 0 24 24" width="18" height="18" fill="#${icone.hex}" aria-hidden="true"><path d="${icone.path}"/></svg>`;
-}
-
-const ICONES_COMPARTILHAR = {
-  WhatsApp: svgMarca(siWhatsapp),
-  Telegram: svgMarca(siTelegram),
-  Facebook: svgMarca(siFacebook),
-  X: svgMarca(siX),
-};
-
-const linksCompartilhar = [
-  { rede: "WhatsApp", url: `https://wa.me/?text=${encodeURIComponent(`${textoCompartilhar} ${urlProduto}`)}` },
-  { rede: "Telegram", url: `https://t.me/share/url?url=${encodeURIComponent(urlProduto)}&text=${encodeURIComponent(textoCompartilhar)}` },
-  { rede: "Facebook", url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(urlProduto)}` },
-  { rede: "X", url: `https://twitter.com/intent/tweet?url=${encodeURIComponent(urlProduto)}&text=${encodeURIComponent(textoCompartilhar)}` },
-].map((l) => ({ ...l, icone: ICONES_COMPARTILHAR[l.rede] }));
+const linksCompartilharProduto = linksCompartilhar(urlProduto, textoCompartilhar);
 
 // Dados estruturados (schema.org) pra o Google poder mostrar preço/loja
 // direto no resultado de busca. Sem AggregateRating/Review — não temos
@@ -268,6 +245,18 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
                 </div>
               </div>
             )}
+            <div class="produto-preco-alvo" data-id={p.id}>
+              <button type="button" class="btn-preco-alvo-toggle">🎯 Avisar quando chegar num preço</button>
+              <div class="produto-preco-alvo-form oculto-tela">
+                <input type="number" class="input-preco-alvo" min="0" step="0.01" placeholder="Ex: 89.90" aria-label="Preço-alvo" />
+                <button type="button" class="btn-preco-alvo-salvar">Salvar</button>
+              </div>
+              <div class="produto-preco-alvo-ativo oculto-tela">
+                <span class="produto-preco-alvo-texto"></span>
+                <button type="button" class="btn-preco-alvo-remover" aria-label="Remover preço-alvo" title="Remover preço-alvo">✕</button>
+              </div>
+            </div>
+
             <div class="card-acoes">
               <a href={p.url} target="_blank" rel={p.afiliado ? "noopener sponsored" : "noopener"} class="btn-ver-oferta">Ver Oferta!</a>
               <button type="button" class="btn-comparar-toggle" data-id={p.id} title="Comparar" aria-label="Comparar" aria-pressed="false">⇄</button>
@@ -280,7 +269,7 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
 
             <div class="produto-compartilhar">
               <span class="produto-compartilhar-label">Compartilhar:</span>
-              {linksCompartilhar.map((l) => (
+              {linksCompartilharProduto.map((l) => (
                 <a href={l.url} target="_blank" rel="noopener" class="btn-compartilhar" aria-label={`Compartilhar no ${l.rede}`} title={l.rede} set:html={l.icone} />
               ))}
             </div>

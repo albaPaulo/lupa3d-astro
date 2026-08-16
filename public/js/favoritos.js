@@ -1,5 +1,6 @@
 const CHAVE_FAVORITOS = "lupa3d_favoritos";
 const CHAVE_COMPARACAO = "lupa3d_comparacao";
+const CHAVE_ALVOS = "lupa3d_alvos";
 const MAX_COMPARACAO = 4;
 
 function _lerLista(chave) {
@@ -45,6 +46,41 @@ function adicionarFavoritos(ids) {
   }
   _salvarLista(CHAVE_FAVORITOS, lista);
   return lista;
+}
+
+function _lerObjeto(chave) {
+  try {
+    const bruto = localStorage.getItem(chave);
+    return bruto ? JSON.parse(bruto) : {};
+  } catch {
+    return {};
+  }
+}
+
+function getAlvos() {
+  return _lerObjeto(CHAVE_ALVOS);
+}
+
+function getAlvo(id) {
+  const valor = getAlvos()[id];
+  return valor != null ? Number(valor) : null;
+}
+
+// Definir um alvo também favorita o produto — é a página de favoritos que
+// faz a checagem toda vez que o usuário volta, então precisa estar nela pra
+// o alvo ter efeito (evita manter uma segunda lista de "produtos rastreados"
+// em paralelo aos favoritos).
+function definirAlvo(id, preco) {
+  const alvos = getAlvos();
+  alvos[id] = preco;
+  localStorage.setItem(CHAVE_ALVOS, JSON.stringify(alvos));
+  if (!isFavorito(id)) toggleFavorito(id);
+}
+
+function removerAlvo(id) {
+  const alvos = getAlvos();
+  delete alvos[id];
+  localStorage.setItem(CHAVE_ALVOS, JSON.stringify(alvos));
 }
 
 function getComparacao() {

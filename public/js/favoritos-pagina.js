@@ -3,6 +3,36 @@
 // busca só os produtos favoritados na hora (não o catálogo inteiro).
 let PRODUTOS_FAVORITOS = [];
 let IDS_COM_QUEDA = new Set();
+let IDS_ALVO_ATINGIDO = new Set();
+
+// Preço-alvo é 100% local (localStorage) — não precisa de fetch, só compara
+// com o preço que já veio junto dos favoritos. Conta Pix como válido: se o
+// melhor preço disponível (normal ou Pix) já bateu o alvo, contou.
+function computarAlvosAtingidos(produtos) {
+  const alvos = getAlvos();
+  const atingidos = new Set();
+  for (const p of produtos) {
+    const alvo = alvos[p.id];
+    if (alvo == null) continue;
+    const temPixMelhor = p.preco_pix != null && Number(p.preco_pix) < Number(p.preco);
+    const melhorPreco = temPixMelhor ? Number(p.preco_pix) : Number(p.preco);
+    if (melhorPreco <= Number(alvo)) atingidos.add(p.id);
+  }
+  return atingidos;
+}
+
+function atualizarAlertaAlvo() {
+  const alerta = document.getElementById("favoritos-alerta-alvo");
+  if (!alerta) return;
+  const quantidade = PRODUTOS_FAVORITOS.filter((p) => IDS_ALVO_ATINGIDO.has(p.id)).length;
+  if (quantidade === 0) {
+    alerta.classList.add("oculto-tela");
+    return;
+  }
+  const verbo = quantidade === 1 ? "atingiu" : "atingiram";
+  alerta.textContent = `🎯 ${quantidade} dos seus favoritos ${verbo} o preço-alvo`;
+  alerta.classList.remove("oculto-tela");
+}
 
 // Não temos alerta por e-mail — mas já rastreamos o histórico de preço de
 // cada produto, então dá pra comparar o preço atual com o maior já visto
@@ -57,6 +87,7 @@ function cardHTMLCliente(p) {
   const kit = p.kit_manual ?? p.kit ?? false;
   const temPix = p.preco_pix != null && Number(p.preco_pix) < Number(p.preco);
   const caiuPreco = IDS_COM_QUEDA.has(p.id);
+  const atingiuAlvo = IDS_ALVO_ATINGIDO.has(p.id);
   const imagem = p.imagem_url
     ? `<img src="${escapeHTMLJS(p.imagem_url)}" alt="${escapeHTMLJS(p.nome)}" loading="lazy" referrerpolicy="no-referrer">`
     : `<span class="card-imagem-vazia">📦</span>`;
@@ -66,7 +97,7 @@ function cardHTMLCliente(p) {
       <button class="btn-favorito" data-id="${p.id}" title="Favoritar" aria-label="Favoritar" aria-pressed="false">☆</button>
       ${p.destaque ? `<span class="badge-destaque">🔥</span>` : ""}
       ${kit ? `<span class="badge-kit">Kit/Combo</span>` : ""}
-      ${caiuPreco ? `<span class="badge-menor-preco">📉 Baixou de preço</span>` : ""}
+      ${atingiuAlvo ? `<span class="badge-menor-preco">🎯 Atingiu seu preço-alvo!</span>` : caiuPreco ? `<span class="badge-menor-preco">📉 Baixou de preço</span>` : ""}
       ${p.afiliado ? `<span class="badge-afiliado" title="Link de afiliado — o LUPA3D pode receber uma comissão nessa compra, sem custo extra pra você">Afiliado</span>` : ""}
       <div class="card-imagem">${imagem}</div>
       <div class="card-corpo">
@@ -103,7 +134,7 @@ function popularFiltrosFavoritos(produtos) {
 function renderizarGridFavoritos() {
   const grid = document.getElementById("grid");
   const status = document.getElementById("status");
-  const btnCompartilhar = document.getElementById("btn-compartilhar-favoritos");
+  const compartilharWrap = document.getElementById("favoritos-compartilhar");
   if (!grid) return;
 
   if (PRODUTOS_FAVORITOS.length === 0) {
@@ -112,17 +143,19 @@ function renderizarGridFavoritos() {
       status.textContent = "Você ainda não favoritou nenhum produto — clique na estrela ☆ de um card pra guardar aqui.";
       status.classList.remove("status-carregando");
     }
-    btnCompartilhar?.classList.add("oculto-tela");
+    compartilharWrap?.classList.add("oculto-tela");
     return;
   }
 
   if (status) status.textContent = "";
   grid.innerHTML = PRODUTOS_FAVORITOS.map(cardHTMLCliente).join("");
-  btnCompartilhar?.classList.remove("oculto-tela");
+  compartilharWrap?.classList.remove("oculto-tela");
+  atualizarLinksCompartilhar();
   hidratarFavoritos();
   hidratarComparacao();
   aplicarFiltros();
   atualizarAlertaQueda();
+  atualizarAlertaAlvo();
 }
 
 async function aplicarColunasGrid() {
@@ -169,8 +202,33 @@ async function carregarFavoritos() {
   }
 
   IDS_COM_QUEDA = await buscarQuedasFavoritos(PRODUTOS_FAVORITOS);
+  IDS_ALVO_ATINGIDO = computarAlvosAtingidos(PRODUTOS_FAVORITOS);
   popularFiltrosFavoritos(PRODUTOS_FAVORITOS);
   renderizarGridFavoritos();
+}
+
+// public/js/*.js não passa pelo bundler do Astro (é servido como arquivo
+// estático), então não dá pra importar src/lib/compartilhar.js aqui — a
+// mesma lógica de montar os links por rede é repetida (igual normalizarBuscaJS
+// já faz nesse arquivo pros outros helpers client-side).
+function atualizarLinksCompartilhar() {
+  const container = document.getElementById("favoritos-compartilhar");
+  if (!container) return;
+
+  const ids = getFavoritos();
+  const url = `${window.location.origin}/favoritos/?favoritos=${ids.join(",")}`;
+  const texto = "Confira meus produtos favoritos no LUPA3D";
+
+  const urlsPorRede = {
+    WhatsApp: `https://wa.me/?text=${encodeURIComponent(`${texto} ${url}`)}`,
+    Telegram: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(texto)}`,
+    Facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+    X: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(texto)}`,
+  };
+
+  container.querySelectorAll("[data-rede]").forEach((a) => {
+    a.href = urlsPorRede[a.dataset.rede] || "#";
+  });
 }
 
 function ligarCompartilharFavoritos() {

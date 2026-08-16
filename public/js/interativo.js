@@ -869,6 +869,58 @@ function ligarBotaoTopo() {
   btn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 }
 
+// Só existe na página de produto — permite pedir pra ver um aviso quando o
+// preço chegar num valor específico (usa o mesmo mecanismo de favoritos:
+// definirAlvo já favorita o produto, e é /favoritos/ que checa o alvo toda
+// vez que o usuário volta lá, sem precisar de e-mail nem backend novo).
+function ligarPrecoAlvo() {
+  const bloco = document.querySelector(".produto-preco-alvo");
+  if (!bloco) return;
+
+  const id = Number(bloco.dataset.id);
+  const btnToggle = bloco.querySelector(".btn-preco-alvo-toggle");
+  const form = bloco.querySelector(".produto-preco-alvo-form");
+  const input = bloco.querySelector(".input-preco-alvo");
+  const btnSalvar = bloco.querySelector(".btn-preco-alvo-salvar");
+  const caixaAtiva = bloco.querySelector(".produto-preco-alvo-ativo");
+  const texto = bloco.querySelector(".produto-preco-alvo-texto");
+  const btnRemover = bloco.querySelector(".btn-preco-alvo-remover");
+
+  function renderizar() {
+    const alvo = getAlvo(id);
+    const temAlvo = alvo != null;
+    btnToggle.classList.toggle("oculto-tela", temAlvo);
+    form.classList.add("oculto-tela");
+    caixaAtiva.classList.toggle("oculto-tela", !temAlvo);
+    if (temAlvo) texto.textContent = `🎯 Avisar em ${formatarPrecoJS(alvo)}`;
+  }
+
+  btnToggle.addEventListener("click", () => {
+    btnToggle.classList.add("oculto-tela");
+    form.classList.remove("oculto-tela");
+    input.focus();
+  });
+
+  function salvar() {
+    const valor = parseFloat(input.value.replace(",", "."));
+    if (!valor || valor <= 0) return;
+    definirAlvo(id, valor);
+    renderizar();
+  }
+
+  btnSalvar.addEventListener("click", salvar);
+  input.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter") salvar();
+  });
+
+  btnRemover.addEventListener("click", () => {
+    removerAlvo(id);
+    renderizar();
+  });
+
+  renderizar();
+}
+
 restaurarEstadoDaURL();
 hidratarFavoritos();
 hidratarComparacao();
@@ -879,5 +931,6 @@ ligarBuscaComRedirecionamento();
 ligarBotaoTema();
 ligarMenuMobile();
 ligarBotaoTopo();
+ligarPrecoAlvo();
 aplicarFiltros(true);
 verificarConfigSite();
