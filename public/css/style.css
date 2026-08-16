@@ -2474,6 +2474,20 @@ header.topo {
   cursor: pointer;
 }
 
+.favoritos-alerta-queda {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: color-mix(in srgb, var(--cor-pix) 10%, var(--cor-card));
+  border: 1px solid color-mix(in srgb, var(--cor-pix) 30%, var(--cor-borda));
+  border-radius: 0.65rem;
+  padding: 0.65rem 0.9rem;
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--cor-pix);
+}
+
 .banner-aviso {
   background: var(--cor-marca);
   color: white;

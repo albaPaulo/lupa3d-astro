@@ -2,11 +2,61 @@
 // por visitante (localStorage), não tem como gerar essa página no build —
 // busca só os produtos favoritados na hora (não o catálogo inteiro).
 let PRODUTOS_FAVORITOS = [];
+let IDS_COM_QUEDA = new Set();
+
+// Não temos alerta por e-mail — mas já rastreamos o histórico de preço de
+// cada produto, então dá pra comparar o preço atual com o maior já visto
+// (mesma definição de "queda" usada no selo de desconto da página do
+// produto) e avisar direto na tela quem dos favoritos baixou.
+async function buscarQuedasFavoritos(produtos) {
+  if (produtos.length === 0) return new Set();
+
+  const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.LUPA3D_CONFIG;
+  const ids = produtos.map((p) => p.id);
+  try {
+    const resp = await fetch(
+      `${SUPABASE_URL}/rest/v1/historico_precos?select=produto_id,preco&produto_id=in.(${ids.join(",")})`,
+      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
+    );
+    if (!resp.ok) return new Set();
+    const historico = await resp.json();
+
+    const maximoPorProduto = new Map();
+    for (const h of historico) {
+      const atual = maximoPorProduto.get(h.produto_id) ?? -Infinity;
+      if (h.preco > atual) maximoPorProduto.set(h.produto_id, h.preco);
+    }
+
+    const comQueda = new Set();
+    for (const p of produtos) {
+      const maximo = maximoPorProduto.get(p.id);
+      if (maximo != null && Number(p.preco) < maximo) comQueda.add(p.id);
+    }
+    return comQueda;
+  } catch {
+    return new Set();
+  }
+}
+
+function atualizarAlertaQueda() {
+  const alerta = document.getElementById("favoritos-alerta-queda");
+  if (!alerta) return;
+  // Conta só quem ainda está na lista (não os que já foram desfavoritados).
+  const quantidade = PRODUTOS_FAVORITOS.filter((p) => IDS_COM_QUEDA.has(p.id)).length;
+  if (quantidade === 0) {
+    alerta.classList.add("oculto-tela");
+    return;
+  }
+  const verbo = quantidade === 1 ? "baixou" : "baixaram";
+  alerta.textContent = `📉 ${quantidade} dos seus favoritos ${verbo} de preço`;
+  alerta.classList.remove("oculto-tela");
+}
 
 function cardHTMLCliente(p) {
   const material = p.material_manual || p.material || "";
   const kit = p.kit_manual ?? p.kit ?? false;
   const temPix = p.preco_pix != null && Number(p.preco_pix) < Number(p.preco);
+  const caiuPreco = IDS_COM_QUEDA.has(p.id);
   const imagem = p.imagem_url
     ? `<img src="${escapeHTMLJS(p.imagem_url)}" alt="${escapeHTMLJS(p.nome)}" loading="lazy" referrerpolicy="no-referrer">`
     : `<span class="card-imagem-vazia">📦</span>`;
@@ -16,6 +66,7 @@ function cardHTMLCliente(p) {
       <button class="btn-favorito" data-id="${p.id}" title="Favoritar" aria-label="Favoritar" aria-pressed="false">☆</button>
       ${p.destaque ? `<span class="badge-destaque">🔥</span>` : ""}
       ${kit ? `<span class="badge-kit">Kit/Combo</span>` : ""}
+      ${caiuPreco ? `<span class="badge-menor-preco">📉 Baixou de preço</span>` : ""}
       ${p.afiliado ? `<span class="badge-afiliado" title="Link de afiliado — o LUPA3D pode receber uma comissão nessa compra, sem custo extra pra você">Afiliado</span>` : ""}
       <div class="card-imagem">${imagem}</div>
       <div class="card-corpo">
@@ -71,6 +122,7 @@ function renderizarGridFavoritos() {
   hidratarFavoritos();
   hidratarComparacao();
   aplicarFiltros();
+  atualizarAlertaQueda();
 }
 
 async function aplicarColunasGrid() {
@@ -116,6 +168,7 @@ async function carregarFavoritos() {
     return;
   }
 
+  IDS_COM_QUEDA = await buscarQuedasFavoritos(PRODUTOS_FAVORITOS);
   popularFiltrosFavoritos(PRODUTOS_FAVORITOS);
   renderizarGridFavoritos();
 }
