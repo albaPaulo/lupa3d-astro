@@ -118,6 +118,31 @@ export function formatarPreco(valor) {
   return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+const _PESO_RE = /(\d+(?:[.,]\d+)?)\s*(kg|g)\b/i;
+
+// Extrai o peso do próprio nome do produto (ex: "... 1kg", "... 500g") —
+// não é um campo separado no banco, os scrapers nunca coletaram isso à
+// parte. Só retorna algo quando o nome traz uma unidade de peso real (kg/g);
+// sem match nenhum (a maioria dos nomes de filamento/resina traz peso, mas
+// alguns não), retorna null em vez de arriscar mostrar um R$/kg errado.
+export function pesoEmKg(nome) {
+  const match = (nome || "").match(_PESO_RE);
+  if (!match) return null;
+  const valor = parseFloat(match[1].replace(",", "."));
+  if (!valor) return null;
+  const emKg = match[2].toLowerCase() === "kg" ? valor : valor / 1000;
+  // Fora dessa faixa é mais provável ser outra coisa (código de produto,
+  // resolução de impressora "10K" etc.) do que peso de verdade.
+  if (emKg < 0.01 || emKg > 30) return null;
+  return emKg;
+}
+
+export function precoPorKgTexto(nome, preco) {
+  const peso = pesoEmKg(nome);
+  if (!peso || preco == null) return null;
+  return `${formatarPreco(Number(preco) / peso)}/kg`;
+}
+
 export function materialEfetivo(p) {
   return p.material_manual || p.material || null;
 }

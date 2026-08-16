@@ -15,6 +15,7 @@ import {
   LABEL_CATEGORIA,
   materialEfetivo,
   otimizarImagem,
+  precoPorKgTexto,
 } from "../../lib/supabase.js";
 import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPrecoEfetivo, badgeProdutoNovo, precoAnteriorParaExibicao } from "../../lib/badges.js";
 import { desenharGraficoSVG } from "../../lib/grafico.js";
@@ -97,6 +98,7 @@ const economiaValor = precoMaximoHistorico && precoMaximoHistorico > p.preco
 const descontoPercentual = precoAnterior && precoAnterior > p.preco
   ? Math.round(((precoAnterior - p.preco) / precoAnterior) * 100)
   : null;
+const porKg = precoPorKgTexto(p.nome, p.preco);
 
 const urlProduto = `https://lupa3d.com.br/produto/${p.id}/`;
 const textoCompartilhar = `${p.nome} por ${formatarPreco(p.preco)} — comparei no LUPA3D`;
@@ -235,6 +237,7 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
               )}
               <span class="card-preco">{formatarPreco(p.preco)}</span>
               {p.preco_pix != null && Number(p.preco_pix) < Number(p.preco) && <span class="card-preco-pix">{formatarPreco(p.preco_pix)} no Pix</span>}
+              {porKg && <span class="card-preco-kg">{porKg}</span>}
             </div>
             {economiaValor != null && (
               <div class="produto-vendido-economia">
@@ -245,18 +248,6 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
                 </div>
               </div>
             )}
-            <div class="produto-preco-alvo" data-id={p.id}>
-              <button type="button" class="btn-preco-alvo-toggle">🎯 Avisar quando chegar num preço</button>
-              <div class="produto-preco-alvo-form oculto-tela">
-                <input type="number" class="input-preco-alvo" min="0" step="0.01" placeholder="Ex: 89.90" aria-label="Preço-alvo" />
-                <button type="button" class="btn-preco-alvo-salvar">Salvar</button>
-              </div>
-              <div class="produto-preco-alvo-ativo oculto-tela">
-                <span class="produto-preco-alvo-texto"></span>
-                <button type="button" class="btn-preco-alvo-remover" aria-label="Remover preço-alvo" title="Remover preço-alvo">✕</button>
-              </div>
-            </div>
-
             <div class="card-acoes">
               <a href={p.url} target="_blank" rel={p.afiliado ? "noopener sponsored" : "noopener"} class="btn-ver-oferta">Ver Oferta!</a>
               <button type="button" class="btn-comparar-toggle" data-id={p.id} title="Comparar" aria-label="Comparar" aria-pressed="false">⇄</button>
@@ -289,6 +280,18 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
               </div>
             )}
             <div id="grafico-container" set:html={graficoSVG}></div>
+
+            <div class="produto-preco-alvo" data-id={p.id}>
+              <button type="button" class="btn-preco-alvo-toggle">🎯 Avisar quando chegar num preço</button>
+              <div class="produto-preco-alvo-form oculto-tela">
+                <input type="number" class="input-preco-alvo" min="0" step="0.01" placeholder="Ex: 89.90" aria-label="Preço-alvo" />
+                <button type="button" class="btn-preco-alvo-salvar">Salvar</button>
+              </div>
+              <div class="produto-preco-alvo-ativo oculto-tela">
+                <span class="produto-preco-alvo-texto"></span>
+                <button type="button" class="btn-preco-alvo-remover" aria-label="Remover preço-alvo" title="Remover preço-alvo">✕</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

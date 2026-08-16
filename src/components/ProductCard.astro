@@ -1,10 +1,11 @@
 ---
-import { formatarPreco, materialEfetivo, kitEfetivo, EMOJI_CATEGORIA, normalizarBusca, otimizarImagem } from "../lib/supabase.js";
+import { formatarPreco, materialEfetivo, kitEfetivo, EMOJI_CATEGORIA, normalizarBusca, otimizarImagem, precoPorKgTexto } from "../lib/supabase.js";
 
 const { p, menorPreco = null, produtoNovo = null, precoAnterior = null } = Astro.props;
 const material = materialEfetivo(p) || "";
 const kit = kitEfetivo(p);
 const temPix = p.preco_pix != null && Number(p.preco_pix) < Number(p.preco);
+const porKg = precoPorKgTexto(p.nome, p.preco);
 ---
 <article
   class="card"
@@ -38,6 +39,7 @@ const temPix = p.preco_pix != null && Number(p.preco_pix) < Number(p.preco);
       {precoAnterior && <span class="card-preco-anterior">{formatarPreco(precoAnterior)}</span>}
       <span class="card-preco">{formatarPreco(p.preco)}</span>
       {temPix && <span class="card-preco-pix">{formatarPreco(p.preco_pix)} no Pix</span>}
+      {porKg && <span class="card-preco-kg">{porKg}</span>}
     </div>
     <div class="card-loja-linha">
       <span class="card-loja-monograma" aria-hidden="true">{(p.loja || "?").charAt(0).toUpperCase()}</span>

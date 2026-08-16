@@ -1029,6 +1029,11 @@ header.topo {
   opacity: 0.6;
 }
 
+.card-preco-kg {
+  font-size: 0.7rem;
+  opacity: 0.55;
+}
+
 /* Botão quadrado (1:1) que alterna estado no clique — mesmo padrão do
    .btn-favorito (☆/★), mas sem posição absoluta, pra ficar ao lado de "Ver
    detalhes" em vez de flutuar sobre a imagem. Tamanho por padrão pequeno
@@ -1701,9 +1706,20 @@ header.topo {
   align-items: start;
 }
 
+/* As três ficam em colunas independentes (align-items:start em ambas as
+   grids), então o conteúdo de cada uma decide sua própria altura — sem
+   isso, a imagem (que não tem muito o que mostrar) fica visivelmente mais
+   baixa que "Vendido por"/"Histórico", que variam de altura conforme o
+   produto (com/sem selo de desconto, com/sem variação de preço no
+   gráfico). Um piso comum aproxima as três sem forçar stretch nelas. */
+.produto-imagem-box, .produto-vendido-box, .produto-historico-box {
+  min-height: 460px;
+}
+
 @media (max-width: 700px) {
   .produto-grid { grid-template-columns: 1fr; }
   .produto-linha-topo { grid-template-columns: 1fr; }
+  .produto-imagem-box, .produto-vendido-box, .produto-historico-box { min-height: 0; }
 }
 
 .produto-imagem-box {

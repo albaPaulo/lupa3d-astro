@@ -82,12 +82,26 @@ function atualizarAlertaQueda() {
   alerta.classList.remove("oculto-tela");
 }
 
+// Mesma extração de src/lib/supabase.js (pesoEmKg/precoPorKgTexto) — esse
+// arquivo não passa pelo bundler do Astro, então não dá pra importar de lá.
+const PESO_RE_JS = /(\d+(?:[.,]\d+)?)\s*(kg|g)\b/i;
+function precoPorKgTextoJS(nome, preco) {
+  const match = (nome || "").match(PESO_RE_JS);
+  if (!match || preco == null) return null;
+  const valor = parseFloat(match[1].replace(",", "."));
+  if (!valor) return null;
+  const emKg = match[2].toLowerCase() === "kg" ? valor : valor / 1000;
+  if (emKg < 0.01 || emKg > 30) return null;
+  return `${formatarPrecoJS(Number(preco) / emKg)}/kg`;
+}
+
 function cardHTMLCliente(p) {
   const material = p.material_manual || p.material || "";
   const kit = p.kit_manual ?? p.kit ?? false;
   const temPix = p.preco_pix != null && Number(p.preco_pix) < Number(p.preco);
   const caiuPreco = IDS_COM_QUEDA.has(p.id);
   const atingiuAlvo = IDS_ALVO_ATINGIDO.has(p.id);
+  const porKg = precoPorKgTextoJS(p.nome, p.preco);
   const imagem = p.imagem_url
     ? `<img src="${escapeHTMLJS(p.imagem_url)}" alt="${escapeHTMLJS(p.nome)}" loading="lazy" referrerpolicy="no-referrer">`
     : `<span class="card-imagem-vazia">📦</span>`;
@@ -105,6 +119,7 @@ function cardHTMLCliente(p) {
         <div class="card-precos">
           <span class="card-preco">${formatarPrecoJS(p.preco)}</span>
           ${p.preco_pix ? `<span class="card-preco-pix">${formatarPrecoJS(p.preco_pix)} no Pix</span>` : ""}
+          ${porKg ? `<span class="card-preco-kg">${porKg}</span>` : ""}
         </div>
         <span class="card-vendido-por">Vendido por ${escapeHTMLJS(p.loja)}</span>
         <div class="card-acoes">
