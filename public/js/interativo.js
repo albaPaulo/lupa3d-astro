@@ -380,6 +380,51 @@ function atualizarDescricaoMaterial() {
   caixa.classList.remove("oculto-tela");
 }
 
+const LIMIAR_CARREGAMENTO_LENTO = 150;
+let carregandoGrid = false;
+
+function mostrarIndicadorGrid() {
+  const grid = document.getElementById("grid");
+  if (!grid || carregandoGrid) return;
+  carregandoGrid = true;
+  if (!document.querySelector(".grid-carregando-aviso")) {
+    const aviso = document.createElement("div");
+    aviso.className = "grid-carregando-aviso";
+    aviso.innerHTML = `<span class="spinner-circular" aria-hidden="true"></span> Carregando produtos...`;
+    grid.parentElement.insertBefore(aviso, grid);
+  }
+}
+
+function esconderIndicadorGrid() {
+  document.querySelector(".grid-carregando-aviso")?.remove();
+  carregandoGrid = false;
+}
+
+// Trocar categoria/material/ordenação/busca chama aplicarFiltros, que
+// percorre e reordena todos os cards da categoria de forma síncrona — em
+// grades grandes (até ~800 cards em "Filamento") isso trava a tela por um
+// instante. Só mostra o aviso quando a grade é grande o bastante pra isso
+// ser perceptível — numa grade pequena o trabalho termina rápido demais
+// pro aviso nem chegar a aparecer, e mostrar mesmo assim só piscaria a
+// tela à toa. O setTimeout garante que o navegador pinta o aviso antes de
+// travar a thread principal com o trabalho pesado.
+function rodarComIndicadorSeGrande(fn) {
+  if (carregandoGrid) return;
+  const grid = document.getElementById("grid");
+  const totalCards = grid ? grid.querySelectorAll(".card").length : 0;
+
+  if (totalCards < LIMIAR_CARREGAMENTO_LENTO) {
+    fn();
+    return;
+  }
+
+  mostrarIndicadorGrid();
+  setTimeout(() => {
+    fn();
+    esconderIndicadorGrid();
+  }, 20);
+}
+
 // Filtra/ordena/limita os cards que já estão no DOM (renderizados no build)
 // — sem buscar nada de novo, só mostra/esconde e reordena os nós existentes.
 function aplicarFiltros(resetarLimite = true) {
@@ -511,15 +556,15 @@ function limparCampoFiltro(campo) {
 
 function ligarFiltros() {
   const busca = document.getElementById("busca");
-  if (busca) busca.addEventListener("input", debounce(() => aplicarFiltros(true), 250));
+  if (busca) busca.addEventListener("input", debounce(() => rodarComIndicadorSeGrande(() => aplicarFiltros(true)), 250));
 
   for (const id of ["filtro-categoria", "filtro-material", "ordenar"]) {
-    document.getElementById(id)?.addEventListener("change", () => aplicarFiltros(true));
+    document.getElementById(id)?.addEventListener("change", () => rodarComIndicadorSeGrande(() => aplicarFiltros(true)));
   }
-  document.getElementById("filtro-pix")?.addEventListener("change", () => aplicarFiltros(true));
+  document.getElementById("filtro-pix")?.addEventListener("change", () => rodarComIndicadorSeGrande(() => aplicarFiltros(true)));
 
   for (const id of ["filtro-preco-min", "filtro-preco-max"]) {
-    document.getElementById(id)?.addEventListener("input", debounce(() => aplicarFiltros(true), 250));
+    document.getElementById(id)?.addEventListener("input", debounce(() => rodarComIndicadorSeGrande(() => aplicarFiltros(true)), 250));
   }
 
   // "Mais filtros" só existe na home — material/ordenar/Pix ficam escondidos
@@ -555,26 +600,11 @@ function ligarFiltros() {
     select.dispatchEvent(new Event("change", { bubbles: true }));
   });
 
-  // aplicarFiltros percorre e reordena todos os cards da categoria (até
-  // ~800 em "Filamento"), de forma síncrona — em vez de travar a tela sem
-  // aviso nenhum nesse meio tempo, mostra o spinner primeiro e só faz o
-  // trabalho pesado depois (setTimeout garante que o navegador já pintou o
-  // estado de carregando antes de travar a thread principal).
-  document.getElementById("btn-ver-mais")?.addEventListener("click", (ev) => {
-    const btn = ev.currentTarget;
-    if (btn.classList.contains("carregando")) return;
-    const textoOriginal = btn.textContent;
-    btn.classList.add("carregando");
-    btn.disabled = true;
-    btn.textContent = "Carregando...";
-
-    setTimeout(() => {
+  document.getElementById("btn-ver-mais")?.addEventListener("click", () => {
+    rodarComIndicadorSeGrande(() => {
       LIMITE_EXIBICAO += INCREMENTO_EXIBICAO;
       aplicarFiltros(false);
-      btn.classList.remove("carregando");
-      btn.disabled = false;
-      btn.textContent = textoOriginal;
-    }, 20);
+    });
   });
 
   document.getElementById("filtros-ativos")?.addEventListener("click", (ev) => {
@@ -582,13 +612,13 @@ function ligarFiltros() {
       for (const campo of ["busca", "filtro-categoria", "filtro-material", "filtro-pix", "filtro-preco-min", "filtro-preco-max"]) {
         limparCampoFiltro(campo);
       }
-      aplicarFiltros(true);
+      rodarComIndicadorSeGrande(() => aplicarFiltros(true));
       return;
     }
     const chip = ev.target.closest(".filtro-chip");
     if (chip && ev.target.closest("button")) {
       limparCampoFiltro(chip.dataset.campo);
-      aplicarFiltros(true);
+      rodarComIndicadorSeGrande(() => aplicarFiltros(true));
     }
   });
 }

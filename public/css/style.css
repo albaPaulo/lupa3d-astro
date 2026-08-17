@@ -807,29 +807,33 @@ header.topo {
   cursor: pointer;
 }
 
-.btn-ver-mais.carregando {
-  cursor: wait;
-  opacity: 0.85;
-  padding-left: 2.6rem;
-  position: relative;
-}
-
-.btn-ver-mais.carregando::before {
-  content: "";
-  position: absolute;
-  left: 1rem;
-  top: 50%;
+.spinner-circular {
+  display: inline-block;
   width: 0.9rem;
   height: 0.9rem;
-  margin-top: -0.45rem;
-  border: 2px solid color-mix(in srgb, var(--cor-fundo) 35%, transparent);
-  border-top-color: var(--cor-fundo);
+  border: 2px solid color-mix(in srgb, var(--cor-texto) 20%, transparent);
+  border-top-color: var(--cor-marca);
   border-radius: 50%;
   animation: girar-spinner 0.7s linear infinite;
+  vertical-align: -0.15em;
 }
 
 @keyframes girar-spinner {
   to { transform: rotate(360deg); }
+}
+
+/* Aparece só quando trocar de filtro/categoria mexe numa grade grande o
+   bastante pra travar a tela por um instante (ver rodarComIndicadorSeGrande
+   em interativo.js) — grades pequenas nunca chegam a mostrar isso. */
+.grid-carregando-aviso {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  opacity: 0.75;
 }
 
 .vazio {
