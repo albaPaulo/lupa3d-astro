@@ -807,6 +807,31 @@ header.topo {
   cursor: pointer;
 }
 
+.btn-ver-mais.carregando {
+  cursor: wait;
+  opacity: 0.85;
+  padding-left: 2.6rem;
+  position: relative;
+}
+
+.btn-ver-mais.carregando::before {
+  content: "";
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  width: 0.9rem;
+  height: 0.9rem;
+  margin-top: -0.45rem;
+  border: 2px solid color-mix(in srgb, var(--cor-fundo) 35%, transparent);
+  border-top-color: var(--cor-fundo);
+  border-radius: 50%;
+  animation: girar-spinner 0.7s linear infinite;
+}
+
+@keyframes girar-spinner {
+  to { transform: rotate(360deg); }
+}
+
 .vazio {
   grid-column: 1 / -1;
   text-align: center;

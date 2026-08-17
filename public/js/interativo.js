@@ -555,9 +555,26 @@ function ligarFiltros() {
     select.dispatchEvent(new Event("change", { bubbles: true }));
   });
 
-  document.getElementById("btn-ver-mais")?.addEventListener("click", () => {
-    LIMITE_EXIBICAO += INCREMENTO_EXIBICAO;
-    aplicarFiltros(false);
+  // aplicarFiltros percorre e reordena todos os cards da categoria (até
+  // ~800 em "Filamento"), de forma síncrona — em vez de travar a tela sem
+  // aviso nenhum nesse meio tempo, mostra o spinner primeiro e só faz o
+  // trabalho pesado depois (setTimeout garante que o navegador já pintou o
+  // estado de carregando antes de travar a thread principal).
+  document.getElementById("btn-ver-mais")?.addEventListener("click", (ev) => {
+    const btn = ev.currentTarget;
+    if (btn.classList.contains("carregando")) return;
+    const textoOriginal = btn.textContent;
+    btn.classList.add("carregando");
+    btn.disabled = true;
+    btn.textContent = "Carregando...";
+
+    setTimeout(() => {
+      LIMITE_EXIBICAO += INCREMENTO_EXIBICAO;
+      aplicarFiltros(false);
+      btn.classList.remove("carregando");
+      btn.disabled = false;
+      btn.textContent = textoOriginal;
+    }, 20);
   });
 
   document.getElementById("filtros-ativos")?.addEventListener("click", (ev) => {
