@@ -47,6 +47,15 @@ export async function getStaticPaths() {
       .sort((a, b) => (b.cliques_total || 0) - (a.cliques_total || 0))
       .slice(0, 5);
 
+    // Outros produtos da mesma loja — mesmo critério de "não repetir card"
+    // das outras duas seções de descoberta (exclui o próprio produto e quem
+    // já apareceu em parecidos ou em "mais da categoria").
+    const idsExcluidosLoja = new Set([...idsExcluidos, ...maisDaCategoria.map((item) => item.id)]);
+    const produtosDaLoja = produtos
+      .filter((outro) => outro.loja === p.loja && !idsExcluidosLoja.has(outro.id))
+      .sort((a, b) => (b.cliques_total || 0) - (a.cliques_total || 0))
+      .slice(0, 5);
+
     return {
       params: { id: String(p.id) },
       props: {
@@ -55,6 +64,7 @@ export async function getStaticPaths() {
         historico: historicoPorProduto.get(p.id) || [],
         parecidos,
         maisDaCategoria,
+        produtosDaLoja,
         menorPreco: badgeMenorPrecoEfetivo(p, badgesMenorPreco, historicoPorProduto, historicoAtivo),
         produtoNovo: badgeProdutoNovo(p, badgesProdutoNovo),
         precoAnterior: precoAnteriorParaExibicao(p, historicoPorProduto),
@@ -63,7 +73,7 @@ export async function getStaticPaths() {
   });
 }
 
-const { produto: p, loja, historico, parecidos, maisDaCategoria, menorPreco, produtoNovo, precoAnterior } = Astro.props;
+const { produto: p, loja, historico, parecidos, maisDaCategoria, produtosDaLoja, menorPreco, produtoNovo, precoAnterior } = Astro.props;
 const categoriaLabel = LABEL_CATEGORIA[p.categoria] || p.categoria;
 // "parecidos" já é filtrado por mesma categoria + mesmo material (quando
 // detectado) em produtosParecidos() — o título reflete exatamente esse
@@ -227,7 +237,7 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
               </a>
             )}
             <span class="card-loja-nome-texto">{p.loja}</span>
-            <a href={`/loja/${p.loja}/`} class="produto-vendido-ver-mais">Ver mais produtos</a>
+            <a href={`/loja/${p.loja}/`} class="produto-vendido-ver-mais">Ver página da loja</a>
             {menorPreco && (
               <span class="produto-vendido-menor-preco">{menorPreco.icone ? `${menorPreco.icone} ` : "👍 "}{menorPreco.label || `Menor preço em ${menorPreco.dias} dias`}</span>
             )}
@@ -326,6 +336,17 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
         </div>
         <div class="grid" style="--colunas-grid: 4">
           {maisDaCategoria.map((item) => <ProductCard p={item} />)}
+        </div>
+      </section>
+    )}
+
+    {produtosDaLoja.length > 0 && (
+      <section class="produto-mais-categoria">
+        <div class="titulo-secao-grid-linha">
+          <h2 class="titulo-secao-grid">Produtos da {p.loja}</h2>
+        </div>
+        <div class="grid" style="--colunas-grid: 4">
+          {produtosDaLoja.map((item) => <ProductCard p={item} />)}
         </div>
       </section>
     )}
