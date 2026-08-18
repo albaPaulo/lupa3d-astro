@@ -351,6 +351,9 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
         <div class="grid" style="--colunas-grid: 5">
           {maisDaCategoria.map((item) => <ProductCard p={item} />)}
         </div>
+        <div class="ver-mais-container">
+          <a href={`/categoria/${p.categoria}/`} class="btn-ver-mais">Ver mais</a>
+        </div>
       </section>
     )}
   </main>
