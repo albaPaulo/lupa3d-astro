@@ -141,24 +141,65 @@ export function desenharGraficoSVG(pontos) {
     ? `<div class="grafico-eixo-y">${[...ticks].reverse().map((t) => `<span style="top:${coordY(t)}px">${formatarEixo(t)}</span>`).join("")}</div>`
     : "";
 
+  // Preços flutuantes sobre o próprio gráfico (início da linha + fim da
+  // linha normal/Pix) — posicionados em % de X (o SVG estica horizontalmente
+  // por fora do viewBox 560, então px cru não bateria) e px de Y (a altura é
+  // fixa em 260px = mesma unidade do viewBox, então bate 1 pra 1).
+  const xPercent = (i) => (coordX(i) / largura) * 100;
+  const ultimoIndicePix = temPix
+    ? [...pontos].reverse().findIndex((p) => p.preco_pix != null)
+    : -1;
+  const idxUltimoPix = ultimoIndicePix >= 0 ? pontos.length - 1 - ultimoIndicePix : -1;
+
+  const precosFlutuantes = `
+    <div class="grafico-preco-inicial" style="left:${xPercent(0)}%; top:${coordY(pontos[0].preco)}px">${formatarPreco(pontos[0].preco)}</div>
+    <div class="grafico-preco-final grafico-preco-final-normal" style="left:${xPercent(pontos.length - 1)}%; top:${coordY(pontos[pontos.length - 1].preco)}px">${formatarPreco(pontos[pontos.length - 1].preco)}</div>
+    ${idxUltimoPix >= 0 ? `<div class="grafico-preco-final grafico-preco-final-pix" style="left:${xPercent(idxUltimoPix)}%; top:${coordY(pontos[idxUltimoPix].preco_pix)}px">${formatarPreco(pontos[idxUltimoPix].preco_pix)}</div>` : ""}
+  `;
+
   const dataInicial = new Date(pontos[0].capturado_em).toLocaleDateString("pt-BR");
   const mediaNormal = precosNormais.reduce((soma, v) => soma + v, 0) / precosNormais.length;
+
+  // Data em que cada extremo (min/max) foi registrado — pega a primeira
+  // ocorrência na série, não necessariamente a mais recente.
+  const dataDoValor = (valor) => {
+    const ponto = pontos.find((p) => p.preco === valor);
+    return ponto ? new Date(ponto.capturado_em).toLocaleDateString("pt-BR") : null;
+  };
+  const dataMenor = dataDoValor(minNormal);
+  const dataMaior = dataDoValor(maxNormal);
+  const diasAcompanhado = Math.round(
+    (new Date(pontos[pontos.length - 1].capturado_em) - new Date(pontos[0].capturado_em)) / 86400000
+  );
+  const textoPeriodoMedia = diasAcompanhado > 0 ? `Últimos ${diasAcompanhado} dias` : "Hoje";
 
   const legenda = minNormal === maxNormal
     ? `<div class="grafico-legendas grafico-legendas-unica"><span>Acompanhando desde ${dataInicial} — sem variação de preço ainda</span></div>`
     : `
       <div class="grafico-legendas">
         <div class="grafico-stat grafico-stat-menor">
-          <span class="grafico-stat-label">Menor preço</span>
-          <span class="grafico-stat-valor">${formatarPreco(minNormal)}</span>
+          <span class="grafico-stat-icone" aria-hidden="true">↓</span>
+          <div class="grafico-stat-texto">
+            <span class="grafico-stat-label">Menor preço</span>
+            <span class="grafico-stat-valor">${formatarPreco(minNormal)}</span>
+            ${dataMenor ? `<span class="grafico-stat-data">${dataMenor}</span>` : ""}
+          </div>
         </div>
         <div class="grafico-stat grafico-stat-maior">
-          <span class="grafico-stat-label">Maior preço</span>
-          <span class="grafico-stat-valor">${formatarPreco(maxNormal)}</span>
+          <span class="grafico-stat-icone" aria-hidden="true">↑</span>
+          <div class="grafico-stat-texto">
+            <span class="grafico-stat-label">Maior preço</span>
+            <span class="grafico-stat-valor">${formatarPreco(maxNormal)}</span>
+            ${dataMaior ? `<span class="grafico-stat-data">${dataMaior}</span>` : ""}
+          </div>
         </div>
         <div class="grafico-stat grafico-stat-media">
-          <span class="grafico-stat-label">Preço médio</span>
-          <span class="grafico-stat-valor">${formatarPreco(mediaNormal)}</span>
+          <span class="grafico-stat-icone" aria-hidden="true">≈</span>
+          <div class="grafico-stat-texto">
+            <span class="grafico-stat-label">Preço médio</span>
+            <span class="grafico-stat-valor">${formatarPreco(mediaNormal)}</span>
+            <span class="grafico-stat-data">${textoPeriodoMedia}</span>
+          </div>
         </div>
       </div>
     `;
@@ -175,24 +216,27 @@ export function desenharGraficoSVG(pontos) {
   return `
     <div class="grafico-plot">
       ${eixoY}
-      <svg viewBox="0 0 ${largura} ${altura}" class="grafico-historico" preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="grafico-area-fill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="var(--cor-marca)" stop-opacity="0.18"/>
-            <stop offset="100%" stop-color="var(--cor-marca)" stop-opacity="0"/>
-          </linearGradient>
-        </defs>
-        ${gradeY}
-        ${linhaMinima}
-        <path d="${areaPath}" fill="url(#grafico-area-fill)" class="grafico-area"></path>
-        ${temPix ? `<polyline points="${linhaPix}" class="grafico-linha-pix"></polyline>` : ""}
-        <polyline points="${linha}" class="grafico-linha"></polyline>
-        ${pontosCirculoPix}
-        ${pontosCirculo}
-      </svg>
+      <div class="grafico-svg-wrap">
+        <svg viewBox="0 0 ${largura} ${altura}" class="grafico-historico" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="grafico-area-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="var(--cor-marca)" stop-opacity="0.18"/>
+              <stop offset="100%" stop-color="var(--cor-marca)" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          ${gradeY}
+          ${linhaMinima}
+          <path d="${areaPath}" fill="url(#grafico-area-fill)" class="grafico-area"></path>
+          ${temPix ? `<polyline points="${linhaPix}" class="grafico-linha-pix"></polyline>` : ""}
+          <polyline points="${linha}" class="grafico-linha"></polyline>
+          ${pontosCirculoPix}
+          ${pontosCirculo}
+        </svg>
+        ${precosFlutuantes}
+      </div>
     </div>
     <div class="grafico-eixo-x">${eixoX}</div>
-    ${legenda}
     ${legendaSeries}
+    ${legenda}
   `;
 }
