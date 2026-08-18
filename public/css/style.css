@@ -6,7 +6,6 @@
   --cor-marca: #2563eb;
   --cor-pix: #146b38;
   --cor-favorito: #b45309;
-  --cor-roxo: #7c3aed;
 }
 
 /* [data-tema] no <html> vem do botão de tema (claro/escuro/automático,
@@ -23,7 +22,6 @@
     --cor-marca: #60a5fa;
     --cor-pix: #34d399;
     --cor-favorito: #fbbf24;
-    --cor-roxo: #a78bfa;
   }
 }
 
@@ -35,7 +33,6 @@
   --cor-marca: #60a5fa;
   --cor-pix: #34d399;
   --cor-favorito: #fbbf24;
-  --cor-roxo: #a78bfa;
 }
 
 * { box-sizing: border-box; }
@@ -1535,9 +1532,6 @@ header.topo {
 .grafico-stat-maior { background: color-mix(in srgb, var(--cor-marca) 10%, var(--cor-fundo)); }
 .grafico-stat-maior .grafico-stat-icone { background: color-mix(in srgb, var(--cor-marca) 22%, transparent); color: var(--cor-marca); }
 
-.grafico-stat-media { background: color-mix(in srgb, var(--cor-roxo) 10%, var(--cor-fundo)); }
-.grafico-stat-media .grafico-stat-icone { background: color-mix(in srgb, var(--cor-roxo) 22%, transparent); color: var(--cor-roxo); }
-
 .grafico-legenda-series {
   display: flex;
   justify-content: center;
@@ -1809,7 +1803,7 @@ header.topo {
 
 .produto-linha-topo {
   display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
   gap: 0.85rem;
   align-items: start;
 }

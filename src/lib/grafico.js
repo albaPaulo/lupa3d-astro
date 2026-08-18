@@ -158,7 +158,6 @@ export function desenharGraficoSVG(pontos) {
   `;
 
   const dataInicial = new Date(pontos[0].capturado_em).toLocaleDateString("pt-BR");
-  const mediaNormal = precosNormais.reduce((soma, v) => soma + v, 0) / precosNormais.length;
 
   // Data em que cada extremo (min/max) foi registrado — pega a primeira
   // ocorrência na série, não necessariamente a mais recente.
@@ -168,10 +167,6 @@ export function desenharGraficoSVG(pontos) {
   };
   const dataMenor = dataDoValor(minNormal);
   const dataMaior = dataDoValor(maxNormal);
-  const diasAcompanhado = Math.round(
-    (new Date(pontos[pontos.length - 1].capturado_em) - new Date(pontos[0].capturado_em)) / 86400000
-  );
-  const textoPeriodoMedia = diasAcompanhado > 0 ? `Últimos ${diasAcompanhado} dias` : "Hoje";
 
   const legenda = minNormal === maxNormal
     ? `<div class="grafico-legendas grafico-legendas-unica"><span>Acompanhando desde ${dataInicial} — sem variação de preço ainda</span></div>`
@@ -191,14 +186,6 @@ export function desenharGraficoSVG(pontos) {
             <span class="grafico-stat-label">Maior preço</span>
             <span class="grafico-stat-valor">${formatarPreco(maxNormal)}</span>
             ${dataMaior ? `<span class="grafico-stat-data">${dataMaior}</span>` : ""}
-          </div>
-        </div>
-        <div class="grafico-stat grafico-stat-media">
-          <span class="grafico-stat-icone" aria-hidden="true">≈</span>
-          <div class="grafico-stat-texto">
-            <span class="grafico-stat-label">Preço médio</span>
-            <span class="grafico-stat-valor">${formatarPreco(mediaNormal)}</span>
-            <span class="grafico-stat-data">${textoPeriodoMedia}</span>
           </div>
         </div>
       </div>
