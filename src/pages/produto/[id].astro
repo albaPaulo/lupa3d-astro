@@ -45,7 +45,7 @@ export async function getStaticPaths() {
     const maisDaCategoria = produtos
       .filter((outro) => outro.categoria === p.categoria && !idsExcluidos.has(outro.id))
       .sort((a, b) => (b.cliques_total || 0) - (a.cliques_total || 0))
-      .slice(0, 12);
+      .slice(0, 5);
 
     return {
       params: { id: String(p.id) },
