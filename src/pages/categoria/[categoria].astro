@@ -127,11 +127,7 @@ const descricao = `Compare preços de ${produtosDaCategoria.length} produtos de 
 
     <div id="filtros-ativos" class="filtros-ativos"></div>
 
-    <button type="button" id="btn-mais-filtros" class="btn-mais-filtros" aria-expanded="false" aria-controls="controles-avancados">
-      🔍 Mais filtros
-    </button>
-
-    <div class="controles oculto-tela" id="controles-avancados">
+    <div class="controles" id="controles-avancados">
       <select id="filtro-material" aria-label="Filtrar por material">
         <option value="">Todos os materiais</option>
         {materiais.map((m) => <option value={m}>{m}</option>)}

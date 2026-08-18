@@ -142,11 +142,7 @@ const descricao = `Confira ${produtosComQueda.length} produtos com queda de pre√
 
     <div id="filtros-ativos" class="filtros-ativos"></div>
 
-    <button type="button" id="btn-mais-filtros" class="btn-mais-filtros" aria-expanded="false" aria-controls="controles-avancados">
-      üîç Mais filtros
-    </button>
-
-    <div class="controles oculto-tela" id="controles-avancados">
+    <div class="controles" id="controles-avancados">
       <select id="filtro-categoria" aria-label="Filtrar por categoria">
         <option value="">Todas as categorias</option>
         {categorias.map((c) => <option value={c}>{LABEL_CATEGORIA[c] || c}</option>)}

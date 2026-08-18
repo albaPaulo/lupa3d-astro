@@ -567,16 +567,6 @@ function ligarFiltros() {
     document.getElementById(id)?.addEventListener("input", debounce(() => rodarComIndicadorSeGrande(() => aplicarFiltros(true)), 250));
   }
 
-  // "Mais filtros" só existe na home — material/ordenar/Pix ficam escondidos
-  // até o usuário pedir.
-  const btnMaisFiltros = document.getElementById("btn-mais-filtros");
-  const controlesAvancados = document.getElementById("controles-avancados");
-  btnMaisFiltros?.addEventListener("click", () => {
-    const aberto = controlesAvancados.classList.toggle("oculto-tela") === false;
-    btnMaisFiltros.setAttribute("aria-expanded", String(aberto));
-    btnMaisFiltros.textContent = aberto ? "🔍 Menos filtros" : "🔍 Mais filtros";
-  });
-
   // Tags de material (categoria/[categoria].astro) — reaproveita o mesmo
   // <select> e aplicarFiltros() do filtro de material normal.
   document.querySelector(".tags-material")?.addEventListener("click", (ev) => {
