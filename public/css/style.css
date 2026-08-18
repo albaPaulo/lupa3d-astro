@@ -1839,7 +1839,7 @@ header.topo {
   gap: 0.75rem;
 }
 
-.produto-imagem-box .detalhe-imagem { width: 100%; }
+.produto-imagem-box .detalhe-imagem { width: 70%; max-width: 220px; }
 
 .produto-imagem-descricao { width: 100%; }
 
@@ -1930,7 +1930,7 @@ header.topo {
   font-size: 0.75rem;
 }
 
-.produto-preco-alvo { margin-bottom: 0.75rem; }
+.produto-preco-alvo { margin-top: 0.85rem; margin-bottom: 0.75rem; }
 
 .btn-preco-alvo-toggle {
   width: 100%;
