@@ -334,7 +334,7 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
         <div class="titulo-secao-grid-linha">
           <h2 class="titulo-secao-grid">Produtos da {p.loja}</h2>
         </div>
-        <div class="grid" style="--colunas-grid: 4">
+        <div class="grid" style="--colunas-grid: 5">
           {produtosDaLoja.map((item) => <ProductCard p={item} />)}
         </div>
         <div class="ver-mais-container">
@@ -348,7 +348,7 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
         <div class="titulo-secao-grid-linha">
           <h2 class="titulo-secao-grid">Continue explorando {categoriaLabel}</h2>
         </div>
-        <div class="grid" style="--colunas-grid: 4">
+        <div class="grid" style="--colunas-grid: 5">
           {maisDaCategoria.map((item) => <ProductCard p={item} />)}
         </div>
       </section>
