@@ -1871,10 +1871,23 @@ header.topo {
   background: var(--cor-card);
 }
 
-.produto-vendido-box .card-loja-link {
+.card-loja-nome-texto {
+  display: block;
   font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--cor-marca);
+}
+
+.produto-vendido-ver-mais {
+  display: inline-block;
+  font-size: 0.78rem;
+  color: var(--cor-marca);
+  opacity: 0.8;
+  text-decoration: none;
   margin-bottom: 0.5rem;
 }
+
+.produto-vendido-ver-mais:hover { opacity: 1; text-decoration: underline; }
 
 .produto-vendido-menor-preco {
   display: inline-flex;
