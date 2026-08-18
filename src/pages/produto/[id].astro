@@ -329,17 +329,6 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
       )}
     </div>
 
-    {maisDaCategoria.length > 0 && (
-      <section class="produto-mais-categoria">
-        <div class="titulo-secao-grid-linha">
-          <h2 class="titulo-secao-grid">Continue explorando {categoriaLabel}</h2>
-        </div>
-        <div class="grid" style="--colunas-grid: 4">
-          {maisDaCategoria.map((item) => <ProductCard p={item} />)}
-        </div>
-      </section>
-    )}
-
     {produtosDaLoja.length > 0 && (
       <section class="produto-mais-categoria">
         <div class="titulo-secao-grid-linha">
@@ -347,6 +336,20 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
         </div>
         <div class="grid" style="--colunas-grid: 4">
           {produtosDaLoja.map((item) => <ProductCard p={item} />)}
+        </div>
+        <div class="ver-mais-container">
+          <a href={`/loja/${p.loja}/`} class="btn-ver-mais">Ver mais</a>
+        </div>
+      </section>
+    )}
+
+    {maisDaCategoria.length > 0 && (
+      <section class="produto-mais-categoria">
+        <div class="titulo-secao-grid-linha">
+          <h2 class="titulo-secao-grid">Continue explorando {categoriaLabel}</h2>
+        </div>
+        <div class="grid" style="--colunas-grid: 4">
+          {maisDaCategoria.map((item) => <ProductCard p={item} />)}
         </div>
       </section>
     )}
