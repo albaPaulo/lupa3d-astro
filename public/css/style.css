@@ -1058,11 +1058,6 @@ header.topo {
   opacity: 0.6;
 }
 
-.card-preco-kg {
-  font-size: 0.7rem;
-  opacity: 0.55;
-}
-
 /* Botão quadrado (1:1) que alterna estado no clique — mesmo padrão do
    .btn-favorito (☆/★), mas sem posição absoluta, pra ficar ao lado de "Ver
    detalhes" em vez de flutuar sobre a imagem. Tamanho por padrão pequeno

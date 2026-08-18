@@ -15,7 +15,6 @@ import {
   LABEL_CATEGORIA,
   materialEfetivo,
   otimizarImagem,
-  precoPorKgTexto,
 } from "../../lib/supabase.js";
 import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPrecoEfetivo, badgeProdutoNovo, precoAnteriorParaExibicao } from "../../lib/badges.js";
 import { desenharGraficoSVG } from "../../lib/grafico.js";
@@ -101,7 +100,6 @@ const economiaValor = precoMaximoHistorico && precoMaximoHistorico > p.preco
 const descontoPercentual = precoAnterior && precoAnterior > p.preco
   ? Math.round(((precoAnterior - p.preco) / precoAnterior) * 100)
   : null;
-const porKg = precoPorKgTexto(p.nome, p.preco);
 
 const urlProduto = `https://lupa3d.com.br/produto/${p.id}/`;
 const textoCompartilhar = `${p.nome} por ${formatarPreco(p.preco)} — comparei no LUPA3D`;
@@ -242,7 +240,6 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
               )}
               <span class="card-preco">{formatarPreco(p.preco)}</span>
               {p.preco_pix != null && Number(p.preco_pix) < Number(p.preco) && <span class="card-preco-pix">{formatarPreco(p.preco_pix)} no Pix</span>}
-              {porKg && <span class="card-preco-kg">{porKg}</span>}
             </div>
             {economiaValor != null && (
               <div class="produto-vendido-economia">
