@@ -1754,11 +1754,15 @@ header.topo {
 .produto-imagem-box {
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0.75rem;
 }
 
 .produto-imagem-box .detalhe-imagem { width: 100%; }
+
+.produto-imagem-descricao { width: 100%; }
 
 .btn-zoom {
   position: absolute;
@@ -2002,11 +2006,6 @@ header.topo {
 }
 
 .produto-historico-expandido .grafico-historico { height: 320px; }
-
-.produto-descricao-box .compartilhar {
-  justify-content: center;
-  margin-top: 1.5rem;
-}
 
 /* --- Painel administrativo --- */
 

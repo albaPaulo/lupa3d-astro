@@ -86,7 +86,10 @@ function truncarTexto(texto, limite) {
   const ultimoEspaco = cortado.lastIndexOf(" ");
   return `${cortado.slice(0, ultimoEspaco > 0 ? ultimoEspaco : limite)}…`;
 }
-const descricaoProduto = truncarTexto(p.descricao_manual || p.descricao, DESCRICAO_LIMITE) || "Sem descrição disponível para este produto.";
+// null (não texto de fallback) quando não há descrição real — a caixa de
+// imagem some com o bloco de descrição inteiro nesse caso, em vez de
+// mostrar uma caixa "Sem descrição disponível" praticamente vazia.
+const descricaoProduto = truncarTexto(p.descricao_manual || p.descricao, DESCRICAO_LIMITE) || null;
 const graficoSVG = desenharGraficoSVG(historico);
 const precoMaximoHistorico = historico.length > 0 ? Math.max(...historico.map((h) => h.preco)) : null;
 const quedaPercentual = precoMaximoHistorico && precoMaximoHistorico > p.preco
@@ -207,11 +210,12 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
               <span class="card-imagem-vazia">📦</span>
             )}
           </div>
-        </div>
-
-        <div class="produto-box produto-descricao-box">
-          <h2 class="produto-box-titulo">Descrição</h2>
-          <p class="detalhe-descricao">{descricaoProduto}</p>
+          {descricaoProduto && (
+            <div class="produto-imagem-descricao">
+              <h2 class="produto-box-titulo">Descrição</h2>
+              <p class="detalhe-descricao">{descricaoProduto}</p>
+            </div>
+          )}
         </div>
       </div>
 
