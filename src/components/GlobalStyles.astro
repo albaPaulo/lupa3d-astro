@@ -20,3 +20,18 @@ const css = fs.readFileSync(path.join(process.cwd(), "public/css/style.css"), "u
   })();
 </script>
 <style set:html={css}></style>
+
+<link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#2563eb" />
+
+<script is:inline>
+  // Registra o Service Worker (só existe pra habilitar "Adicionar à tela
+  // inicial" — veja o comentário em /sw.js). Roda depois do load pra não
+  // competir com o carregamento da página, e falha em silêncio em navegador
+  // sem suporte (Service Worker é opcional, não é requisito pro site funcionar).
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    });
+  }
+</script>

@@ -1,0 +1,13 @@
+{
+  "name": "LUPA3D — Compare preços de filamento e resina 3D",
+  "short_name": "LUPA3D",
+  "description": "Compare preços de filamentos, resinas e impressoras 3D entre várias lojas brasileiras.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f7f8",
+  "theme_color": "#2563eb",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
