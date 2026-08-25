@@ -6,8 +6,11 @@ import GlobalStyles from "../../components/GlobalStyles.astro";
 const [produtos, lojasConfig] = await Promise.all([fetchProdutos(), fetchLojas()]);
 
 const contagemPorLoja = new Map();
+const contagemPixPorLoja = new Map();
 for (const p of produtos) {
   contagemPorLoja.set(p.loja, (contagemPorLoja.get(p.loja) || 0) + 1);
+  const temPix = p.preco_pix != null && Number(p.preco_pix) < Number(p.preco);
+  if (temPix) contagemPixPorLoja.set(p.loja, (contagemPixPorLoja.get(p.loja) || 0) + 1);
 }
 const nomesLojas = [...contagemPorLoja.keys()].sort();
 ---
@@ -36,6 +39,8 @@ const nomesLojas = [...contagemPorLoja.keys()].sort();
       {nomesLojas.map((nome) => {
         const cfg = lojasConfig.find((l) => l.nome === nome);
         const qtd = contagemPorLoja.get(nome);
+        const qtdPix = contagemPixPorLoja.get(nome) || 0;
+        const percentualPix = qtdPix > 0 ? Math.round((qtdPix / qtd) * 100) : 0;
         return (
           <a href={`/loja/${nome}/`} class="loja-card">
             <div class="loja-card-logo-wrap">
@@ -47,6 +52,7 @@ const nomesLojas = [...contagemPorLoja.keys()].sort();
             </div>
             <span class="loja-card-nome">{nome}</span>
             <span class="loja-card-qtd">{qtd} produto{qtd === 1 ? "" : "s"}</span>
+            {percentualPix > 0 && <span class="loja-card-pix">🟢 {percentualPix}% com desconto Pix</span>}
           </a>
         );
       })}

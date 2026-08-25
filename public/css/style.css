@@ -1748,6 +1748,15 @@ header.topo {
   opacity: 0.7;
 }
 
+.loja-card-pix {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--cor-pix);
+  background: color-mix(in srgb, var(--cor-pix) 12%, var(--cor-fundo));
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+}
+
 .produto-box {
   background: var(--cor-card);
   border: 1px solid var(--cor-borda);
