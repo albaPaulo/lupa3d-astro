@@ -83,6 +83,14 @@ const secoesPadrao = [
     icone: "💸",
     produtos: produtosDiretos.filter((p) => badgesPorId.get(p.id)?.menorPreco).slice(0, LIMITE_SECAO_PADRAO),
   },
+  {
+    nome: "Maiores descontos no Pix",
+    icone: "💚",
+    produtos: produtosDiretos
+      .filter((p) => p.preco_pix != null && Number(p.preco_pix) < Number(p.preco))
+      .sort((a, b) => (1 - Number(b.preco_pix) / Number(b.preco)) - (1 - Number(a.preco_pix) / Number(a.preco)))
+      .slice(0, LIMITE_SECAO_PADRAO),
+  },
   // Seção incompleta (menos de 5 produtos) fica torta na grade de 5 colunas —
   // melhor sumir do que mostrar 1-2 cards soltos.
 ].filter((s) => s.produtos.length >= LIMITE_SECAO_PADRAO);
