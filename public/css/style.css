@@ -1259,9 +1259,31 @@ header.topo {
 
 .tabela-comparacao thead th { background: var(--cor-fundo); }
 
-.btn-print-comparacao {
-  display: block;
+.comparacao-cabecalho {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  text-align: center;
+}
+
+.comparacao-imagem {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  background: var(--cor-card);
+  border-radius: 0.5rem;
+}
+
+.modal-comparacao-acoes {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
   margin: 1.25rem auto 0;
+  flex-wrap: wrap;
+}
+
+.btn-print-comparacao {
   background: var(--cor-marca);
   color: white;
   border: none;
@@ -1274,6 +1296,12 @@ header.topo {
 }
 
 .btn-print-comparacao:disabled { opacity: 0.6; cursor: default; }
+
+.btn-print-comparacao.secundario {
+  background: transparent;
+  color: var(--cor-marca);
+  border: 1px solid var(--cor-marca);
+}
 
 .detalhe {
   display: grid;

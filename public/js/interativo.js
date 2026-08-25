@@ -144,7 +144,7 @@ async function buscarProdutosPorIds(ids) {
   if (ids.length === 0) return [];
   const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.LUPA3D_CONFIG;
   const resp = await fetch(
-    `${SUPABASE_URL}/rest/v1/produtos?select=id,nome,loja,preco,preco_pix,categoria,url&id=in.(${ids.join(",")})`,
+    `${SUPABASE_URL}/rest/v1/produtos?select=id,nome,loja,preco,preco_pix,categoria,url,imagem_url&id=in.(${ids.join(",")})`,
     { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
   );
   if (!resp.ok) throw new Error("Falha ao buscar produtos pra comparação");
@@ -176,7 +176,21 @@ async function abrirModalComparacao() {
     ["", (p) => `<a href="${escapeHTMLJS(p.url)}" target="_blank" rel="noopener">Ver na loja &rarr;</a>`],
   ];
 
-  const cabecalho = produtos.map((p) => `<th>${escapeHTMLJS(p.nome)}</th>`).join("");
+  const cabecalho = produtos
+    .map(
+      (p) => `
+      <th>
+        <div class="comparacao-cabecalho">
+          ${
+            p.imagem_url
+              ? `<img src="${escapeHTMLJS(p.imagem_url)}" alt="${escapeHTMLJS(p.nome)}" class="comparacao-imagem" loading="lazy" referrerpolicy="no-referrer">`
+              : ""
+          }
+          <span>${escapeHTMLJS(p.nome)}</span>
+        </div>
+      </th>`
+    )
+    .join("");
   const corpo = linhas
     .map(
       ([rotulo, fn]) => `
