@@ -161,6 +161,12 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
     </div>
 
     <p class="hero-subtitulo">Compare preços, acompanhe o histórico e descubra onde comprar mais barato.</p>
+
+    <div class="hero-confianca">
+      <span>🔍 Compare preços</span>
+      <span>📈 Histórico de preços</span>
+      <span>🏬 Várias lojas confiáveis</span>
+    </div>
   </section>
 
   <FaixaProvaSocial totalProdutos={produtos.length} totalLojas={totalLojas} />
@@ -178,6 +184,27 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
       <SecaoHome secao={secao} produtos={produtosDaSecao} badgesPorId={badgesPorId} />
     ))}
   </main>
+
+  <section class="como-funciona">
+    <h2 class="como-funciona-titulo">Como funciona o LUPA3D</h2>
+    <div class="como-funciona-passos">
+      <div class="como-funciona-passo">
+        <span class="como-funciona-icone" aria-hidden="true">🔍</span>
+        <h3>1. Pesquise</h3>
+        <p>Encontre o produto que você precisa comparando várias marcas e modelos num só lugar.</p>
+      </div>
+      <div class="como-funciona-passo">
+        <span class="como-funciona-icone" aria-hidden="true">📊</span>
+        <h3>2. Compare</h3>
+        <p>Veja preços, desconto no Pix e o histórico de preço de cada loja antes de decidir.</p>
+      </div>
+      <div class="como-funciona-passo">
+        <span class="como-funciona-icone" aria-hidden="true">🛒</span>
+        <h3>3. Compre</h3>
+        <p>Clique em "Ver Oferta!" e finalize a compra direto na loja parceira escolhida.</p>
+      </div>
+    </div>
+  </section>
 
   <Footer />
 
