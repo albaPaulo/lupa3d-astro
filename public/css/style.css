@@ -1158,6 +1158,7 @@ header.topo {
   position: fixed;
   bottom: 1.5rem;
   left: 50%;
+  z-index: 90;
   /* translateY em % (não px fixo) esconde a barra fora da tela não importa
      quantas linhas o conteúdo quebrar — no mobile ela cresce bastante
      (flex-wrap), e um deslocamento fixo em px podia deixar um pedaço
@@ -1214,7 +1215,7 @@ header.topo {
   display: none;
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: 200;
   background: rgba(0,0,0,0.5);
   align-items: center;
   justify-content: center;
@@ -2038,6 +2039,50 @@ header.topo {
 
 .btn-preco-alvo-remover:hover { opacity: 1; }
 
+.form-sugestao {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 1rem;
+}
+
+.form-sugestao label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.form-sugestao textarea,
+.form-sugestao input {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: 0.5rem;
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  font: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+}
+
+.form-sugestao button {
+  align-self: flex-start;
+  margin-top: 0.5rem;
+  background: var(--cor-marca);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.form-sugestao button:disabled { opacity: 0.6; cursor: default; }
+
+.sugestao-status { font-size: 0.85rem; min-height: 1.2em; }
+.sugestao-status-ok { color: var(--cor-pix); font-weight: 600; }
+.sugestao-status-erro { color: #b91c1c; font-weight: 600; }
+
 .produto-vendido-economia-titulo { font-weight: 700; color: var(--cor-pix); }
 .produto-vendido-economia-valor { opacity: 0.85; }
 
@@ -2401,6 +2446,31 @@ header.topo {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.sugestoes-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.sugestao-item {
+  border: 1px solid var(--cor-borda);
+  border-radius: 0.65rem;
+  padding: 0.75rem 1rem;
+  background: var(--cor-card);
+}
+
+.sugestao-item-mensagem {
+  margin: 0 0 0.4rem;
+  white-space: pre-wrap;
+}
+
+.sugestao-item-meta {
+  margin: 0;
+  font-size: 0.78rem;
+  opacity: 0.65;
 }
 
 .analytics-item {
