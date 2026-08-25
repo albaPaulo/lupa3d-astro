@@ -75,6 +75,9 @@ const badgesPorId = new Map(badges.map((b) => [b.id, b]));
 const titulo = `${nome} — LUPA3D`;
 const descricao = loja?.descricao || `Confira os ${produtosDaLoja.length} produtos e preços da ${nome} no LUPA3D.`;
 const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
+
+const qtdComPix = produtosDaLoja.filter((p) => p.preco_pix != null && Number(p.preco_pix) < Number(p.preco)).length;
+const percentualPix = qtdComPix > 0 ? Math.round((qtdComPix / produtosDaLoja.length) * 100) : 0;
 ---
 <!doctype html>
 <html lang="pt-BR">
@@ -118,6 +121,10 @@ const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
         {loja?.logo_url && <img src={loja.logo_url} class="loja-perfil-logo" alt="" referrerpolicy="no-referrer" />}
       </div>
       <h1 class="loja-perfil-nome">{nome}</h1>
+    </div>
+    <div class="loja-perfil-resumo">
+      <span class="loja-card-qtd">{produtosDaLoja.length} produto{produtosDaLoja.length === 1 ? "" : "s"}</span>
+      {percentualPix > 0 && <span class="loja-card-pix">🟢 {percentualPix}% com desconto Pix</span>}
     </div>
     {loja?.descricao && <p class="loja-perfil-descricao">{loja.descricao}</p>}
     {redes.length > 0 && (

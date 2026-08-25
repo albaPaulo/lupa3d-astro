@@ -108,6 +108,8 @@ header.topo {
   .topo-linha nav.abas button {
     width: 100%;
     justify-content: center;
+    font-size: 1.05rem;
+    padding: 0.7rem 0.9rem;
   }
 
   /* Só na página de produto: ".link-voltar" some o texto e sobra a seta,
@@ -635,6 +637,14 @@ header.topo {
   color: var(--cor-texto);
   opacity: 0.85;
   line-height: 1.5;
+}
+
+.loja-perfil-resumo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.5rem 0 0 1.5rem;
 }
 
 .loja-perfil-redes {
