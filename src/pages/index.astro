@@ -55,6 +55,15 @@ const secoesPadrao = [
       .slice(0, LIMITE_SECAO_PADRAO),
   },
   {
+    nome: "Novidades",
+    icone: "🆕",
+    verMaisHref: "/novidades/",
+    produtos: [...produtosDiretos]
+      .filter((p) => p.criado_em)
+      .sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em))
+      .slice(0, LIMITE_SECAO_PADRAO),
+  },
+  {
     nome: "Maiores quedas de preço",
     icone: "📉",
     verMaisHref: "/ofertas/",
@@ -67,15 +76,6 @@ const secoesPadrao = [
         const descontoB = 1 - Number(b.preco) / badgesPorId.get(b.id).precoAnterior;
         return descontoB - descontoA;
       })
-      .slice(0, LIMITE_SECAO_PADRAO),
-  },
-  {
-    nome: "Novidades",
-    icone: "🆕",
-    verMaisHref: "/novidades/",
-    produtos: [...produtosDiretos]
-      .filter((p) => p.criado_em)
-      .sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em))
       .slice(0, LIMITE_SECAO_PADRAO),
   },
   {

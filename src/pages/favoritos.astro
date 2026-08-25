@@ -68,6 +68,7 @@ const redesCompartilhar = Object.entries(ICONES_COMPARTILHAR).map(([rede, icone]
         <a href="#" data-rede={r.rede} target="_blank" rel="noopener" class="btn-compartilhar" aria-label={`Compartilhar no ${r.rede}`} title={r.rede} set:html={r.icone} />
       ))}
       <button type="button" id="btn-compartilhar-favoritos" class="btn-compartilhar" aria-label="Copiar link" title="Copiar link">🔗</button>
+      <button type="button" id="btn-salvar-imagem-favoritos" class="btn-compartilhar" aria-label="Salvar imagem" title="Salvar imagem">📷</button>
     </div>
   </div>
 
@@ -89,5 +90,36 @@ const redesCompartilhar = Object.entries(ICONES_COMPARTILHAR).map(([rede, icone]
   <script is:inline defer src="/js/favoritos.js"></script>
   <script is:inline defer src="/js/interativo.js"></script>
   <script is:inline defer src="/js/favoritos-pagina.js"></script>
+
+  <script>
+    // Mesmo padrão do botão "Salvar imagem" da comparação (BarraComparacao.astro)
+    // — import dinâmico da html-to-image só quando clicado, pra não pesar no
+    // carregamento de quem não usa.
+    document.getElementById("btn-salvar-imagem-favoritos")?.addEventListener("click", async (ev) => {
+      const btn = ev.currentTarget;
+      const alvo = document.getElementById("grid");
+      if (!alvo) return;
+
+      const textoOriginal = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "⏳";
+
+      try {
+        const { toPng } = await import("html-to-image");
+        const corFundo = getComputedStyle(document.documentElement).getPropertyValue("--cor-fundo").trim() || "#ffffff";
+        const dataUrl = await toPng(alvo, { backgroundColor: corFundo, pixelRatio: 2 });
+        const link = document.createElement("a");
+        link.download = "favoritos-lupa3d.png";
+        link.href = dataUrl;
+        link.click();
+      } catch (e) {
+        console.error("Falha ao gerar imagem dos favoritos:", e);
+        alert("Não foi possível gerar a imagem agora — tente de novo em alguns segundos.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = textoOriginal;
+      }
+    });
+  </script>
 </body>
 </html>
