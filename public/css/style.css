@@ -122,7 +122,10 @@ header.topo {
   margin: 1.25rem auto 0;
   padding: 2rem 1.5rem;
   border-radius: 1.5rem;
-  background: color-mix(in srgb, var(--cor-texto) 4%, var(--cor-fundo));
+  /* color-mix com --cor-marca (em vez de --cor-texto) puxa pro azul da
+     marca — se ajusta sozinho no escuro porque as duas variáveis já mudam
+     de valor por tema, sem precisar de uma regra separada pra isso. */
+  background: linear-gradient(135deg, color-mix(in srgb, var(--cor-marca) 12%, var(--cor-fundo)), var(--cor-fundo));
   text-align: center;
 }
 
