@@ -107,6 +107,12 @@ const quedaPercentual = precoMaximoHistorico && precoMaximoHistorico > p.preco
 const economiaValor = precoMaximoHistorico && precoMaximoHistorico > p.preco
   ? precoMaximoHistorico - p.preco
   : null;
+// Complemento honesto da caixa de economia: quando o preço atual É o maior
+// já registrado (subiu, não caiu), não tem economia nenhuma pra mostrar —
+// mas avisar que é o pior momento histórico pra comprar é uma informação
+// tão real quanto a de queda. Exige pelo menos 2 pontos de histórico, senão
+// "maior preço já registrado" é trivialmente verdade pra qualquer produto novo.
+const noMaiorPrecoHistorico = historico.length >= 2 && precoMaximoHistorico != null && Number(p.preco) >= Number(precoMaximoHistorico);
 const descontoPercentual = precoAnterior && precoAnterior > p.preco
   ? Math.round(((precoAnterior - p.preco) / precoAnterior) * 100)
   : null;
@@ -258,6 +264,15 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
                 <div>
                   <span class="produto-vendido-economia-titulo">Você está economizando</span>
                   <span class="produto-vendido-economia-valor">{formatarPreco(economiaValor)} em relação ao maior preço já registrado</span>
+                </div>
+              </div>
+            )}
+            {noMaiorPrecoHistorico && (
+              <div class="produto-vendido-economia produto-vendido-alerta-maximo">
+                <span class="produto-vendido-economia-icone" aria-hidden="true">⚠️</span>
+                <div>
+                  <span class="produto-vendido-economia-titulo">Maior preço já registrado</span>
+                  <span class="produto-vendido-economia-valor">Pode valer a pena esperar baixar</span>
                 </div>
               </div>
             )}

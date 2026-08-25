@@ -1964,6 +1964,13 @@ header.topo {
 
 .produto-vendido-economia-icone { font-size: 1.2rem; }
 
+.produto-vendido-alerta-maximo {
+  background: color-mix(in srgb, var(--cor-favorito) 10%, var(--cor-card));
+  border-color: color-mix(in srgb, var(--cor-favorito) 30%, var(--cor-borda));
+}
+
+.produto-vendido-alerta-maximo .produto-vendido-economia-titulo { color: var(--cor-favorito); }
+
 .produto-vendido-economia-titulo,
 .produto-vendido-economia-valor {
   display: block;
