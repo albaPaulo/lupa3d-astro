@@ -120,7 +120,7 @@ header.topo {
 .barra-busca-categoria {
   max-width: 1200px;
   margin: 1.25rem auto 0;
-  padding: 2rem 1.5rem;
+  padding: 2rem 2.5rem;
   border-radius: 1.5rem;
   /* color-mix com --cor-marca (em vez de --cor-texto) puxa pro azul da
      marca — se ajusta sozinho no escuro porque as duas variáveis já mudam
