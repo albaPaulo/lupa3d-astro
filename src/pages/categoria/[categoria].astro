@@ -9,6 +9,7 @@ import {
   fetchProdutos,
   fetchHistoricoTodos,
   fetchConfiguracoes,
+  fetchLojaEstadoMap,
   buildHistoricoPorProduto,
   materialEfetivo,
   EMOJI_CATEGORIA,
@@ -17,10 +18,11 @@ import {
 import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPrecoEfetivo, badgeProdutoNovo, precoAnteriorParaExibicao } from "../../lib/badges.js";
 
 export async function getStaticPaths() {
-  const [produtos, historicoTodos, config] = await Promise.all([
+  const [produtos, historicoTodos, config, lojaEstadoMap] = await Promise.all([
     fetchProdutos(),
     fetchHistoricoTodos(),
     fetchConfiguracoes(),
+    fetchLojaEstadoMap(),
   ]);
 
   const categorias = [...new Set(produtos.map((p) => p.categoria).filter(Boolean))].sort();
@@ -40,6 +42,8 @@ export async function getStaticPaths() {
         produtosDaCategoria,
         colunasGrid,
         materiais: [...new Set(produtosDaCategoria.map(materialEfetivo).filter(Boolean))].sort(),
+        lojaEstadoMap,
+        estados: [...new Set(produtosDaCategoria.flatMap((p) => lojaEstadoMap[p.loja] || []))].sort(),
         badges: produtosDaCategoria.map((p) => ({
           id: p.id,
           menorPreco: badgeMenorPrecoEfetivo(p, badgesMenorPreco, historicoPorProduto, historicoAtivo),
@@ -51,7 +55,7 @@ export async function getStaticPaths() {
   });
 }
 
-const { categoria, categorias, produtosDaCategoria, colunasGrid, materiais, badges } = Astro.props;
+const { categoria, categorias, produtosDaCategoria, colunasGrid, materiais, lojaEstadoMap, estados, badges } = Astro.props;
 const badgesPorId = new Map(badges.map((b) => [b.id, b]));
 const categoriaLabel = LABEL_CATEGORIA[categoria] || categoria;
 const titulo = `${categoriaLabel} — LUPA3D`;
@@ -139,6 +143,12 @@ const descricao = `Compare preços de ${produtosDaCategoria.length} produtos de 
         <option value="cliques">Mais clicados</option>
         <option value="recentes">Mais recentes</option>
       </select>
+      {estados.length > 0 && (
+        <select id="filtro-estado" aria-label="Filtrar por estado da loja">
+          <option value="">Todos os estados</option>
+          {estados.map((uf) => <option value={uf}>{uf}</option>)}
+        </select>
+      )}
       <div class="filtro-preco-linha">
         <input type="number" id="filtro-preco-min" placeholder="Preço mín." min="0" step="0.01" aria-label="Preço mínimo" />
         <span aria-hidden="true">—</span>
@@ -150,6 +160,10 @@ const descricao = `Compare preços de ${produtosDaCategoria.length} produtos de 
       </label>
     </div>
   </section>
+
+  <script is:inline define:vars={{ lojaEstadoMap }}>
+    window.LUPA3D_LOJA_ESTADO = lojaEstadoMap;
+  </script>
 
   <div class="titulo-secao-grid-linha">
     <h2 class="titulo-secao-grid">{categoriaLabel} ({produtosDaCategoria.length})</h2>

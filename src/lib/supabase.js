@@ -82,6 +82,19 @@ export async function fetchLojas() {
   return resp.json();
 }
 
+// Loja com mais de uma unidade física guarda os estados separados por
+// vírgula (ex: "SP, RJ") — usado pelo filtro de localização nas páginas de
+// listagem, cruzando produto (data-loja no card) com o(s) estado(s) da loja.
+export async function fetchLojaEstadoMap() {
+  const lojas = await fetchLojas();
+  return Object.fromEntries(
+    lojas.map((l) => [
+      l.nome,
+      (l.estado || "").split(",").map((uf) => uf.trim().toUpperCase()).filter(Boolean),
+    ])
+  );
+}
+
 // Redimensiona/comprime via Netlify Image CDN as fotos de produto, que vêm
 // hotlinkadas direto do CDN de cada loja no tamanho original (às vezes bem
 // maior que o exibido). Domínios de origem liberados em netlify.toml.

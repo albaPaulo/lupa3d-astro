@@ -454,6 +454,7 @@ function aplicarFiltros(resetarLimite = true) {
   const ordenar = document.getElementById("ordenar")?.value || "";
 
   const soPix = document.getElementById("filtro-pix")?.checked || false;
+  const estado = document.getElementById("filtro-estado")?.value || "";
   const precoMinStr = document.getElementById("filtro-preco-min")?.value || "";
   const precoMaxStr = document.getElementById("filtro-preco-max")?.value || "";
   const precoMin = precoMinStr !== "" ? Number(precoMinStr) : null;
@@ -498,9 +499,15 @@ function aplicarFiltros(resetarLimite = true) {
     const okCategoria = !categoria || card.dataset.categoria === categoria;
     const okMaterial = !material || card.dataset.material === material;
     const okPix = !soPix || card.dataset.pix === "1";
+    // Cruza a loja do card com o mapa loja->estado(s) injetado pela página
+    // (window.LUPA3D_LOJA_ESTADO) — loja com mais de uma unidade aparece em
+    // qualquer estado dela. Sem dado de estado pra essa loja, o card só some
+    // quando um estado específico está selecionado (não afeta "Todos").
+    const ufsLoja = window.LUPA3D_LOJA_ESTADO?.[card.dataset.loja] || [];
+    const okEstado = !estado || ufsLoja.includes(estado);
     const okPrecoMin = precoMin == null || precoCard >= precoMin;
     const okPrecoMax = precoMax == null || precoCard <= precoMax;
-    if (okBusca && okCategoria && okMaterial && okPix && okPrecoMin && okPrecoMax) combinam.push(card);
+    if (okBusca && okCategoria && okMaterial && okPix && okEstado && okPrecoMin && okPrecoMax) combinam.push(card);
     else card.classList.add("oculto-tela");
   }
 
@@ -532,6 +539,7 @@ function atualizarChipsFiltros() {
   const categoria = document.getElementById("filtro-categoria");
   const material = document.getElementById("filtro-material");
   const pix = document.getElementById("filtro-pix");
+  const estado = document.getElementById("filtro-estado");
   const precoMin = document.getElementById("filtro-preco-min");
   const precoMax = document.getElementById("filtro-preco-max");
 
@@ -540,6 +548,7 @@ function atualizarChipsFiltros() {
   if (categoria?.value) ativos.push({ campo: "filtro-categoria", texto: categoria.value });
   if (material?.value) ativos.push({ campo: "filtro-material", texto: material.value });
   if (pix?.checked) ativos.push({ campo: "filtro-pix", texto: "Desconto no Pix" });
+  if (estado?.value) ativos.push({ campo: "filtro-estado", texto: `📍 ${estado.value}` });
   if (precoMin?.value) ativos.push({ campo: "filtro-preco-min", texto: `Mín. R$ ${precoMin.value}` });
   if (precoMax?.value) ativos.push({ campo: "filtro-preco-max", texto: `Máx. R$ ${precoMax.value}` });
 
@@ -572,7 +581,7 @@ function ligarFiltros() {
   const busca = document.getElementById("busca");
   if (busca) busca.addEventListener("input", debounce(() => rodarComIndicadorSeGrande(() => aplicarFiltros(true)), 250));
 
-  for (const id of ["filtro-categoria", "filtro-material", "ordenar"]) {
+  for (const id of ["filtro-categoria", "filtro-material", "ordenar", "filtro-estado"]) {
     document.getElementById(id)?.addEventListener("change", () => rodarComIndicadorSeGrande(() => aplicarFiltros(true)));
   }
   document.getElementById("filtro-pix")?.addEventListener("change", () => rodarComIndicadorSeGrande(() => aplicarFiltros(true)));

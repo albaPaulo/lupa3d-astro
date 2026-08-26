@@ -9,6 +9,7 @@ import {
   fetchProdutos,
   fetchHistoricoTodos,
   fetchConfiguracoes,
+  fetchLojaEstadoMap,
   buildHistoricoPorProduto,
   materialEfetivo,
   EMOJI_CATEGORIA,
@@ -16,10 +17,11 @@ import {
 } from "../../lib/supabase.js";
 import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPrecoEfetivo, badgeProdutoNovo, precoAnteriorParaExibicao } from "../../lib/badges.js";
 
-const [produtos, historicoTodos, config] = await Promise.all([
+const [produtos, historicoTodos, config, lojaEstadoMap] = await Promise.all([
   fetchProdutos(),
   fetchHistoricoTodos(),
   fetchConfiguracoes(),
+  fetchLojaEstadoMap(),
 ]);
 const historicoPorProduto = buildHistoricoPorProduto(historicoTodos);
 const badgesMenorPreco = badgesMenorPrecoDeConfig(config);
@@ -41,6 +43,7 @@ const produtosComQueda = produtos
 
 const categorias = [...new Set(produtosComQueda.map((p) => p.categoria).filter(Boolean))].sort();
 const materiais = [...new Set(produtosComQueda.map(materialEfetivo).filter(Boolean))].sort();
+const estados = [...new Set(produtosComQueda.flatMap((p) => lojaEstadoMap[p.loja] || []))].sort();
 
 // Em quais categorias cada material aparece de verdade entre os produtos em
 // queda — mesmo padrão de loja/[nome].astro, pra esconder tag irrelevante
@@ -157,6 +160,12 @@ const descricao = `Confira ${produtosComQueda.length} produtos com queda de pre�
         <option value="cliques">Mais clicados</option>
         <option value="recentes">Mais recentes</option>
       </select>
+      {estados.length > 0 && (
+        <select id="filtro-estado" aria-label="Filtrar por estado da loja">
+          <option value="">Todos os estados</option>
+          {estados.map((uf) => <option value={uf}>{uf}</option>)}
+        </select>
+      )}
       <div class="filtro-preco-linha">
         <input type="number" id="filtro-preco-min" placeholder="Preço mín." min="0" step="0.01" aria-label="Preço mínimo" />
         <span aria-hidden="true">—</span>
@@ -168,6 +177,10 @@ const descricao = `Confira ${produtosComQueda.length} produtos com queda de pre�
       </label>
     </div>
   </section>
+
+  <script is:inline define:vars={{ lojaEstadoMap }}>
+    window.LUPA3D_LOJA_ESTADO = lojaEstadoMap;
+  </script>
 
   <div class="titulo-secao-grid-linha">
     <h2 class="titulo-secao-grid">Ofertas ({produtosComQueda.length})</h2>
