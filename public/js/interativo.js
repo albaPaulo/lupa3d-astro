@@ -686,6 +686,10 @@ async function buscarSugestoesRemoto(termo, limite = 8) {
   const filtroCampo = (campo) => palavras.map((p) => `${campo}.imatch.${encodeURIComponent(paraPadraoSemAcento(p))}`).join(",");
   const url =
     `${SUPABASE_URL}/rest/v1/produtos?select=id,nome,preco,loja,imagem_url` +
+    // Sem isso, produto sem estoque ou escondido pelo admin (oculto=true)
+    // aparecia normalmente aqui — essa consulta é direta no banco, não passa
+    // pelo fetchProdutos() do build que já faz esse filtro pro resto do site.
+    `&disponivel=eq.true&oculto=eq.false` +
     `&or=(and(${filtroCampo("nome")}),and(${filtroCampo("loja")}),and(${filtroCampo("material_manual")}),and(${filtroCampo("material")}))` +
     `&order=cliques_total.desc.nullslast&limit=${limite}`;
 

@@ -29,13 +29,14 @@ function categoriasDesativadasSet(config) {
 // padrão do PostgREST), e como a ordenação é por mais recém-atualizado,
 // lojas inteiras cujos produtos foram salvos mais cedo no scraper somem da
 // listagem sem gerar nenhum erro.
-async function fetchProdutosBrutos() {
+async function fetchProdutosBrutos({ incluirIndisponiveis = false } = {}) {
   const TAMANHO_PAGINA = 1000;
   let offset = 0;
   const todos = [];
+  const filtroDisponivel = incluirIndisponiveis ? "" : "&disponivel=eq.true";
   while (true) {
     const resp = await fetch(
-      `${SUPABASE_URL}/rest/v1/produtos?select=*&disponivel=eq.true&oculto=eq.false&order=destaque.desc,atualizado_em.desc`,
+      `${SUPABASE_URL}/rest/v1/produtos?select=*${filtroDisponivel}&oculto=eq.false&order=destaque.desc,atualizado_em.desc`,
       { headers: { ...headers(), Range: `${offset}-${offset + TAMANHO_PAGINA - 1}` } }
     );
     if (!resp.ok) throw new Error(`Falha ao buscar produtos: ${resp.status}`);
@@ -47,8 +48,12 @@ async function fetchProdutosBrutos() {
   return todos;
 }
 
-export async function fetchProdutos() {
-  const [produtos, config] = await Promise.all([fetchProdutosBrutos(), fetchConfiguracoes()]);
+// incluirIndisponiveis: usado só pela página de produto, pra manter no ar o
+// link de um produto que ficou sem estoque (mostrando "indisponível" em vez
+// de sumir com a página) — home/categoria/loja/comparação continuam usando
+// o padrão (só disponível), essa opção nunca deve vazar pra listagem.
+export async function fetchProdutos({ incluirIndisponiveis = false } = {}) {
+  const [produtos, config] = await Promise.all([fetchProdutosBrutos({ incluirIndisponiveis }), fetchConfiguracoes()]);
   const desativadas = categoriasDesativadasSet(config);
   const afiliadosAtivos = config.mostrar_produtos_afiliados !== "false";
   // categoria_manual (edição no admin) vence a categoria detectada pelo

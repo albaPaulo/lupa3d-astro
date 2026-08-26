@@ -1992,6 +1992,17 @@ header.topo {
 
 .produto-vendido-ver-mais:hover { opacity: 1; text-decoration: underline; }
 
+.produto-indisponivel-aviso {
+  display: block;
+  background: color-mix(in srgb, #dc2626 12%, var(--cor-card));
+  color: #dc2626;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.5rem 0.7rem;
+  border-radius: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+
 .produto-vendido-menor-preco {
   display: inline-flex;
   align-items: center;

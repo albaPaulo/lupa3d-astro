@@ -21,8 +21,14 @@ import { desenharGraficoSVG } from "../../lib/grafico.js";
 import { linksCompartilhar } from "../../lib/compartilhar.js";
 
 export async function getStaticPaths() {
-  const [produtos, lojasConfig, historicoTodos, config] = await Promise.all([
+  // "produtos" (só disponível) é o universo usado pra parecidos/descoberta —
+  // um produto sem estoque nunca deve aparecer como sugestão em outra
+  // página. "produtosTodos" inclui indisponível só pra decidir quais páginas
+  // gerar, senão o link de um produto que ficou sem estoque vira 404 em vez
+  // de mostrar "indisponível" com o histórico de preço ainda visível.
+  const [produtos, produtosTodos, lojasConfig, historicoTodos, config] = await Promise.all([
     fetchProdutos(),
+    fetchProdutos({ incluirIndisponiveis: true }),
     fetchLojas(),
     fetchHistoricoTodos(),
     fetchConfiguracoes(),
@@ -34,7 +40,7 @@ export async function getStaticPaths() {
   const historicoAtivo = config.menor_preco_historico_ativo !== "false";
   const faixaPrecoAtiva = config.parecidos_faixa_preco_ativa === "true";
 
-  return produtos.map((p) => {
+  return produtosTodos.map((p) => {
     const parecidos = produtosParecidos(produtos, p, faixaPrecoAtiva);
     // Seção de navegação/descoberta, separada dos "parecidos" (que são pra
     // comparar preço do MESMO material em outras lojas) — aqui é qualquer
@@ -238,6 +244,9 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
         <div class="produto-linha-topo">
           <div class="produto-box produto-vendido-box">
             <h2 class="produto-box-titulo">Vendido por</h2>
+            {!p.disponivel && (
+              <div class="produto-indisponivel-aviso">⚠️ Indisponível no momento nessa loja</div>
+            )}
             {loja?.logo_url && (
               <a href={`/loja/${p.loja}/`} class="produto-vendido-logo-link">
                 <img src={loja.logo_url} alt={`Logotipo da ${p.loja}`} class="produto-vendido-logo" referrerpolicy="no-referrer" />
@@ -277,7 +286,7 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
               </div>
             )}
             <div class="card-acoes">
-              <a href={p.url} target="_blank" rel={p.afiliado ? "noopener sponsored" : "noopener"} class="btn-ver-oferta">Ver Oferta!</a>
+              <a href={p.url} target="_blank" rel={p.afiliado ? "noopener sponsored" : "noopener"} class="btn-ver-oferta">{p.disponivel ? "Ver Oferta!" : "Ver na loja"}</a>
               <button type="button" class="btn-comparar-toggle" data-id={p.id} title="Comparar" aria-label="Comparar" aria-pressed="false">⇄</button>
             </div>
             {p.afiliado && (
