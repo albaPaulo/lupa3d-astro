@@ -13,7 +13,17 @@ for (const p of produtos) {
   if (temPix) contagemPixPorLoja.set(p.loja, (contagemPixPorLoja.get(p.loja) || 0) + 1);
 }
 const nomesLojas = [...contagemPorLoja.keys()].sort();
-const estados = [...new Set(lojasConfig.map((l) => l.estado).filter(Boolean))].sort();
+
+// Loja com mais de uma unidade física guarda vários estados separados por
+// vírgula (ex: "SP, RJ") — trata como lista em vez de valor único, tanto pro
+// filtro geral quanto pro data-attribute de cada card.
+function estadosDeLoja(cfg) {
+  return (cfg?.estado || "")
+    .split(",")
+    .map((uf) => uf.trim().toUpperCase())
+    .filter(Boolean);
+}
+const estados = [...new Set(lojasConfig.flatMap(estadosDeLoja))].sort();
 ---
 <!doctype html>
 <html lang="pt-BR">
@@ -55,8 +65,9 @@ const estados = [...new Set(lojasConfig.map((l) => l.estado).filter(Boolean))].s
         const qtd = contagemPorLoja.get(nome);
         const qtdPix = contagemPixPorLoja.get(nome) || 0;
         const percentualPix = qtdPix > 0 ? Math.round((qtdPix / qtd) * 100) : 0;
+        const ufsLoja = estadosDeLoja(cfg);
         return (
-          <a href={`/loja/${nome}/`} class="loja-card" data-estado={cfg?.estado || ""}>
+          <a href={`/loja/${nome}/`} class="loja-card" data-estados={ufsLoja.join(",")}>
             <div class="loja-card-logo-wrap">
               {cfg?.logo_url ? (
                 <img src={cfg.logo_url} alt="" class="loja-card-logo" referrerpolicy="no-referrer" />
@@ -67,7 +78,7 @@ const estados = [...new Set(lojasConfig.map((l) => l.estado).filter(Boolean))].s
             <span class="loja-card-nome">{nome}</span>
             <span class="loja-card-qtd">{qtd} produto{qtd === 1 ? "" : "s"}</span>
             {percentualPix > 0 && <span class="loja-card-pix">🟢 {percentualPix}% com desconto Pix</span>}
-            {cfg?.estado && <span class="loja-card-estado">📍 {cfg.estado}</span>}
+            {ufsLoja.length > 0 && <span class="loja-card-estado">📍 {ufsLoja.join(", ")}</span>}
           </a>
         );
       })}
@@ -85,7 +96,8 @@ const estados = [...new Set(lojasConfig.map((l) => l.estado).filter(Boolean))].s
         const cards = [...document.querySelectorAll("#lojas-grid .loja-card")];
         let visiveis = 0;
         cards.forEach((card) => {
-          const mostra = !uf || card.dataset.estado === uf;
+          const ufsCard = (card.dataset.estados || "").split(",").filter(Boolean);
+          const mostra = !uf || ufsCard.includes(uf);
           card.classList.toggle("oculto-tela", !mostra);
           if (mostra) visiveis++;
         });

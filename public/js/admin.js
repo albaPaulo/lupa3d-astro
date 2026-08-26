@@ -700,8 +700,8 @@ function linhaLojaHTML(nome) {
         <textarea data-campo="descricao" rows="2" placeholder="ex: Fabricante nacional de filamentos PLA e PETG desde 2019.">${cfg.descricao || ""}</textarea>
       </label>
       <label>
-        Estado (UF) — usado no filtro por localização em /lojas/
-        <input type="text" data-campo="estado" value="${cfg.estado || ""}" placeholder="ex: SP" maxlength="2" style="text-transform:uppercase">
+        Estado(s) (UF) — usado no filtro por localização em /lojas/. Se a loja tem mais de uma unidade física, separe por vírgula (ex: SP, RJ)
+        <input type="text" data-campo="estado" value="${cfg.estado || ""}" placeholder="ex: SP ou SP, RJ" style="text-transform:uppercase">
       </label>
       <label>
         Instagram (link)

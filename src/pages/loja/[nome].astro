@@ -78,6 +78,10 @@ const redes = REDES_LOJA.filter((r) => loja?.[r.chave]);
 
 const qtdComPix = produtosDaLoja.filter((p) => p.preco_pix != null && Number(p.preco_pix) < Number(p.preco)).length;
 const percentualPix = qtdComPix > 0 ? Math.round((qtdComPix / produtosDaLoja.length) * 100) : 0;
+
+// Loja com mais de uma unidade física guarda vários estados separados por
+// vírgula (ex: "SP, RJ") — mesmo critério usado em /lojas/.
+const ufsLoja = (loja?.estado || "").split(",").map((uf) => uf.trim().toUpperCase()).filter(Boolean);
 ---
 <!doctype html>
 <html lang="pt-BR">
@@ -125,7 +129,7 @@ const percentualPix = qtdComPix > 0 ? Math.round((qtdComPix / produtosDaLoja.len
     <div class="loja-perfil-resumo">
       <span class="loja-card-qtd">{produtosDaLoja.length} produto{produtosDaLoja.length === 1 ? "" : "s"}</span>
       {percentualPix > 0 && <span class="loja-card-pix">🟢 {percentualPix}% com desconto Pix</span>}
-      {loja?.estado && <span class="loja-card-estado">📍 {loja.estado}</span>}
+      {ufsLoja.length > 0 && <span class="loja-card-estado">📍 {ufsLoja.join(", ")}</span>}
     </div>
     {loja?.descricao && <p class="loja-perfil-descricao">{loja.descricao}</p>}
     {redes.length > 0 && (
