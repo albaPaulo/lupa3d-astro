@@ -103,6 +103,7 @@ const admEls = {
   analyticsGraficoDias: document.getElementById("analytics-grafico-dias"),
   analyticsTopProdutos: document.getElementById("analytics-top-produtos"),
   analyticsPorLoja: document.getElementById("analytics-por-loja"),
+  sugestoesLista: document.getElementById("sugestoes-lista"),
 };
 
 // Fábrica reutilizada pelas duas listas de badges (menor preço / produto
@@ -621,6 +622,34 @@ async function carregarLojas() {
   LOJAS_CONFIG = await resp.json();
 }
 
+async function carregarSugestoes() {
+  admEls.sugestoesLista.innerHTML = `<p class="admin-status">Carregando...</p>`;
+  try {
+    const resp = await fetchAdmin("/rest/v1/sugestoes?select=*&order=criado_em.desc");
+    if (!resp.ok) throw new Error("Falha ao carregar sugestões");
+    const sugestoes = await resp.json();
+
+    admEls.sugestoesLista.innerHTML = sugestoes.length
+      ? sugestoes
+          .map(
+            (s) => `
+        <div class="sugestao-item">
+          <p class="sugestao-item-mensagem">${escapeHTML(s.mensagem)}</p>
+          <p class="sugestao-item-meta">
+            ${new Date(s.criado_em).toLocaleString("pt-BR")}
+            ${s.email ? ` — <a href="mailto:${escapeHTML(s.email)}">${escapeHTML(s.email)}</a>` : ""}
+          </p>
+        </div>
+      `
+          )
+          .join("")
+      : `<p class="admin-status">Nenhuma sugestão recebida ainda.</p>`;
+  } catch (e) {
+    admEls.sugestoesLista.innerHTML = `<p class="admin-status">Não foi possível carregar as sugestões.</p>`;
+    console.error(e);
+  }
+}
+
 const DIAS_ALERTA_LOJA_DESATUALIZADA = 3;
 
 function ultimaAtualizacaoLoja(nome) {
@@ -671,6 +700,10 @@ function linhaLojaHTML(nome) {
         <textarea data-campo="descricao" rows="2" placeholder="ex: Fabricante nacional de filamentos PLA e PETG desde 2019.">${cfg.descricao || ""}</textarea>
       </label>
       <label>
+        Estado (UF) — usado no filtro por localização em /lojas/
+        <input type="text" data-campo="estado" value="${cfg.estado || ""}" placeholder="ex: SP" maxlength="2" style="text-transform:uppercase">
+      </label>
+      <label>
         Instagram (link)
         <input type="text" data-campo="instagram_url" value="${cfg.instagram_url || ""}" placeholder="https://instagram.com/...">
       </label>
@@ -704,6 +737,7 @@ async function salvarLoja(card) {
   const logoUrl = card.querySelector('[data-campo="logo_url"]').value.trim();
   const bannerUrl = card.querySelector('[data-campo="banner_url"]').value.trim();
   const descricao = card.querySelector('[data-campo="descricao"]').value.trim();
+  const estado = card.querySelector('[data-campo="estado"]').value.trim().toUpperCase();
   const instagramUrl = card.querySelector('[data-campo="instagram_url"]').value.trim();
   const facebookUrl = card.querySelector('[data-campo="facebook_url"]').value.trim();
   const linkedinUrl = card.querySelector('[data-campo="linkedin_url"]').value.trim();
@@ -713,6 +747,7 @@ async function salvarLoja(card) {
     logo_url: logoUrl || null,
     banner_url: bannerUrl || null,
     descricao: descricao || null,
+    estado: estado || null,
     instagram_url: instagramUrl || null,
     facebook_url: facebookUrl || null,
     linkedin_url: linkedinUrl || null,
@@ -971,6 +1006,7 @@ function ligarEventosAdmin() {
     btn.addEventListener("click", () => {
       ativarAba(btn.dataset.aba);
       if (btn.dataset.aba === "analytics") carregarAnalytics();
+      if (btn.dataset.aba === "sugestoes") carregarSugestoes();
     });
   });
 

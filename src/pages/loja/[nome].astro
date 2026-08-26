@@ -125,6 +125,7 @@ const percentualPix = qtdComPix > 0 ? Math.round((qtdComPix / produtosDaLoja.len
     <div class="loja-perfil-resumo">
       <span class="loja-card-qtd">{produtosDaLoja.length} produto{produtosDaLoja.length === 1 ? "" : "s"}</span>
       {percentualPix > 0 && <span class="loja-card-pix">🟢 {percentualPix}% com desconto Pix</span>}
+      {loja?.estado && <span class="loja-card-estado">📍 {loja.estado}</span>}
     </div>
     {loja?.descricao && <p class="loja-perfil-descricao">{loja.descricao}</p>}
     {redes.length > 0 && (
