@@ -455,9 +455,7 @@ function aplicarFiltros(resetarLimite = true) {
 
   const soPix = document.getElementById("filtro-pix")?.checked || false;
   const estado = document.getElementById("filtro-estado")?.value || "";
-  const precoMinStr = document.getElementById("filtro-preco-min")?.value || "";
   const precoMaxStr = document.getElementById("filtro-preco-max")?.value || "";
-  const precoMin = precoMinStr !== "" ? Number(precoMinStr) : null;
   const precoMax = precoMaxStr !== "" ? Number(precoMaxStr) : null;
 
   // Cada tag de material sabe (via data-categorias) em quais categorias ela
@@ -505,9 +503,8 @@ function aplicarFiltros(resetarLimite = true) {
     // quando um estado específico está selecionado (não afeta "Todos").
     const ufsLoja = window.LUPA3D_LOJA_ESTADO?.[card.dataset.loja] || [];
     const okEstado = !estado || ufsLoja.includes(estado);
-    const okPrecoMin = precoMin == null || precoCard >= precoMin;
     const okPrecoMax = precoMax == null || precoCard <= precoMax;
-    if (okBusca && okCategoria && okMaterial && okPix && okEstado && okPrecoMin && okPrecoMax) combinam.push(card);
+    if (okBusca && okCategoria && okMaterial && okPix && okEstado && okPrecoMax) combinam.push(card);
     else card.classList.add("oculto-tela");
   }
 
@@ -540,7 +537,6 @@ function atualizarChipsFiltros() {
   const material = document.getElementById("filtro-material");
   const pix = document.getElementById("filtro-pix");
   const estado = document.getElementById("filtro-estado");
-  const precoMin = document.getElementById("filtro-preco-min");
   const precoMax = document.getElementById("filtro-preco-max");
 
   const ativos = [];
@@ -549,7 +545,6 @@ function atualizarChipsFiltros() {
   if (material?.value) ativos.push({ campo: "filtro-material", texto: material.value });
   if (pix?.checked) ativos.push({ campo: "filtro-pix", texto: "Desconto no Pix" });
   if (estado?.value) ativos.push({ campo: "filtro-estado", texto: `📍 ${estado.value}` });
-  if (precoMin?.value) ativos.push({ campo: "filtro-preco-min", texto: `Mín. R$ ${precoMin.value}` });
   if (precoMax?.value) ativos.push({ campo: "filtro-preco-max", texto: `Máx. R$ ${precoMax.value}` });
 
   if (ativos.length === 0) {
@@ -586,9 +581,7 @@ function ligarFiltros() {
   }
   document.getElementById("filtro-pix")?.addEventListener("change", () => rodarComIndicadorSeGrande(() => aplicarFiltros(true)));
 
-  for (const id of ["filtro-preco-min", "filtro-preco-max"]) {
-    document.getElementById(id)?.addEventListener("input", debounce(() => rodarComIndicadorSeGrande(() => aplicarFiltros(true)), 250));
-  }
+  document.getElementById("filtro-preco-max")?.addEventListener("input", debounce(() => rodarComIndicadorSeGrande(() => aplicarFiltros(true)), 250));
 
   // Tags de material (categoria/[categoria].astro) — reaproveita o mesmo
   // <select> e aplicarFiltros() do filtro de material normal.
@@ -622,7 +615,7 @@ function ligarFiltros() {
 
   document.getElementById("filtros-ativos")?.addEventListener("click", (ev) => {
     if (ev.target.closest(".filtro-limpar-todos")) {
-      for (const campo of ["busca", "filtro-categoria", "filtro-material", "filtro-pix", "filtro-preco-min", "filtro-preco-max"]) {
+      for (const campo of ["busca", "filtro-categoria", "filtro-material", "filtro-pix", "filtro-estado", "filtro-preco-max"]) {
         limparCampoFiltro(campo);
       }
       rodarComIndicadorSeGrande(() => aplicarFiltros(true));
