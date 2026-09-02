@@ -7,7 +7,25 @@ function headers() {
   return { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` };
 }
 
-export async function fetchConfiguracoes() {
+// Cada page (home, categoria, ofertas, loja, produto, mais-clicados,
+// novidades, feed.xml) busca produtos/histórico/config de forma independente
+// no getStaticPaths/frontmatter dela — sem isso, uma build só do site refaz
+// a MESMA busca (a tabela de histórico inteira, ~dezenas de milhares de
+// linhas) até 8 vezes, foi o que estourou a cota de egress do projeto. O
+// cache é por chamada do processo de build (guarda a Promise, não só o
+// resultado, pra chamadas concorrentes antes da primeira resolver
+// compartilharem a mesma request em voo) e nunca é usado no navegador do
+// visitante — zera a cada build novo, então o dado sempre é o mais recente.
+function memoizar(fn) {
+  const cache = new Map();
+  return (...args) => {
+    const chave = JSON.stringify(args);
+    if (!cache.has(chave)) cache.set(chave, fn(...args));
+    return cache.get(chave);
+  };
+}
+
+async function fetchConfiguracoesSemCache() {
   const resp = await fetch(`${SUPABASE_URL}/rest/v1/configuracoes?select=chave,valor`, { headers: headers() });
   if (!resp.ok) throw new Error(`Falha ao buscar configurações: ${resp.status}`);
   const linhas = await resp.json();
@@ -15,6 +33,7 @@ export async function fetchConfiguracoes() {
   for (const { chave, valor } of linhas) config[chave] = valor;
   return config;
 }
+export const fetchConfiguracoes = memoizar(fetchConfiguracoesSemCache);
 
 function categoriasDesativadasSet(config) {
   return new Set((config.categorias_desativadas || "").split(",").map((c) => c.trim()).filter(Boolean));
@@ -29,7 +48,7 @@ function categoriasDesativadasSet(config) {
 // padrão do PostgREST), e como a ordenação é por mais recém-atualizado,
 // lojas inteiras cujos produtos foram salvos mais cedo no scraper somem da
 // listagem sem gerar nenhum erro.
-async function fetchProdutosBrutos({ incluirIndisponiveis = false } = {}) {
+async function fetchProdutosBrutosSemCache({ incluirIndisponiveis = false } = {}) {
   const TAMANHO_PAGINA = 1000;
   let offset = 0;
   const todos = [];
@@ -47,6 +66,9 @@ async function fetchProdutosBrutos({ incluirIndisponiveis = false } = {}) {
   }
   return todos;
 }
+// Chamada sempre com o mesmo formato de argumento (objeto explícito) pelas
+// duas linhas de fetchProdutos() logo abaixo — chave de cache consistente.
+const fetchProdutosBrutos = memoizar(fetchProdutosBrutosSemCache);
 
 // incluirIndisponiveis: usado só pela página de produto, pra manter no ar o
 // link de um produto que ficou sem estoque (mostrando "indisponível" em vez
@@ -68,19 +90,21 @@ export async function fetchProdutos({ incluirIndisponiveis = false } = {}) {
     .filter((p) => afiliadosAtivos || !p.afiliado);
 }
 
-export async function fetchSecoes() {
+async function fetchSecoesSemCache() {
   const resp = await fetch(`${SUPABASE_URL}/rest/v1/secoes_home?select=*&ativo=eq.true&order=ordem.asc`, {
     headers: headers(),
   });
   if (!resp.ok) throw new Error(`Falha ao buscar seções: ${resp.status}`);
   return resp.json();
 }
+export const fetchSecoes = memoizar(fetchSecoesSemCache);
 
-export async function fetchLojas() {
+async function fetchLojasSemCache() {
   const resp = await fetch(`${SUPABASE_URL}/rest/v1/lojas?select=*`, { headers: headers() });
   if (!resp.ok) throw new Error(`Falha ao buscar lojas: ${resp.status}`);
   return resp.json();
 }
+export const fetchLojas = memoizar(fetchLojasSemCache);
 
 // Loja com mais de uma unidade física guarda os estados separados por
 // vírgula (ex: "SP, RJ") — usado pelo filtro de localização nas páginas de
@@ -147,7 +171,7 @@ export function kitEfetivo(p) {
 // Busca a tabela inteira de uma vez (paginada) em vez de uma chamada por
 // produto — com ~22 mil linhas isso é uma dúzia de requests no build, contra
 // centenas de requests (um por produto) se buscássemos individualmente.
-export async function fetchHistoricoTodos() {
+async function fetchHistoricoTodosSemCache() {
   const TAMANHO_PAGINA = 1000;
   let offset = 0;
   const todos = [];
@@ -164,6 +188,7 @@ export async function fetchHistoricoTodos() {
   }
   return todos;
 }
+export const fetchHistoricoTodos = memoizar(fetchHistoricoTodosSemCache);
 
 export function buildHistoricoPorProduto(historicoTodos) {
   const mapa = new Map();
