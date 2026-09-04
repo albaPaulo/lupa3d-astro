@@ -4,4 +4,7 @@
 window.LUPA3D_CONFIG = {
   SUPABASE_URL: "https://ilsrwxqelasqarszdwqi.supabase.co",
   SUPABASE_ANON_KEY: "sb_publishable_TOSsLFoeIquhRUbJndyVHw_SywCmBbV",
+  // Chave pública VAPID do alerta de preço via push — a privada fica só no
+  // scraper (.env, fora do git), usada pra assinar o envio do push.
+  VAPID_PUBLIC_KEY: "BF4cAwfYzSXXGwMy9lcot_27Y4tDNrz6zLE-KOqz37BsR-gDKqx2erXZiRojQ2YDMyUZP4MXGHO7UpR4J1kQRiY",
 };

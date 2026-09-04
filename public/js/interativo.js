@@ -926,10 +926,93 @@ function ligarBotaoTopo() {
   btn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 }
 
+function base64UrlParaUint8Array(base64Url) {
+  const padding = "=".repeat((4 - (base64Url.length % 4)) % 4);
+  const base64 = (base64Url + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const bruto = atob(base64);
+  return Uint8Array.from([...bruto].map((c) => c.charCodeAt(0)));
+}
+
+// Pede permissão de notificação só na hora de criar o primeiro alerta (nunca
+// no carregamento da página) e reaproveita a inscrição já existente nas
+// próximas vezes — cada navegador tem no máximo uma inscrição push por vez.
+async function obterInscricaoPush() {
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) return null;
+  try {
+    const registro = await navigator.serviceWorker.ready;
+    let inscricao = await registro.pushManager.getSubscription();
+    if (!inscricao) {
+      const permissao = await Notification.requestPermission();
+      if (permissao !== "granted") return null;
+      inscricao = await registro.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: base64UrlParaUint8Array(window.LUPA3D_CONFIG.VAPID_PUBLIC_KEY),
+      });
+    }
+    return inscricao;
+  } catch (e) {
+    console.error("Falha ao criar inscrição push:", e);
+    return null;
+  }
+}
+
+// Salva o alerta no Supabase (upsert por produto+inscrição) pro scraper
+// conseguir avisar mesmo com o site fechado. Puramente aditivo: se o
+// navegador não suportar push ou o usuário negar a permissão, o alvo
+// continua funcionando do jeito antigo (checagem passiva ao visitar
+// /favoritos/), só sem o aviso via notificação.
+async function salvarAlertaPush(produtoId, precoAlvo) {
+  const inscricao = await obterInscricaoPush();
+  if (!inscricao) return false;
+  try {
+    const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.LUPA3D_CONFIG;
+    const chaves = inscricao.toJSON().keys;
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/alertas_preco?on_conflict=produto_id,push_endpoint`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        "Content-Type": "application/json",
+        Prefer: "resolution=merge-duplicates",
+      },
+      body: JSON.stringify({
+        produto_id: produtoId,
+        preco_alvo: precoAlvo,
+        push_endpoint: inscricao.endpoint,
+        push_p256dh: chaves.p256dh,
+        push_auth: chaves.auth,
+        notificado: false,
+      }),
+    });
+    return resp.ok;
+  } catch (e) {
+    console.error("Falha ao salvar alerta de preço:", e);
+    return false;
+  }
+}
+
+async function removerAlertaPush(produtoId) {
+  if (!("serviceWorker" in navigator)) return;
+  try {
+    const registro = await navigator.serviceWorker.ready;
+    const inscricao = await registro.pushManager.getSubscription();
+    if (!inscricao) return;
+    const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.LUPA3D_CONFIG;
+    await fetch(
+      `${SUPABASE_URL}/rest/v1/alertas_preco?produto_id=eq.${produtoId}&push_endpoint=eq.${encodeURIComponent(inscricao.endpoint)}`,
+      { method: "DELETE", headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
+    );
+  } catch (e) {
+    console.error("Falha ao remover alerta de preço:", e);
+  }
+}
+
 // Só existe na página de produto — permite pedir pra ver um aviso quando o
 // preço chegar num valor específico (usa o mesmo mecanismo de favoritos:
 // definirAlvo já favorita o produto, e é /favoritos/ que checa o alvo toda
-// vez que o usuário volta lá, sem precisar de e-mail nem backend novo).
+// vez que o usuário volta lá — isso continua funcionando mesmo sem push).
+// Além disso, tenta inscrever o navegador em push notification de verdade
+// (salvarAlertaPush), que avisa mesmo com o site fechado.
 function ligarPrecoAlvo() {
   const bloco = document.querySelector(".produto-preco-alvo");
   if (!bloco) return;
@@ -958,11 +1041,16 @@ function ligarPrecoAlvo() {
     input.focus();
   });
 
-  function salvar() {
+  async function salvar() {
     const valor = parseFloat(input.value.replace(",", "."));
     if (!valor || valor <= 0) return;
     definirAlvo(id, valor);
     renderizar();
+    // Push é aditivo e assíncrono — se não rolar (navegador sem suporte,
+    // permissão negada), o texto avisa que o alerta só funciona ao visitar
+    // /favoritos/ manualmente, em vez de prometer uma notificação que não vem.
+    const pushOk = await salvarAlertaPush(id, valor);
+    if (!pushOk) texto.textContent = `🎯 Avisar em ${formatarPrecoJS(valor)} (só ao visitar favoritos)`;
   }
 
   btnSalvar.addEventListener("click", salvar);
@@ -973,6 +1061,7 @@ function ligarPrecoAlvo() {
   btnRemover.addEventListener("click", () => {
     removerAlvo(id);
     renderizar();
+    removerAlertaPush(id);
   });
 
   renderizar();
