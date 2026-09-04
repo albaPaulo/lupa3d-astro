@@ -2323,6 +2323,14 @@ header.topo {
 
 .modal-grafico-caixa { width: 700px; }
 
+.modal-grafico-acoes {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  margin: 1.25rem auto 0;
+  flex-wrap: wrap;
+}
+
 .modal-grafico-caixa .grafico-svg-wrap { height: 320px; }
 
 .grafico-periodo-tabs {

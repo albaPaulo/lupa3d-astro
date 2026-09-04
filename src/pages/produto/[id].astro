@@ -423,27 +423,33 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
     <div id="modal-grafico" class="modal">
       <div class="modal-caixa modal-grafico-caixa">
         <button id="modal-grafico-fechar" class="modal-fechar" aria-label="Fechar">✕</button>
-        <h2 class="produto-box-titulo"><span aria-hidden="true">📈</span> Histórico de preço</h2>
-        {graficoModalPeriodos.length > 1 && (
-          <div class="grafico-periodo-tabs" role="tablist">
-            {graficoModalPeriodos.map((periodo, i) => (
-              <button
-                type="button"
-                class={`grafico-periodo-tab${i === graficoModalPeriodos.length - 1 ? " ativo" : ""}`}
-                data-periodo={periodo.chave}
-              >
-                {periodo.label}
-              </button>
-            ))}
-          </div>
-        )}
-        {graficoModalPeriodos.map((periodo, i) => (
-          <div
-            class={`grafico-periodo-conteudo${i === graficoModalPeriodos.length - 1 ? "" : " oculto-tela"}`}
-            data-periodo-conteudo={periodo.chave}
-            set:html={periodo.svg}
-          />
-        ))}
+        <div id="modal-grafico-conteudo">
+          <h2 class="produto-box-titulo"><span aria-hidden="true">📈</span> Histórico de preço — {p.nome}</h2>
+          {graficoModalPeriodos.length > 1 && (
+            <div class="grafico-periodo-tabs" role="tablist">
+              {graficoModalPeriodos.map((periodo, i) => (
+                <button
+                  type="button"
+                  class={`grafico-periodo-tab${i === graficoModalPeriodos.length - 1 ? " ativo" : ""}`}
+                  data-periodo={periodo.chave}
+                >
+                  {periodo.label}
+                </button>
+              ))}
+            </div>
+          )}
+          {graficoModalPeriodos.map((periodo, i) => (
+            <div
+              class={`grafico-periodo-conteudo${i === graficoModalPeriodos.length - 1 ? "" : " oculto-tela"}`}
+              data-periodo-conteudo={periodo.chave}
+              set:html={periodo.svg}
+            />
+          ))}
+        </div>
+        <div class="modal-grafico-acoes">
+          <button id="btn-print-grafico" type="button" class="btn-print-comparacao">📷 Salvar imagem</button>
+          <button id="btn-compartilhar-grafico" type="button" class="btn-print-comparacao secundario">🔗 Compartilhar</button>
+        </div>
       </div>
     </div>
   )}
@@ -451,12 +457,16 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
   <script is:inline defer src="/js/config.js"></script>
   <script is:inline defer src="/js/favoritos.js"></script>
   <script is:inline defer src="/js/interativo.js"></script>
-  {historico.length >= 2 && (
-    <script is:inline>
-      (function () {
-        const btnExpandir = document.getElementById("btn-expandir-grafico");
-        const modal = document.getElementById("modal-grafico");
-        if (!btnExpandir || !modal) return;
+  <script>
+    // Não é is:inline (precisa passar pelo bundler do Astro pra resolver o
+    // import dinâmico de "html-to-image") — por isso o guard abaixo em vez
+    // de um {historico.length >= 2 &&...} no template: Astro extrai/agrupa
+    // scripts não-inline no bundle da página independente de condicional no
+    // JSX ao redor, então o elemento pode não existir quando roda.
+    (function () {
+      const btnExpandir = document.getElementById("btn-expandir-grafico");
+      const modal = document.getElementById("modal-grafico");
+      if (!btnExpandir || !modal) return;
         const btnFechar = document.getElementById("modal-grafico-fechar");
         const tabs = modal.querySelectorAll(".grafico-periodo-tab");
         const conteudos = modal.querySelectorAll("[data-periodo-conteudo]");
@@ -475,8 +485,67 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
             conteudos.forEach((c) => c.classList.toggle("oculto-tela", c.dataset.periodoConteudo !== periodo));
           });
         });
-      })();
-    </script>
-  )}
+
+        // toPng só é buscado (import dinâmico) quando um dos botões é
+        // clicado — mesmo padrão do BarraComparacao, pra não pesar o
+        // carregamento inicial da página com quem nunca vai usar isso.
+        const conteudoGrafico = document.getElementById("modal-grafico-conteudo");
+        async function gerarImagemGrafico() {
+          const { toPng } = await import("html-to-image");
+          const corFundo = getComputedStyle(document.documentElement).getPropertyValue("--cor-card").trim() || "#ffffff";
+          return toPng(conteudoGrafico, { backgroundColor: corFundo, pixelRatio: 2 });
+        }
+
+        const btnPrint = document.getElementById("btn-print-grafico");
+        btnPrint?.addEventListener("click", async () => {
+          const textoOriginal = btnPrint.textContent;
+          btnPrint.disabled = true;
+          btnPrint.textContent = "Gerando imagem...";
+          try {
+            const dataUrl = await gerarImagemGrafico();
+            const link = document.createElement("a");
+            link.download = "historico-preco-lupa3d.png";
+            link.href = dataUrl;
+            link.click();
+          } catch (e) {
+            console.error("Falha ao gerar imagem do gráfico:", e);
+            alert("Não foi possível gerar a imagem agora — tente de novo em alguns segundos.");
+          } finally {
+            btnPrint.disabled = false;
+            btnPrint.textContent = textoOriginal;
+          }
+        });
+
+        const btnCompartilhar = document.getElementById("btn-compartilhar-grafico");
+        btnCompartilhar?.addEventListener("click", async () => {
+          const textoOriginal = btnCompartilhar.textContent;
+          btnCompartilhar.disabled = true;
+          btnCompartilhar.textContent = "Gerando imagem...";
+          try {
+            const dataUrl = await gerarImagemGrafico();
+            const arquivo = new File([await (await fetch(dataUrl)).blob()], "historico-preco-lupa3d.png", { type: "image/png" });
+            // Share nativo (mobile, com o app do WhatsApp/Instagram etc. na
+            // lista) quando disponível — desktop quase nunca suporta
+            // compartilhar arquivo, então cai pro download automaticamente.
+            if (navigator.canShare?.({ files: [arquivo] })) {
+              await navigator.share({ files: [arquivo], title: document.title });
+            } else {
+              const link = document.createElement("a");
+              link.download = "historico-preco-lupa3d.png";
+              link.href = dataUrl;
+              link.click();
+            }
+          } catch (e) {
+            if (e.name !== "AbortError") {
+              console.error("Falha ao compartilhar gráfico:", e);
+              alert("Não foi possível compartilhar agora — tente de novo em alguns segundos.");
+            }
+          } finally {
+            btnCompartilhar.disabled = false;
+            btnCompartilhar.textContent = textoOriginal;
+          }
+        });
+    })();
+  </script>
 </body>
 </html>
