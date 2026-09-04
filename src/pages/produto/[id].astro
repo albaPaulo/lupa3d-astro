@@ -106,6 +106,33 @@ function truncarTexto(texto, limite) {
 // mostrar uma caixa "Sem descrição disponível" praticamente vazia.
 const descricaoProduto = truncarTexto(p.descricao_manual || p.descricao, DESCRICAO_LIMITE) || null;
 const graficoSVG = desenharGraficoSVG(historico);
+
+// Recortes de período pro modal de gráfico expandido — só entra no seletor
+// quando o período é de fato mais curto que o histórico completo do produto,
+// senão o botão mostraria exatamente a mesma coisa que "Tudo" (site ainda é
+// novo, então "6 meses"/"1 ano" só aparecem quando existir dado suficiente).
+const DEFINICAO_PERIODOS_GRAFICO = [
+  { chave: "7d", label: "1 semana", dias: 7 },
+  { chave: "30d", label: "1 mês", dias: 30 },
+  { chave: "3m", label: "3 meses", dias: 90 },
+  { chave: "6m", label: "6 meses", dias: 180 },
+  { chave: "1a", label: "1 ano", dias: 365 },
+];
+// Usa a data do último ponto (não a data do build) como referência de "hoje"
+// — mantém os recortes estáveis em relação ao dado real, não a quando o site
+// foi gerado.
+const referenciaData = historico.length > 0 ? new Date(historico[historico.length - 1].capturado_em) : null;
+const diasDeHistorico = referenciaData
+  ? (referenciaData - new Date(historico[0].capturado_em)) / (1000 * 60 * 60 * 24)
+  : 0;
+const periodosGrafico = DEFINICAO_PERIODOS_GRAFICO.filter((periodo) => diasDeHistorico > periodo.dias).map((periodo) => {
+  const corte = new Date(referenciaData.getTime() - periodo.dias * 24 * 60 * 60 * 1000);
+  const pontosDoPeriodo = historico.filter((h) => new Date(h.capturado_em) >= corte);
+  return { ...periodo, svg: desenharGraficoSVG(pontosDoPeriodo) };
+});
+// "Tudo" sempre por último e ativo por padrão — mesma visão que já aparece
+// no gráfico inline da página, sem surpresa ao abrir o modal.
+const graficoModalPeriodos = [...periodosGrafico, { chave: "tudo", label: "Tudo", svg: graficoSVG }];
 const precoMaximoHistorico = historico.length > 0 ? Math.max(...historico.map((h) => h.preco)) : null;
 const quedaPercentual = precoMaximoHistorico && precoMaximoHistorico > p.preco
   ? Math.round(((precoMaximoHistorico - p.preco) / precoMaximoHistorico) * 100)
@@ -304,7 +331,12 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
           </div>
 
           <div class="produto-box produto-historico-box">
-            <h2 class="produto-box-titulo"><span aria-hidden="true">📈</span> Histórico de preço</h2>
+            <div class="produto-historico-cabecalho">
+              <h2 class="produto-box-titulo"><span aria-hidden="true">📈</span> Histórico de preço</h2>
+              {historico.length >= 2 && (
+                <button type="button" id="btn-expandir-grafico" class="btn-expandir-grafico">🔍 Expandir</button>
+              )}
+            </div>
             {historico.length >= 2 && (
               <div class="historico-resumo">
                 <div class="historico-resumo-atual">
@@ -387,8 +419,64 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
 
   <BarraComparacao />
 
+  {historico.length >= 2 && (
+    <div id="modal-grafico" class="modal">
+      <div class="modal-caixa modal-grafico-caixa">
+        <button id="modal-grafico-fechar" class="modal-fechar" aria-label="Fechar">✕</button>
+        <h2 class="produto-box-titulo"><span aria-hidden="true">📈</span> Histórico de preço</h2>
+        {graficoModalPeriodos.length > 1 && (
+          <div class="grafico-periodo-tabs" role="tablist">
+            {graficoModalPeriodos.map((periodo, i) => (
+              <button
+                type="button"
+                class={`grafico-periodo-tab${i === graficoModalPeriodos.length - 1 ? " ativo" : ""}`}
+                data-periodo={periodo.chave}
+              >
+                {periodo.label}
+              </button>
+            ))}
+          </div>
+        )}
+        {graficoModalPeriodos.map((periodo, i) => (
+          <div
+            class={`grafico-periodo-conteudo${i === graficoModalPeriodos.length - 1 ? "" : " oculto-tela"}`}
+            data-periodo-conteudo={periodo.chave}
+            set:html={periodo.svg}
+          />
+        ))}
+      </div>
+    </div>
+  )}
+
   <script is:inline defer src="/js/config.js"></script>
   <script is:inline defer src="/js/favoritos.js"></script>
   <script is:inline defer src="/js/interativo.js"></script>
+  {historico.length >= 2 && (
+    <script is:inline>
+      (function () {
+        const btnExpandir = document.getElementById("btn-expandir-grafico");
+        const modal = document.getElementById("modal-grafico");
+        if (!btnExpandir || !modal) return;
+        const btnFechar = document.getElementById("modal-grafico-fechar");
+        const tabs = modal.querySelectorAll(".grafico-periodo-tab");
+        const conteudos = modal.querySelectorAll("[data-periodo-conteudo]");
+
+        btnExpandir.addEventListener("click", () => modal.classList.add("visivel"));
+        btnFechar?.addEventListener("click", () => modal.classList.remove("visivel"));
+        modal.addEventListener("click", (ev) => {
+          if (ev.target === modal) modal.classList.remove("visivel");
+        });
+
+        tabs.forEach((tab) => {
+          tab.addEventListener("click", () => {
+            tabs.forEach((t) => t.classList.remove("ativo"));
+            tab.classList.add("ativo");
+            const periodo = tab.dataset.periodo;
+            conteudos.forEach((c) => c.classList.toggle("oculto-tela", c.dataset.periodoConteudo !== periodo));
+          });
+        });
+      })();
+    </script>
+  )}
 </body>
 </html>

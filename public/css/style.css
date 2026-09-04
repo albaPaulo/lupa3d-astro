@@ -2300,6 +2300,55 @@ header.topo {
 
 .produto-historico-box #grafico-container { width: 100%; }
 
+.produto-historico-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.btn-expandir-grafico {
+  flex-shrink: 0;
+  border: 1px solid var(--cor-borda);
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.btn-expandir-grafico:hover { background: var(--cor-borda); }
+
+.modal-grafico-caixa { width: 700px; }
+
+.modal-grafico-caixa .grafico-svg-wrap { height: 320px; }
+
+.grafico-periodo-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.75rem 0 1rem;
+}
+
+.grafico-periodo-tab {
+  border: 1px solid var(--cor-borda);
+  background: transparent;
+  color: var(--cor-texto);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.grafico-periodo-tab.ativo {
+  background: var(--cor-marca);
+  border-color: var(--cor-marca);
+  color: white;
+}
+
 .produto-historico-expandido {
   align-items: stretch;
   flex: 1;
