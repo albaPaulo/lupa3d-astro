@@ -956,35 +956,54 @@ async function obterInscricaoPush() {
   }
 }
 
-// Salva o alerta no Supabase (upsert por produto+inscrição) pro scraper
-// conseguir avisar mesmo com o site fechado. Puramente aditivo: se o
-// navegador não suportar push ou o usuário negar a permissão, o alvo
-// continua funcionando do jeito antigo (checagem passiva ao visitar
-// /favoritos/), só sem o aviso via notificação.
+// Salva o alerta no Supabase (INSERT; se já existir pra esse produto+
+// inscrição, cai pra UPDATE) pro scraper conseguir avisar mesmo com o site
+// fechado. Puramente aditivo: se o navegador não suportar push ou o usuário
+// negar a permissão, o alvo continua funcionando do jeito antigo (checagem
+// passiva ao visitar /favoritos/), só sem o aviso via notificação.
+//
+// Não usa upsert via on_conflict+resolution=merge-duplicates: mesmo com
+// return=minimal, esse caminho ainda dá 42501 (RLS) pro anon — só INSERT e
+// UPDATE simples funcionam. return=minimal em si é o que resolve o RLS:
+// por padrão o PostgREST faz INSERT/UPDATE ... RETURNING, que exige o anon
+// também ter policy de SELECT (que essa tabela não tem de propósito) —
+// diagnóstico confirmado pelo suporte da Supabase no ticket SU-454770.
 async function salvarAlertaPush(produtoId, precoAlvo) {
   const inscricao = await obterInscricaoPush();
   if (!inscricao) return false;
   try {
     const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.LUPA3D_CONFIG;
     const chaves = inscricao.toJSON().keys;
-    const resp = await fetch(`${SUPABASE_URL}/rest/v1/alertas_preco?on_conflict=produto_id,push_endpoint`, {
+    const headersBase = {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    };
+    const corpo = {
+      produto_id: produtoId,
+      preco_alvo: precoAlvo,
+      push_endpoint: inscricao.endpoint,
+      push_p256dh: chaves.p256dh,
+      push_auth: chaves.auth,
+      notificado: false,
+    };
+
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/alertas_preco`, {
       method: "POST",
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        "Content-Type": "application/json",
-        Prefer: "resolution=merge-duplicates",
-      },
-      body: JSON.stringify({
-        produto_id: produtoId,
-        preco_alvo: precoAlvo,
-        push_endpoint: inscricao.endpoint,
-        push_p256dh: chaves.p256dh,
-        push_auth: chaves.auth,
-        notificado: false,
-      }),
+      headers: headersBase,
+      body: JSON.stringify(corpo),
     });
-    return resp.ok;
+    if (resp.ok) return true;
+    if (resp.status !== 409) return false;
+
+    // 409 = já existe um alerta pra esse produto+inscrição (ex: usuário
+    // mudou o valor-alvo) — atualiza em vez de inserir de novo.
+    const respAtualizar = await fetch(
+      `${SUPABASE_URL}/rest/v1/alertas_preco?produto_id=eq.${produtoId}&push_endpoint=eq.${encodeURIComponent(inscricao.endpoint)}`,
+      { method: "PATCH", headers: headersBase, body: JSON.stringify({ preco_alvo: precoAlvo, notificado: false }) }
+    );
+    return respAtualizar.ok;
   } catch (e) {
     console.error("Falha ao salvar alerta de preço:", e);
     return false;
@@ -1000,7 +1019,10 @@ async function removerAlertaPush(produtoId) {
     const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.LUPA3D_CONFIG;
     await fetch(
       `${SUPABASE_URL}/rest/v1/alertas_preco?produto_id=eq.${produtoId}&push_endpoint=eq.${encodeURIComponent(inscricao.endpoint)}`,
-      { method: "DELETE", headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
+      {
+        method: "DELETE",
+        headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, Prefer: "return=minimal" },
+      }
     );
   } catch (e) {
     console.error("Falha ao remover alerta de preço:", e);
