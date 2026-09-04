@@ -1,0 +1,60 @@
+---
+import Footer from "../components/Footer.astro";
+import GlobalStyles from "../components/GlobalStyles.astro";
+---
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, follow" />
+  <title>Página não encontrada — LUPA3D</title>
+  <meta name="description" content="Essa página não existe ou foi movida. Volte para o LUPA3D e continue comparando preços de filamento e resina 3D." />
+  <GlobalStyles />
+</head>
+<body>
+  <header class="topo">
+    <div class="topo-linha">
+      <a href="/" class="logo-lupa3d">LUPA<span>3D</span></a>
+      <nav class="abas">
+        <a href="/">&larr; Início</a>
+        <a href="/ofertas/">🔥 Ofertas</a>
+        <a href="/favoritos/">♡ Favoritos (<span data-contador-favoritos>0</span>)</a>
+        <a href="/lojas/">🏬 Lojas</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="barra-busca-categoria">
+    <h1 class="hero-titulo">404 — Página não encontrada.</h1>
+    <p class="hero-subtitulo">O link pode estar quebrado ou o produto pode não existir mais. Tenta buscar de novo:</p>
+
+    <div class="busca-solo">
+      <div class="busca-grande">
+        <span class="busca-icone" aria-hidden="true">🔍</span>
+        <input
+          type="search"
+          id="busca"
+          placeholder="Pesquisar produto..."
+          aria-label="Buscar produtos"
+          autocomplete="off"
+          data-busca-destino="/ofertas/"
+          data-categorias=""
+        />
+        <div id="busca-sugestoes" class="busca-sugestoes oculto-tela"></div>
+      </div>
+    </div>
+
+    <div class="pagina-404-acoes">
+      <a href="/ofertas/" class="btn-ver-mais">🔥 Ver ofertas</a>
+      <a href="/lojas/" class="btn-ver-mais">🏬 Ver lojas</a>
+    </div>
+  </section>
+
+  <Footer />
+
+  <script is:inline defer src="/js/config.js"></script>
+  <script is:inline defer src="/js/favoritos.js"></script>
+  <script is:inline defer src="/js/interativo.js"></script>
+</body>
+</html>

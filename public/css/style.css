@@ -867,6 +867,14 @@ header.topo {
   padding: 0 0 2rem;
 }
 
+.pagina-404-acoes {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0 0 2rem;
+}
+
 .btn-ver-mais {
   background: var(--cor-texto);
   color: var(--cor-fundo);
