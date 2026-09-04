@@ -1124,11 +1124,6 @@ header.topo {
   border-radius: 999px;
 }
 
-.card-vendido-por {
-  font-size: 0.75rem;
-  opacity: 0.6;
-}
-
 /* Botão quadrado (1:1) que alterna estado no clique — mesmo padrão do
    .btn-favorito (☆/★), mas sem posição absoluta, pra ficar ao lado de "Ver
    detalhes" em vez de flutuar sobre a imagem. Tamanho por padrão pequeno

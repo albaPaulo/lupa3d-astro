@@ -102,11 +102,14 @@ function cardHTMLCliente(p) {
       <div class="card-imagem">${imagem}</div>
       <div class="card-corpo">
         <h3 class="card-nome">${escapeHTMLJS(p.nome)}</h3>
+        ${material ? `<span class="card-material">${escapeHTMLJS(material)}</span>` : ""}
         <div class="card-precos">
           <span class="card-preco">${formatarPrecoJS(p.preco)}</span>
           ${p.preco_pix ? `<span class="card-preco-pix">${formatarPrecoJS(p.preco_pix)} no Pix</span>` : ""}
         </div>
-        <span class="card-vendido-por">Vendido por ${escapeHTMLJS(p.loja)}</span>
+        <div class="card-loja-linha">
+          <span class="card-loja-nome">${escapeHTMLJS(p.loja)}</span>
+        </div>
         <div class="card-acoes">
           <a href="/produto/${p.id}/" class="btn-ver-oferta">Ver detalhes</a>
           <button type="button" class="btn-comparar-toggle" data-id="${p.id}" title="Comparar" aria-label="Comparar" aria-pressed="false">⇄</button>
