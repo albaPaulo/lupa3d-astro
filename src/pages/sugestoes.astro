@@ -1,0 +1,88 @@
+---
+import Footer from "../components/Footer.astro";
+import GlobalStyles from "../components/GlobalStyles.astro";
+---
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Enviar sugestão — LUPA3D</title>
+  <meta name="description" content="Sugira uma melhoria, uma nova funcionalidade ou uma loja pro LUPA3D adicionar." />
+  <link rel="canonical" href="https://lupa3d.com.br/sugestoes/" />
+  <GlobalStyles />
+</head>
+<body>
+  <header class="topo">
+    <div class="topo-linha">
+      <a href="/" class="logo-lupa3d">LUPA<span>3D</span></a>
+      <a href="/" class="link-voltar">&larr; Voltar para todos os produtos</a>
+    </div>
+  </header>
+
+  <main class="produto-pagina">
+    <div class="produto-box">
+      <h1>💡 Enviar sugestão</h1>
+      <p>
+        Tem alguma ideia de melhoria no site, uma funcionalidade que sentiu falta, ou
+        conhece uma loja de filamento/resina que a gente ainda não compara? Manda aqui —
+        a gente lê todas.
+      </p>
+
+      <form id="form-sugestao" class="form-sugestao">
+        <label for="sugestao-mensagem">Sua sugestão</label>
+        <textarea id="sugestao-mensagem" name="mensagem" rows="6" required placeholder="Escreva sua sugestão aqui..."></textarea>
+
+        <label for="sugestao-email">E-mail (opcional, caso queira uma resposta)</label>
+        <input type="email" id="sugestao-email" name="email" placeholder="seu@email.com" />
+
+        <button type="submit" id="btn-enviar-sugestao">Enviar sugestão</button>
+        <p id="sugestao-status" class="sugestao-status" role="status"></p>
+      </form>
+    </div>
+  </main>
+
+  <Footer />
+
+  <script is:inline src="/js/config.js"></script>
+  <script is:inline>
+    document.getElementById("form-sugestao").addEventListener("submit", async (ev) => {
+      ev.preventDefault();
+      const mensagem = document.getElementById("sugestao-mensagem").value.trim();
+      const email = document.getElementById("sugestao-email").value.trim();
+      const status = document.getElementById("sugestao-status");
+      const btn = document.getElementById("btn-enviar-sugestao");
+
+      if (!mensagem) return;
+
+      btn.disabled = true;
+      status.textContent = "Enviando...";
+      status.className = "sugestao-status";
+
+      try {
+        const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.LUPA3D_CONFIG;
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/sugestoes`, {
+          method: "POST",
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify({ mensagem, email: email || null }),
+        });
+        if (!resp.ok) throw new Error("Falha ao enviar");
+
+        status.textContent = "Sugestão enviada — obrigado!";
+        status.className = "sugestao-status sugestao-status-ok";
+        document.getElementById("form-sugestao").reset();
+      } catch (e) {
+        status.textContent = "Não foi possível enviar agora — tente de novo em alguns segundos.";
+        status.className = "sugestao-status sugestao-status-erro";
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
