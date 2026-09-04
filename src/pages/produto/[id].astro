@@ -313,7 +313,7 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
               </div>
             )}
             <div class="card-acoes">
-              <a href={p.url} target="_blank" rel={p.afiliado ? "noopener sponsored" : "noopener"} class="btn-ver-oferta">{p.disponivel ? "Ver Oferta!" : "Ver na loja"}</a>
+              <a href={p.url} target="_blank" rel={p.afiliado ? "noopener sponsored" : "noopener"} class="btn-ver-oferta" data-clique-produto={p.id}>{p.disponivel ? "Ver Oferta!" : "Ver na loja"}</a>
               <button type="button" class="btn-comparar-toggle" data-id={p.id} title="Comparar" aria-label="Comparar" aria-pressed="false">⇄</button>
             </div>
             {p.afiliado && (

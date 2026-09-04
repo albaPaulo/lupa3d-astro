@@ -5,6 +5,25 @@
 // marcados, já que isso é por visitante) e esse script só "liga" o estado
 // certo depois que a página carrega.
 
+// Fire-and-forget: registra o clique num link "Ver Oferta!"/"Ver na loja"
+// pro admin ver depois quais produtos convertem mais (um gatilho no banco já
+// soma isso em produtos.cliques_total, usado em "Mais clicados" e nas
+// ordenações por popularidade). Nunca deve travar ou atrasar a navegação —
+// por isso não usa await antes do link abrir, só dispara e ignora erro.
+function registrarClique(produtoId) {
+  const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.LUPA3D_CONFIG;
+  fetch(`${SUPABASE_URL}/rest/v1/cliques_produto`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify({ produto_id: produtoId }),
+  }).catch((e) => console.error("Falha ao registrar clique:", e));
+}
+
 function escapeHTMLJS(valor) {
   if (valor == null) return "";
   const mapa = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
@@ -173,7 +192,7 @@ async function abrirModalComparacao() {
     ["Preço", (p) => formatarPrecoJS(p.preco)],
     ["Preço Pix", (p) => (p.preco_pix ? formatarPrecoJS(p.preco_pix) : "-")],
     ["Categoria", (p) => p.categoria || "-"],
-    ["", (p) => `<a href="${escapeHTMLJS(p.url)}" target="_blank" rel="noopener">Ver na loja &rarr;</a>`],
+    ["", (p) => `<a href="${escapeHTMLJS(p.url)}" target="_blank" rel="noopener" data-clique-produto="${p.id}">Ver na loja &rarr;</a>`],
   ];
 
   const cabecalho = produtos
@@ -215,6 +234,12 @@ function fecharModalComparacao() {
 
 function ligarEventosInterativos() {
   document.addEventListener("click", (ev) => {
+    const linkClique = ev.target.closest("[data-clique-produto]");
+    if (linkClique) {
+      registrarClique(Number(linkClique.dataset.cliqueProduto));
+      // não retorna — deixa o link abrir normalmente (target="_blank")
+    }
+
     const btnFav = ev.target.closest(".btn-favorito[data-id]");
     if (btnFav) {
       toggleFavorito(Number(btnFav.dataset.id));
