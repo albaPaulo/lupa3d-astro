@@ -1279,8 +1279,8 @@ header.topo {
 
 .btn-sugestao-flutuante {
   position: fixed;
-  bottom: 1.5rem;
-  left: 1.5rem;
+  bottom: 5rem;
+  right: 1.5rem;
   z-index: 50;
   width: 2.75rem;
   height: 2.75rem;

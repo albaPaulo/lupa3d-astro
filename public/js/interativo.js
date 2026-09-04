@@ -961,8 +961,8 @@ function ligarBotaoTopo() {
 
 // Mesmo padrão do botão de topo: cria via JS (não precisa de marcação em
 // cada página), sempre visível — ao contrário do de topo, não depende de
-// scroll, já que a ideia é sempre estar à mão. Fica no canto esquerdo pra
-// não empilhar com o botão de topo (direita) nem com a barra de comparação
+// scroll, já que a ideia é sempre estar à mão. Empilhado logo acima do
+// botão de topo (mesmo canto), sem competir com a barra de comparação
 // (centro) quando ativa.
 function ligarBotaoSugestao() {
   if (document.querySelector(".btn-sugestao-flutuante")) return;
