@@ -11,6 +11,14 @@
 // ordenações por popularidade). Nunca deve travar ou atrasar a navegação —
 // por isso não usa await antes do link abrir, só dispara e ignora erro.
 function registrarClique(produtoId) {
+  // Não conta clique de quem está logado no admin nessa mesma aba (mesma
+  // chave de sessão usada em admin-api.js) — evita misturar navegação de
+  // teste/revisão do próprio site com clique real de visitante. Não cobre
+  // aba anônima/deslogada, só o caso mais comum de revisar já logado.
+  try {
+    if (sessionStorage.getItem("lupa3d_admin_session")) return;
+  } catch {}
+
   const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.LUPA3D_CONFIG;
   fetch(`${SUPABASE_URL}/rest/v1/cliques_produto`, {
     method: "POST",
