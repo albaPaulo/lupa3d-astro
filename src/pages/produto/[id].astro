@@ -516,34 +516,12 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
           }
         });
 
+        // Só copia o link do produto — mesmo padrão do botão de compartilhar
+        // da comparação, sem gerar imagem nenhuma.
         const btnCompartilhar = document.getElementById("btn-compartilhar-grafico");
-        btnCompartilhar?.addEventListener("click", async () => {
-          const textoOriginal = btnCompartilhar.textContent;
-          btnCompartilhar.disabled = true;
-          btnCompartilhar.textContent = "Gerando imagem...";
-          try {
-            const dataUrl = await gerarImagemGrafico();
-            const arquivo = new File([await (await fetch(dataUrl)).blob()], "historico-preco-lupa3d.png", { type: "image/png" });
-            // Share nativo (mobile, com o app do WhatsApp/Instagram etc. na
-            // lista) quando disponível — desktop quase nunca suporta
-            // compartilhar arquivo, então cai pro download automaticamente.
-            if (navigator.canShare?.({ files: [arquivo] })) {
-              await navigator.share({ files: [arquivo], title: document.title });
-            } else {
-              const link = document.createElement("a");
-              link.download = "historico-preco-lupa3d.png";
-              link.href = dataUrl;
-              link.click();
-            }
-          } catch (e) {
-            if (e.name !== "AbortError") {
-              console.error("Falha ao compartilhar gráfico:", e);
-              alert("Não foi possível compartilhar agora — tente de novo em alguns segundos.");
-            }
-          } finally {
-            btnCompartilhar.disabled = false;
-            btnCompartilhar.textContent = textoOriginal;
-          }
+        btnCompartilhar?.addEventListener("click", () => {
+          navigator.clipboard?.writeText(window.location.href);
+          alert("Link copiado!");
         });
     })();
   </script>
