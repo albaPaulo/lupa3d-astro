@@ -951,6 +951,23 @@ function ligarBotaoTopo() {
   btn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 }
 
+// Mesmo padrão do botão de topo: cria via JS (não precisa de marcação em
+// cada página), sempre visível — ao contrário do de topo, não depende de
+// scroll, já que a ideia é sempre estar à mão. Fica no canto esquerdo pra
+// não empilhar com o botão de topo (direita) nem com a barra de comparação
+// (centro) quando ativa.
+function ligarBotaoSugestao() {
+  if (document.querySelector(".btn-sugestao-flutuante")) return;
+  if (window.location.pathname.startsWith("/sugestoes")) return;
+  const link = document.createElement("a");
+  link.href = "/sugestoes/";
+  link.className = "btn-sugestao-flutuante";
+  link.title = "Enviar sugestão";
+  link.setAttribute("aria-label", "Enviar sugestão");
+  link.textContent = "💡";
+  document.body.appendChild(link);
+}
+
 function base64UrlParaUint8Array(base64Url) {
   const padding = "=".repeat((4 - (base64Url.length % 4)) % 4);
   const base64 = (base64Url + padding).replace(/-/g, "+").replace(/_/g, "/");
@@ -1124,6 +1141,7 @@ ligarBuscaComRedirecionamento();
 ligarBotaoTema();
 ligarMenuMobile();
 ligarBotaoTopo();
+ligarBotaoSugestao();
 ligarPrecoAlvo();
 aplicarFiltros(true);
 verificarConfigSite();
