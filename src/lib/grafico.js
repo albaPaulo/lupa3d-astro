@@ -28,7 +28,13 @@ function formatarEixo(valor) {
 // Portado quase igual de frontend/js/produto.js (desenharGraficoSVG) — roda
 // no build em vez de no navegador, mas a função em si é pura (recebe pontos,
 // devolve uma string de HTML/SVG), então não precisou mudar quase nada.
-export function desenharGraficoSVG(pontos) {
+// idSufixo diferencia o id do gradiente entre gráficos que coexistem na
+// mesma página (ex: o gráfico inline + cada aba de período do modal
+// expandido) — sem isso, vários <linearGradient id="grafico-area-fill">
+// duplicados no DOM confundem a captura de imagem (html-to-image), que
+// já não conseguia resolver a referência corretamente.
+export function desenharGraficoSVG(pontos, idSufixo = "") {
+  const idGradiente = `grafico-area-fill${idSufixo ? `-${idSufixo}` : ""}`;
   if (pontos.length < 2) {
     return `<p class="grafico-vazio">Ainda não há histórico suficiente — volte em alguns dias para ver a evolução do preço.</p>`;
   }
@@ -206,14 +212,14 @@ export function desenharGraficoSVG(pontos) {
       <div class="grafico-svg-wrap">
         <svg viewBox="0 0 ${largura} ${altura}" class="grafico-historico" preserveAspectRatio="none">
           <defs>
-            <linearGradient id="grafico-area-fill" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id="${idGradiente}" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stop-color="var(--cor-marca)" stop-opacity="0.18"/>
               <stop offset="100%" stop-color="var(--cor-marca)" stop-opacity="0"/>
             </linearGradient>
           </defs>
           ${gradeY}
           ${linhaMinima}
-          <path d="${areaPath}" fill="url(#grafico-area-fill)" class="grafico-area"></path>
+          <path d="${areaPath}" fill="url(#${idGradiente})" class="grafico-area"></path>
           ${temPix ? `<polyline points="${linhaPix}" class="grafico-linha-pix"></polyline>` : ""}
           <polyline points="${linha}" class="grafico-linha"></polyline>
           ${pontosCirculoPix}

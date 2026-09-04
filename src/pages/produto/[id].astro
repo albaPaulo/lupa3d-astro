@@ -105,7 +105,7 @@ function truncarTexto(texto, limite) {
 // imagem some com o bloco de descrição inteiro nesse caso, em vez de
 // mostrar uma caixa "Sem descrição disponível" praticamente vazia.
 const descricaoProduto = truncarTexto(p.descricao_manual || p.descricao, DESCRICAO_LIMITE) || null;
-const graficoSVG = desenharGraficoSVG(historico);
+const graficoSVG = desenharGraficoSVG(historico, "inline");
 
 // Recortes de período pro modal de gráfico expandido — só entra no seletor
 // quando o período é de fato mais curto que o histórico completo do produto,
@@ -128,11 +128,13 @@ const diasDeHistorico = referenciaData
 const periodosGrafico = DEFINICAO_PERIODOS_GRAFICO.filter((periodo) => diasDeHistorico > periodo.dias).map((periodo) => {
   const corte = new Date(referenciaData.getTime() - periodo.dias * 24 * 60 * 60 * 1000);
   const pontosDoPeriodo = historico.filter((h) => new Date(h.capturado_em) >= corte);
-  return { ...periodo, svg: desenharGraficoSVG(pontosDoPeriodo) };
+  return { ...periodo, svg: desenharGraficoSVG(pontosDoPeriodo, periodo.chave) };
 });
 // "Tudo" sempre por último e ativo por padrão — mesma visão que já aparece
-// no gráfico inline da página, sem surpresa ao abrir o modal.
-const graficoModalPeriodos = [...periodosGrafico, { chave: "tudo", label: "Tudo", svg: graficoSVG }];
+// no gráfico inline da página, sem surpresa ao abrir o modal. Gerado de novo
+// (não reaproveita graficoSVG) só pra ter um id de gradiente próprio, já que
+// os dois convivem no mesmo DOM enquanto o modal existe na página.
+const graficoModalPeriodos = [...periodosGrafico, { chave: "tudo", label: "Tudo", svg: desenharGraficoSVG(historico, "tudo") }];
 const precoMaximoHistorico = historico.length > 0 ? Math.max(...historico.map((h) => h.preco)) : null;
 const quedaPercentual = precoMaximoHistorico && precoMaximoHistorico > p.preco
   ? Math.round(((precoMaximoHistorico - p.preco) / precoMaximoHistorico) * 100)
@@ -493,7 +495,19 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
         async function gerarImagemGrafico() {
           const { toPng } = await import("html-to-image");
           const corFundo = getComputedStyle(document.documentElement).getPropertyValue("--cor-card").trim() || "#ffffff";
-          return toPng(conteudoGrafico, { backgroundColor: corFundo, pixelRatio: 2 });
+          // html-to-image não resolve var(--cor-marca) usada no stop-color do
+          // gradiente do gráfico (funciona ao vivo, mas vira preto sólido na
+          // imagem capturada) — troca pelo valor literal só durante a
+          // captura, e desfaz depois pra continuar reagindo à troca de tema.
+          const corMarca = getComputedStyle(document.documentElement).getPropertyValue("--cor-marca").trim() || "#2563eb";
+          const stops = conteudoGrafico.querySelectorAll('stop[stop-color^="var("]');
+          const valoresOriginais = [...stops].map((stop) => stop.getAttribute("stop-color"));
+          stops.forEach((stop) => stop.setAttribute("stop-color", corMarca));
+          try {
+            return await toPng(conteudoGrafico, { backgroundColor: corFundo, pixelRatio: 2 });
+          } finally {
+            stops.forEach((stop, i) => stop.setAttribute("stop-color", valoresOriginais[i]));
+          }
         }
 
         const btnPrint = document.getElementById("btn-print-grafico");
