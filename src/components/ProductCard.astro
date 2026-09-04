@@ -34,13 +34,13 @@ const temPix = p.preco_pix != null && Number(p.preco_pix) < Number(p.preco);
   </div>
   <div class="card-corpo">
     <h3 class="card-nome">{p.nome}</h3>
+    {material && <span class="card-material">{material}</span>}
     <div class="card-precos">
       {precoAnterior && <span class="card-preco-anterior">{formatarPreco(precoAnterior)}</span>}
       <span class="card-preco">{formatarPreco(p.preco)}</span>
       {temPix && <span class="card-preco-pix">{formatarPreco(p.preco_pix)} no Pix</span>}
     </div>
     <div class="card-loja-linha">
-      <span class="card-loja-monograma" aria-hidden="true">{(p.loja || "?").charAt(0).toUpperCase()}</span>
       <span class="card-loja-nome">{p.loja}</span>
     </div>
     <div class="card-acoes">

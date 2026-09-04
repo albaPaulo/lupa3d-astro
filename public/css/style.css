@@ -941,7 +941,7 @@ header.topo {
 .btn-favorito {
   position: absolute;
   top: 0.5rem;
-  left: 0.5rem;
+  right: 0.5rem;
   z-index: 1;
   width: 2rem;
   height: 2rem;
@@ -958,7 +958,7 @@ header.topo {
 
 .badge-destaque {
   position: absolute;
-  top: 0.5rem;
+  top: 2.7rem;
   right: 0.5rem;
   z-index: 1;
   background: var(--cor-card);
@@ -985,7 +985,7 @@ header.topo {
 
 .badge-menor-preco {
   position: absolute;
-  top: 2.7rem;
+  top: 4.9rem;
   right: 0.5rem;
   z-index: 1;
   background: var(--cor-favorito);
@@ -1015,8 +1015,8 @@ header.topo {
 
 .badge-produto-novo {
   position: absolute;
-  top: 4.9rem;
-  right: 0.5rem;
+  top: 0.5rem;
+  left: 0.5rem;
   z-index: 1;
   background: #16a34a;
   border: 1px solid #16a34a;
@@ -1066,20 +1066,6 @@ header.topo {
   order: -1;
 }
 
-.card-loja-monograma {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.3rem;
-  height: 1.3rem;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--cor-marca) 15%, var(--cor-card));
-  color: var(--cor-marca);
-  font-size: 0.65rem;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
 .card-loja-nome { opacity: 0.75; font-weight: 600; }
 
 .card-loja {
@@ -1107,6 +1093,13 @@ header.topo {
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.card-material {
+  display: block;
+  font-size: 0.72rem;
+  opacity: 0.65;
+  margin-top: 0.15rem;
 }
 
 .card-precos {
