@@ -2662,14 +2662,31 @@ header.topo {
 }
 
 .sugestao-item {
+  position: relative;
   border: 1px solid var(--cor-borda);
   border-radius: 0.65rem;
   padding: 0.75rem 1rem;
   background: var(--cor-card);
 }
 
+.sugestao-item-excluir {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  border: 1px solid #dc2626;
+  background: var(--cor-card);
+  color: #dc2626;
+  font-size: 0.8rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
 .sugestao-item-mensagem {
-  margin: 0 0 0.4rem;
+  margin: 0 0.4rem 0.4rem 0;
+  padding-right: 1.75rem;
   white-space: pre-wrap;
 }
 

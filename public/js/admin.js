@@ -634,6 +634,7 @@ async function carregarSugestoes() {
           .map(
             (s) => `
         <div class="sugestao-item">
+          <button type="button" class="sugestao-item-excluir" data-id="${s.id}" title="Excluir sugestão" aria-label="Excluir sugestão">✕</button>
           <p class="sugestao-item-mensagem">${escapeHTML(s.mensagem)}</p>
           <p class="sugestao-item-meta">
             ${new Date(s.criado_em).toLocaleString("pt-BR")}
@@ -647,6 +648,21 @@ async function carregarSugestoes() {
   } catch (e) {
     admEls.sugestoesLista.innerHTML = `<p class="admin-status">Não foi possível carregar as sugestões.</p>`;
     console.error(e);
+  }
+}
+
+async function excluirSugestao(id) {
+  if (!confirm("Excluir esta sugestão? Essa ação não pode ser desfeita.")) return;
+  try {
+    const resp = await fetchAdmin(`/rest/v1/sugestoes?id=eq.${id}`, {
+      method: "DELETE",
+      headers: { Prefer: "return=minimal" },
+    });
+    if (!resp.ok) throw new Error(await resp.text());
+    await carregarSugestoes();
+  } catch (e) {
+    console.error(e);
+    alert("Erro ao excluir a sugestão.");
   }
 }
 
@@ -1088,6 +1104,12 @@ function ligarEventosAdmin() {
     if (!check) return;
     const id = Number(check.closest(".secao-item").dataset.id);
     alternarAtivoSecao(id, check.checked);
+  });
+
+  admEls.sugestoesLista.addEventListener("click", (ev) => {
+    const btn = ev.target.closest(".sugestao-item-excluir");
+    if (!btn) return;
+    excluirSugestao(Number(btn.dataset.id));
   });
 }
 
