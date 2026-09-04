@@ -954,7 +954,7 @@ header.topo {
   line-height: 1;
 }
 
-.btn-favorito.ativo { background: var(--cor-favorito); color: white; }
+.btn-favorito.ativo { background: var(--cor-card); color: #facc15; }
 
 .badge-destaque {
   position: absolute;
