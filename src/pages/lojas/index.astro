@@ -1,5 +1,5 @@
 ---
-import { fetchProdutos, fetchLojas } from "../../lib/supabase.js";
+import { fetchProdutos, fetchLojas, LABEL_CATEGORIA } from "../../lib/supabase.js";
 import Footer from "../../components/Footer.astro";
 import GlobalStyles from "../../components/GlobalStyles.astro";
 
@@ -7,12 +7,20 @@ const [produtos, lojasConfig] = await Promise.all([fetchProdutos(), fetchLojas()
 
 const contagemPorLoja = new Map();
 const contagemPixPorLoja = new Map();
+const categoriasPorLojaMap = new Map();
 for (const p of produtos) {
   contagemPorLoja.set(p.loja, (contagemPorLoja.get(p.loja) || 0) + 1);
   const temPix = p.preco_pix != null && Number(p.preco_pix) < Number(p.preco);
   if (temPix) contagemPixPorLoja.set(p.loja, (contagemPixPorLoja.get(p.loja) || 0) + 1);
+  if (p.categoria) {
+    if (!categoriasPorLojaMap.has(p.loja)) categoriasPorLojaMap.set(p.loja, new Set());
+    categoriasPorLojaMap.get(p.loja).add(p.categoria);
+  }
 }
 const nomesLojas = [...contagemPorLoja.keys()].sort();
+// Nicho da loja: quais categorias ela de fato vende (não é campo cadastrado,
+// é derivado dos produtos dela) — usado no filtro abaixo.
+const categorias = [...new Set(produtos.map((p) => p.categoria).filter(Boolean))].sort();
 
 // Loja com mais de uma unidade física guarda vários estados separados por
 // vírgula (ex: "SP, RJ") — trata como lista em vez de valor único, tanto pro
@@ -50,14 +58,25 @@ const estados = [...new Set(lojasConfig.flatMap(estadosDeLoja))].sort();
   <main class="lojas-pagina">
     <h1 class="lojas-titulo">Lojas</h1>
 
-    {estados.length > 0 && (
-      <div class="lojas-filtro-estado" role="group" aria-label="Filtrar por estado">
-        <button type="button" class="lojas-filtro-estado-chip ativo" data-estado="">Todos os estados</button>
-        {estados.map((uf) => (
-          <button type="button" class="lojas-filtro-estado-chip" data-estado={uf}>{uf}</button>
-        ))}
-      </div>
-    )}
+    <div class="lojas-filtros">
+      {estados.length > 0 && (
+        <div class="lojas-filtro-estado" role="group" aria-label="Filtrar por estado">
+          <button type="button" class="lojas-filtro-estado-chip ativo" data-estado="">Todos os estados</button>
+          {estados.map((uf) => (
+            <button type="button" class="lojas-filtro-estado-chip" data-estado={uf}>{uf}</button>
+          ))}
+        </div>
+      )}
+
+      {categorias.length > 1 && (
+        <div class="lojas-filtro-categoria" role="group" aria-label="Filtrar por categoria">
+          <button type="button" class="lojas-filtro-categoria-chip ativo" data-categoria="">Todas as categorias</button>
+          {categorias.map((c) => (
+            <button type="button" class="lojas-filtro-categoria-chip" data-categoria={c}>{LABEL_CATEGORIA[c] || c}</button>
+          ))}
+        </div>
+      )}
+    </div>
 
     <div class="lojas-grid" id="lojas-grid">
       {nomesLojas.map((nome) => {
@@ -66,8 +85,14 @@ const estados = [...new Set(lojasConfig.flatMap(estadosDeLoja))].sort();
         const qtdPix = contagemPixPorLoja.get(nome) || 0;
         const percentualPix = qtdPix > 0 ? Math.round((qtdPix / qtd) * 100) : 0;
         const ufsLoja = estadosDeLoja(cfg);
+        const categoriasLoja = [...(categoriasPorLojaMap.get(nome) || [])];
         return (
-          <a href={`/loja/${nome}/`} class="loja-card" data-estados={ufsLoja.join(",")}>
+          <a
+            href={`/loja/${nome}/`}
+            class="loja-card"
+            data-estados={ufsLoja.join(",")}
+            data-categorias={categoriasLoja.join(",")}
+          >
             <div class="loja-card-logo-wrap">
               {cfg?.logo_url ? (
                 <img src={cfg.logo_url} alt="" class="loja-card-logo" referrerpolicy="no-referrer" />
@@ -84,24 +109,43 @@ const estados = [...new Set(lojasConfig.flatMap(estadosDeLoja))].sort();
       })}
     </div>
 
-    <p id="lojas-vazio" class="admin-status oculto-tela">Nenhuma loja cadastrada nesse estado ainda.</p>
+    <p id="lojas-vazio" class="admin-status oculto-tela">Nenhuma loja encontrada com esse filtro.</p>
   </main>
 
   <script is:inline>
+    let lojasFiltroEstado = "";
+    let lojasFiltroCategoria = "";
+
+    function aplicarFiltrosLojas() {
+      const cards = [...document.querySelectorAll("#lojas-grid .loja-card")];
+      let visiveis = 0;
+      cards.forEach((card) => {
+        const ufsCard = (card.dataset.estados || "").split(",").filter(Boolean);
+        const categoriasCard = (card.dataset.categorias || "").split(",").filter(Boolean);
+        const okEstado = !lojasFiltroEstado || ufsCard.includes(lojasFiltroEstado);
+        const okCategoria = !lojasFiltroCategoria || categoriasCard.includes(lojasFiltroCategoria);
+        const mostra = okEstado && okCategoria;
+        card.classList.toggle("oculto-tela", !mostra);
+        if (mostra) visiveis++;
+      });
+      document.getElementById("lojas-vazio").classList.toggle("oculto-tela", visiveis > 0);
+    }
+
     document.querySelectorAll(".lojas-filtro-estado-chip").forEach((chip) => {
       chip.addEventListener("click", () => {
         document.querySelectorAll(".lojas-filtro-estado-chip").forEach((c) => c.classList.remove("ativo"));
         chip.classList.add("ativo");
-        const uf = chip.dataset.estado;
-        const cards = [...document.querySelectorAll("#lojas-grid .loja-card")];
-        let visiveis = 0;
-        cards.forEach((card) => {
-          const ufsCard = (card.dataset.estados || "").split(",").filter(Boolean);
-          const mostra = !uf || ufsCard.includes(uf);
-          card.classList.toggle("oculto-tela", !mostra);
-          if (mostra) visiveis++;
-        });
-        document.getElementById("lojas-vazio").classList.toggle("oculto-tela", visiveis > 0);
+        lojasFiltroEstado = chip.dataset.estado;
+        aplicarFiltrosLojas();
+      });
+    });
+
+    document.querySelectorAll(".lojas-filtro-categoria-chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        document.querySelectorAll(".lojas-filtro-categoria-chip").forEach((c) => c.classList.remove("ativo"));
+        chip.classList.add("ativo");
+        lojasFiltroCategoria = chip.dataset.categoria;
+        aplicarFiltrosLojas();
       });
     });
   </script>

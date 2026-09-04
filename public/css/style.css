@@ -1765,14 +1765,20 @@ header.topo {
   font-size: 1.5rem;
 }
 
-.lojas-filtro-estado {
+.lojas-filtros {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.6rem;
   margin-bottom: 1.25rem;
 }
 
-.lojas-filtro-estado-chip {
+.lojas-filtro-estado, .lojas-filtro-categoria {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.lojas-filtro-estado-chip, .lojas-filtro-categoria-chip {
   padding: 0.4rem 0.9rem;
   border: 1px solid var(--cor-borda);
   border-radius: 999px;
@@ -1783,7 +1789,7 @@ header.topo {
   cursor: pointer;
 }
 
-.lojas-filtro-estado-chip.ativo {
+.lojas-filtro-estado-chip.ativo, .lojas-filtro-categoria-chip.ativo {
   background: var(--cor-marca);
   border-color: var(--cor-marca);
   color: white;
