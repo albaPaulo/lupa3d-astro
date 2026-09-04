@@ -28,13 +28,7 @@ function formatarEixo(valor) {
 // Portado quase igual de frontend/js/produto.js (desenharGraficoSVG) — roda
 // no build em vez de no navegador, mas a função em si é pura (recebe pontos,
 // devolve uma string de HTML/SVG), então não precisou mudar quase nada.
-// idSufixo diferencia o id do gradiente entre gráficos que coexistem na
-// mesma página (ex: o gráfico inline + cada aba de período do modal
-// expandido) — sem isso, vários <linearGradient id="grafico-area-fill">
-// duplicados no DOM confundem a captura de imagem (html-to-image), que
-// já não conseguia resolver a referência corretamente.
-export function desenharGraficoSVG(pontos, idSufixo = "") {
-  const idGradiente = `grafico-area-fill${idSufixo ? `-${idSufixo}` : ""}`;
+export function desenharGraficoSVG(pontos) {
   if (pontos.length < 2) {
     return `<p class="grafico-vazio">Ainda não há histórico suficiente — volte em alguns dias para ver a evolução do preço.</p>`;
   }
@@ -80,11 +74,11 @@ export function desenharGraficoSVG(pontos, idSufixo = "") {
   const areaPath = `M${pontosLinha[0]} L${pontosLinha.join(" L")} L${coordX(pontos.length - 1)},${baseY} L${coordX(0)},${baseY} Z`;
 
   const gradeY = ticks
-    .map((t) => `<line x1="${margemX}" y1="${coordY(t)}" x2="${largura - margemX}" y2="${coordY(t)}" class="grafico-grade-y"></line>`)
+    .map((t) => `<line x1="${margemX}" y1="${coordY(t)}" x2="${largura - margemX}" y2="${coordY(t)}" stroke="var(--cor-borda)" stroke-width="1" class="grafico-grade-y"></line>`)
     .join("");
 
   const linhaMinima = minNormal !== maxNormal
-    ? `<line x1="${margemX}" y1="${coordY(minNormal)}" x2="${largura - margemX}" y2="${coordY(minNormal)}" class="grafico-linha-minima"></line>`
+    ? `<line x1="${margemX}" y1="${coordY(minNormal)}" x2="${largura - margemX}" y2="${coordY(minNormal)}" stroke="var(--cor-favorito)" stroke-width="1" stroke-dasharray="3 3" opacity="0.6" class="grafico-linha-minima"></line>`
     : "";
 
   // Marca visível só nos pontos onde o preço realmente mudou (+ primeiro e
@@ -101,8 +95,10 @@ export function desenharGraficoSVG(pontos, idSufixo = "") {
       const mudouPreco = i === 0 || i === pontos.length - 1 || p.preco !== pontos[i - 1].preco;
       const detalhePix = p.preco_pix != null ? ` (${formatarPreco(p.preco_pix)} no Pix)` : "";
       const tooltip = `<title>${formatarPreco(p.preco)}${detalhePix} — ${data}${ehMenorPreco ? " — menor preço já registrado" : ""}</title>`;
+      const corPonto = ehMenorPreco ? "var(--cor-favorito)" : "var(--cor-marca)";
+      const atributosAtual = ehUltimo ? ` stroke="var(--cor-card)" stroke-width="2"` : "";
       const marcador = mudouPreco
-        ? `<circle cx="${x}" cy="${y}" r="${ehUltimo ? 5 : 3}" class="grafico-ponto${ehMenorPreco ? " grafico-ponto-minimo" : ""}${ehUltimo ? " grafico-ponto-atual" : ""}">${tooltip}</circle>`
+        ? `<circle cx="${x}" cy="${y}" r="${ehUltimo ? 5 : 3}" fill="${corPonto}"${atributosAtual} class="grafico-ponto${ehMenorPreco ? " grafico-ponto-minimo" : ""}${ehUltimo ? " grafico-ponto-atual" : ""}">${tooltip}</circle>`
         : "";
       return `
         <circle cx="${x}" cy="${y}" r="9" fill="transparent" class="grafico-ponto-area">${tooltip}</circle>
@@ -122,7 +118,7 @@ export function desenharGraficoSVG(pontos, idSufixo = "") {
           const mudouPreco = i === 0 || i === pontos.length - 1 || !anterior || anterior.preco_pix !== p.preco_pix;
           const tooltip = `<title>${formatarPreco(p.preco_pix)} no Pix — ${data}</title>`;
           const marcador = mudouPreco
-            ? `<circle cx="${x}" cy="${y}" r="2.5" class="grafico-ponto-pix">${tooltip}</circle>`
+            ? `<circle cx="${x}" cy="${y}" r="2.5" fill="var(--cor-pix)" class="grafico-ponto-pix">${tooltip}</circle>`
             : "";
           return `
             <circle cx="${x}" cy="${y}" r="8" fill="transparent" class="grafico-ponto-area">${tooltip}</circle>
@@ -211,17 +207,11 @@ export function desenharGraficoSVG(pontos, idSufixo = "") {
       ${eixoY}
       <div class="grafico-svg-wrap">
         <svg viewBox="0 0 ${largura} ${altura}" class="grafico-historico" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="${idGradiente}" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="var(--cor-marca)" stop-opacity="0.18"/>
-              <stop offset="100%" stop-color="var(--cor-marca)" stop-opacity="0"/>
-            </linearGradient>
-          </defs>
           ${gradeY}
           ${linhaMinima}
-          <path d="${areaPath}" fill="url(#${idGradiente})" class="grafico-area"></path>
-          ${temPix ? `<polyline points="${linhaPix}" class="grafico-linha-pix"></polyline>` : ""}
-          <polyline points="${linha}" class="grafico-linha"></polyline>
+          <path d="${areaPath}" fill="var(--cor-marca)" fill-opacity="0.12" class="grafico-area"></path>
+          ${temPix ? `<polyline points="${linhaPix}" fill="none" stroke="var(--cor-pix)" stroke-width="2" stroke-dasharray="4 3" class="grafico-linha-pix"></polyline>` : ""}
+          <polyline points="${linha}" fill="none" stroke="var(--cor-marca)" stroke-width="2" class="grafico-linha"></polyline>
           ${pontosCirculoPix}
           ${pontosCirculo}
         </svg>

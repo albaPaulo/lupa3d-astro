@@ -105,7 +105,7 @@ function truncarTexto(texto, limite) {
 // imagem some com o bloco de descrição inteiro nesse caso, em vez de
 // mostrar uma caixa "Sem descrição disponível" praticamente vazia.
 const descricaoProduto = truncarTexto(p.descricao_manual || p.descricao, DESCRICAO_LIMITE) || null;
-const graficoSVG = desenharGraficoSVG(historico, "inline");
+const graficoSVG = desenharGraficoSVG(historico);
 
 // Recortes de período pro modal de gráfico expandido — só entra no seletor
 // quando o período é de fato mais curto que o histórico completo do produto,
@@ -128,13 +128,11 @@ const diasDeHistorico = referenciaData
 const periodosGrafico = DEFINICAO_PERIODOS_GRAFICO.filter((periodo) => diasDeHistorico > periodo.dias).map((periodo) => {
   const corte = new Date(referenciaData.getTime() - periodo.dias * 24 * 60 * 60 * 1000);
   const pontosDoPeriodo = historico.filter((h) => new Date(h.capturado_em) >= corte);
-  return { ...periodo, svg: desenharGraficoSVG(pontosDoPeriodo, periodo.chave) };
+  return { ...periodo, svg: desenharGraficoSVG(pontosDoPeriodo) };
 });
 // "Tudo" sempre por último e ativo por padrão — mesma visão que já aparece
-// no gráfico inline da página, sem surpresa ao abrir o modal. Gerado de novo
-// (não reaproveita graficoSVG) só pra ter um id de gradiente próprio, já que
-// os dois convivem no mesmo DOM enquanto o modal existe na página.
-const graficoModalPeriodos = [...periodosGrafico, { chave: "tudo", label: "Tudo", svg: desenharGraficoSVG(historico, "tudo") }];
+// no gráfico inline da página, sem surpresa ao abrir o modal.
+const graficoModalPeriodos = [...periodosGrafico, { chave: "tudo", label: "Tudo", svg: graficoSVG }];
 const precoMaximoHistorico = historico.length > 0 ? Math.max(...historico.map((h) => h.preco)) : null;
 const quedaPercentual = precoMaximoHistorico && precoMaximoHistorico > p.preco
   ? Math.round(((precoMaximoHistorico - p.preco) / precoMaximoHistorico) * 100)
@@ -494,19 +492,36 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
         const conteudoGrafico = document.getElementById("modal-grafico-conteudo");
         async function gerarImagemGrafico() {
           const { toPng } = await import("html-to-image");
-          const corFundo = getComputedStyle(document.documentElement).getPropertyValue("--cor-card").trim() || "#ffffff";
-          // html-to-image não resolve var(--cor-marca) usada no stop-color do
-          // gradiente do gráfico (funciona ao vivo, mas vira preto sólido na
-          // imagem capturada) — troca pelo valor literal só durante a
-          // captura, e desfaz depois pra continuar reagindo à troca de tema.
-          const corMarca = getComputedStyle(document.documentElement).getPropertyValue("--cor-marca").trim() || "#2563eb";
-          const stops = conteudoGrafico.querySelectorAll('stop[stop-color^="var("]');
-          const valoresOriginais = [...stops].map((stop) => stop.getAttribute("stop-color"));
-          stops.forEach((stop) => stop.setAttribute("stop-color", corMarca));
+          const estiloRaiz = getComputedStyle(document.documentElement);
+          const corFundo = estiloRaiz.getPropertyValue("--cor-card").trim() || "#ffffff";
+          // html-to-image não estiliza elementos dentro de um <svg> de verdade
+          // (clona o SVG inteiro de uma vez via cloneNode nativo, sem passar
+          // pelo passo que copia o estilo computado de cada nó) — então tudo
+          // que o gráfico pinta só via classe CSS (linha, pontos, grade) some
+          // e cai no preto padrão do SVG na imagem capturada, mesmo com as
+          // variáveis resolvendo certinho ao vivo. Os atributos inline
+          // fill/stroke com var(...) no próprio grafico.js são o reforço pra
+          // isso funcionar sem depender de classe — aqui só falta resolver a
+          // variável em si pra texto puro antes de fotografar.
+          const CORES_GRAFICO = ["--cor-marca", "--cor-borda", "--cor-favorito", "--cor-pix", "--cor-card"];
+          const clone = conteudoGrafico.cloneNode(true);
+          let html = clone.innerHTML;
+          for (const nomeVar of CORES_GRAFICO) {
+            const valor = estiloRaiz.getPropertyValue(nomeVar).trim();
+            if (valor) html = html.replaceAll(`var(${nomeVar})`, valor);
+          }
+          clone.innerHTML = html;
+          // Insere ao lado do original (mesma posição/contexto de layout,
+          // já que tirar de fluxo com position:fixed fora da tela resultou
+          // em imagem em branco) e some com o original só durante a
+          // captura, pra não duplicar visualmente por um instante.
+          conteudoGrafico.insertAdjacentElement("afterend", clone);
+          conteudoGrafico.style.display = "none";
           try {
-            return await toPng(conteudoGrafico, { backgroundColor: corFundo, pixelRatio: 2 });
+            return await toPng(clone, { backgroundColor: corFundo, pixelRatio: 2 });
           } finally {
-            stops.forEach((stop, i) => stop.setAttribute("stop-color", valoresOriginais[i]));
+            clone.remove();
+            conteudoGrafico.style.display = "";
           }
         }
 
