@@ -2580,6 +2580,11 @@ header.topo {
 
 .admin-status { font-size: 0.8rem; opacity: 0.8; }
 
+.grid-vazio {
+  text-align: center;
+  padding: 2.5rem 1rem;
+}
+
 .config-categorias-campo {
   display: flex;
   flex-direction: column;

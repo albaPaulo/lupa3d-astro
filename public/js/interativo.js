@@ -554,6 +554,7 @@ function aplicarFiltros(resetarLimite = true) {
   combinam.forEach((card, i) => card.classList.toggle("oculto-tela", i >= LIMITE_EXIBICAO));
 
   document.getElementById("btn-ver-mais")?.classList.toggle("oculto-tela", combinam.length <= LIMITE_EXIBICAO);
+  document.getElementById("grid-vazio")?.classList.toggle("oculto-tela", combinam.length > 0);
 
   atualizarChipsFiltros();
   atualizarDescricaoMaterial();
@@ -646,7 +647,9 @@ function ligarFiltros() {
     });
   });
 
-  document.getElementById("filtros-ativos")?.addEventListener("click", (ev) => {
+  // No document (não só #filtros-ativos): o botão "Limpar filtros" também
+  // aparece dentro de #grid-vazio, quando o filtro não bate com nada.
+  document.addEventListener("click", (ev) => {
     if (ev.target.closest(".filtro-limpar-todos")) {
       for (const campo of ["busca", "filtro-categoria", "filtro-material", "filtro-pix", "filtro-estado", "filtro-preco-max"]) {
         limparCampoFiltro(campo);
