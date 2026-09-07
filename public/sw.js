@@ -1,10 +1,15 @@
 // Service Worker mínimo — existe só pra habilitar "Adicionar à tela inicial"
 // no Android/Chrome, que exige um SW com handler de fetch pra mostrar o
-// prompt de instalação. Sem cache nenhum: os preços mudam todo dia, então
-// guardar página/API em cache seria ativamente ruim (mostraria preço velho
-// pra quem instalou o app) — cada navegação sempre busca a versão mais
-// recente direto da rede.
-self.addEventListener("install", () => {
+// prompt de instalação. Sem cache de conteúdo: os preços mudam todo dia,
+// então guardar página/API em cache seria ativamente ruim (mostraria preço
+// velho pra quem instalou o app) — cada navegação sempre busca a versão mais
+// recente direto da rede. A ÚNICA coisa em cache é a página estática de "sem
+// conexão", só pra não cair na tela de erro feia padrão do navegador quando
+// abrir o app instalado sem internet.
+const CACHE_OFFLINE = "lupa3d-offline-v1";
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(caches.open(CACHE_OFFLINE).then((cache) => cache.add("/offline.html")));
   self.skipWaiting();
 });
 
@@ -13,7 +18,16 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  event.respondWith(fetch(event.request));
+  event.respondWith(
+    fetch(event.request).catch((erro) => {
+      // Só troca pela página de offline em navegação de página inteira —
+      // uma imagem/API que falhar sem internet continua falhando normal,
+      // sem isso o navegador ficaria tentando "consertar" todo recurso
+      // quebrado com a tela de offline no lugar.
+      if (event.request.mode === "navigate") return caches.match("/offline.html");
+      throw erro;
+    })
+  );
 });
 
 // Alerta de preço via push: o scraper (server) envia um payload JSON
