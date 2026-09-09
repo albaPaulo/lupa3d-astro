@@ -178,6 +178,27 @@ async function buscarProdutosPorIds(ids) {
   return resp.json();
 }
 
+// Fire-and-forget, mesmo padrão de registrarClique — só coleta pra ter
+// histórico pronto quando decidirmos construir alguma seção em cima disso
+// ("Últimas comparações", "mais comparados juntos"), sem UI nenhuma ainda.
+function registrarComparacao(ids) {
+  if (ids.length < 2) return;
+  try {
+    if (sessionStorage.getItem("lupa3d_admin_session")) return;
+  } catch {}
+  const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.LUPA3D_CONFIG;
+  fetch(`${SUPABASE_URL}/rest/v1/comparacoes`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify({ produto_ids: ids }),
+  }).catch((e) => console.error("Falha ao registrar comparação:", e));
+}
+
 async function abrirModalComparacao() {
   const modal = document.getElementById("modal-comparacao");
   const conteudo = document.getElementById("modal-comparacao-conteudo");
@@ -187,6 +208,7 @@ async function abrirModalComparacao() {
   modal.classList.add("visivel");
 
   const ids = getComparacao();
+  registrarComparacao(ids);
   let produtos;
   try {
     produtos = await buscarProdutosPorIds(ids);
