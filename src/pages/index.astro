@@ -5,6 +5,7 @@ import Footer from "../components/Footer.astro";
 import FaixaProvaSocial from "../components/FaixaProvaSocial.astro";
 import GlobalStyles from "../components/GlobalStyles.astro";
 import IconeImpressora3D from "../components/IconeImpressora3D.astro";
+import IconeResina from "../components/IconeResina.astro";
 import { fetchProdutos, fetchHistoricoTodos, fetchConfiguracoes, fetchSecoes, buildHistoricoPorProduto, EMOJI_CATEGORIA, LABEL_CATEGORIA } from "../lib/supabase.js";
 import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPrecoEfetivo, badgeProdutoNovo, precoAnteriorParaExibicao } from "../lib/badges.js";
 import { computarProdutosDaSecao } from "../lib/secoes.js";
@@ -142,7 +143,11 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
     <nav class="atalhos-categoria" aria-label="Atalhos de categoria">
       {categorias.map((c) => (
         <a href={`/categoria/${c}/`} class="atalho-categoria">
-          <span class="atalho-categoria-icone" aria-hidden="true">{EMOJI_CATEGORIA[c] || "📦"}</span>
+          {c === "resina" ? (
+            <IconeResina id="atalho-home" class="icone-resina" somenteFrasco />
+          ) : (
+            <span class="atalho-categoria-icone" aria-hidden="true">{EMOJI_CATEGORIA[c] || "📦"}</span>
+          )}
           <span class="atalho-categoria-label">{LABEL_CATEGORIA[c] || c}</span>
         </a>
       ))}
