@@ -137,7 +137,7 @@ export const REDES_LOJA = [
 export const EMOJI_CATEGORIA = { resina: "🧪", filamento: "🧵", acessorio: "🛠️", pigmento: "🎨", impressora: "🖨️" };
 
 export const LABEL_CATEGORIA = {
-  resina: "Resina",
+  resina: "Resina 3D",
   filamento: "Filamento",
   acessorio: "Acessório",
   pigmento: "Pigmento",
