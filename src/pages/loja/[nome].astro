@@ -96,7 +96,7 @@ const ufsLoja = (loja?.estado || "").split(",").map((uf) => uf.trim().toUpperCas
   <meta property="og:site_name" content="LUPA3D" />
   <meta property="og:title" content={titulo} />
   <meta property="og:description" content={descricao} />
-  {loja?.logo_url && <meta property="og:image" content={loja.logo_url} />}
+  <meta property="og:image" content={loja?.logo_url || "https://lupa3d.com.br/icon-512.png"} />
   <meta name="twitter:card" content="summary_large_image" />
 
   <GlobalStyles />
