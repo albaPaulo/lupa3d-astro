@@ -420,7 +420,22 @@ header.topo {
 }
 
 .atalho-categoria-icone { font-size: 2rem; line-height: 1; }
+.atalho-categoria-icone-svg { width: 2rem; height: 2rem; }
 .atalho-categoria-label { font-size: 0.8rem; font-weight: 600; }
+
+.atalho-categoria-em-breve {
+  opacity: 0.55;
+  cursor: default;
+}
+.atalho-categoria-em-breve:hover { border-color: var(--cor-borda); transform: none; }
+
+.atalho-categoria-em-breve-tag {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--cor-marca);
+}
 
 .prova-social {
   display: flex;
