@@ -119,6 +119,13 @@ header.topo {
 
 .barra-busca-categoria {
   max-width: 1200px;
+  /* max-width sozinho não garante espaçamento lateral: com a janela mais
+     estreita que 1200px + a folga, a caixa encosta direto na borda da
+     viewport (margin:auto não sobra nada pra centralizar quando o
+     conteúdo já ocupa 100% da largura disponível). O calc reserva 1rem
+     de cada lado sempre, e o max-width ainda limita a caixa em telas
+     bem largas. */
+  width: calc(100% - 2rem);
   margin: 1.25rem auto 0;
   padding: 2rem 2.5rem;
   border-radius: 1.5rem;
