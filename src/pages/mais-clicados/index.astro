@@ -59,8 +59,8 @@ const badgesPorId = new Map(
   ])
 );
 
-const titulo = "Mais clicados — LUPA3D";
-const descricao = `Os ${maisClicados.length} produtos mais clicados no LUPA3D, comparados entre várias lojas brasileiras.`;
+const titulo = "Mais vistos — LUPA3D";
+const descricao = `Os ${maisClicados.length} produtos mais vistos no LUPA3D, comparados entre várias lojas brasileiras.`;
 ---
 <!doctype html>
 <html lang="pt-BR">
@@ -97,7 +97,7 @@ const descricao = `Os ${maisClicados.length} produtos mais clicados no LUPA3D, c
   </header>
 
   <section class="barra-busca-categoria">
-    <h1 class="hero-titulo">Os produtos mais clicados do LUPA3D.</h1>
+    <h1 class="hero-titulo">Os produtos mais vistos do LUPA3D.</h1>
 
     {categorias.length > 1 && (
       <nav class="atalhos-categoria" aria-label="Atalhos de categoria">
@@ -113,7 +113,7 @@ const descricao = `Os ${maisClicados.length} produtos mais clicados no LUPA3D, c
     <div class="busca-solo">
       <div class="busca-grande">
         <span class="busca-icone" aria-hidden="true">🔍</span>
-        <input type="search" id="busca" placeholder="Pesquisar nos mais clicados..." aria-label="Buscar produtos" autocomplete="off" />
+        <input type="search" id="busca" placeholder="Pesquisar nos mais vistos..." aria-label="Buscar produtos" autocomplete="off" />
         <div id="busca-sugestoes" class="busca-sugestoes oculto-tela"></div>
       </div>
     </div>
@@ -146,7 +146,7 @@ const descricao = `Os ${maisClicados.length} produtos mais clicados no LUPA3D, c
         {materiais.map((m) => <option value={m}>{m}</option>)}
       </select>
       <select id="ordenar" aria-label="Ordenar produtos">
-        <option value="">Ordenar: mais clicados</option>
+        <option value="">Ordenar: mais vistos</option>
         <option value="preco_asc">Menor preço</option>
         <option value="preco_desc">Maior preço</option>
         <option value="recentes">Mais recentes</option>
@@ -172,7 +172,7 @@ const descricao = `Os ${maisClicados.length} produtos mais clicados no LUPA3D, c
   </script>
 
   <div class="titulo-secao-grid-linha">
-    <h2 class="titulo-secao-grid">Mais clicados ({maisClicados.length})</h2>
+    <h2 class="titulo-secao-grid">Mais vistos ({maisClicados.length})</h2>
   </div>
 
   <main id="grid" class="grid" style={`--colunas-grid: ${colunasGrid}`}>
