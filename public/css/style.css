@@ -2294,52 +2294,11 @@ header.topo {
   opacity: 1;
 }
 
-.historico-resumo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 0.75rem;
-  margin-bottom: 0.75rem;
-}
-
-.historico-resumo-atual {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-}
-
-.historico-resumo-label {
-  font-size: 0.75rem;
-  opacity: 0.65;
-}
-
-.historico-resumo-linha-valor {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.historico-resumo-valor {
-  font-size: 1.4rem;
-  font-weight: 800;
-}
-
 .historico-resumo-atualizado {
+  display: block;
   font-size: 0.7rem;
   opacity: 0.55;
-  margin-top: 0.15rem;
-}
-
-.historico-resumo-queda {
-  background: color-mix(in srgb, var(--cor-pix) 14%, var(--cor-card));
-  color: var(--cor-pix);
-  font-size: 0.78rem;
-  font-weight: 700;
-  padding: 0.3rem 0.65rem;
-  border-radius: 999px;
-  white-space: nowrap;
-  flex-shrink: 0;
+  margin-bottom: 0.75rem;
 }
 
 .produto-historico-box #grafico-container { width: 100%; }

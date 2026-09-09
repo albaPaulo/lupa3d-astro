@@ -134,9 +134,6 @@ const periodosGrafico = DEFINICAO_PERIODOS_GRAFICO.filter((periodo) => diasDeHis
 // no gráfico inline da página, sem surpresa ao abrir o modal.
 const graficoModalPeriodos = [...periodosGrafico, { chave: "tudo", label: "Tudo", svg: graficoSVG }];
 const precoMaximoHistorico = historico.length > 0 ? Math.max(...historico.map((h) => h.preco)) : null;
-const quedaPercentual = precoMaximoHistorico && precoMaximoHistorico > p.preco
-  ? Math.round(((precoMaximoHistorico - p.preco) / precoMaximoHistorico) * 100)
-  : null;
 const economiaValor = precoMaximoHistorico && precoMaximoHistorico > p.preco
   ? precoMaximoHistorico - p.preco
   : null;
@@ -338,21 +335,8 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
                 <button type="button" id="btn-expandir-grafico" class="btn-expandir-grafico">🔍 Expandir</button>
               )}
             </div>
-            {historico.length >= 2 && (
-              <div class="historico-resumo">
-                <div class="historico-resumo-atual">
-                  <span class="historico-resumo-label">Preço atual</span>
-                  <div class="historico-resumo-linha-valor">
-                    <span class="historico-resumo-valor">{formatarPreco(p.preco)}</span>
-                    {quedaPercentual != null && (
-                      <span class="historico-resumo-queda">▼ {quedaPercentual}% de queda</span>
-                    )}
-                  </div>
-                  {p.atualizado_em && (
-                    <span class="historico-resumo-atualizado">Última atualização: {new Date(p.atualizado_em).toLocaleDateString("pt-BR")}</span>
-                  )}
-                </div>
-              </div>
+            {historico.length >= 2 && p.atualizado_em && (
+              <span class="historico-resumo-atualizado">Última atualização: {new Date(p.atualizado_em).toLocaleDateString("pt-BR")}</span>
             )}
             <div id="grafico-container" set:html={graficoSVG}></div>
 
