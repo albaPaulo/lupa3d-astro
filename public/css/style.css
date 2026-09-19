@@ -1007,12 +1007,12 @@ header.topo {
 
 .badge-menor-preco {
   position: absolute;
-  top: 4.9rem;
-  right: 0.5rem;
+  top: 2.1rem;
+  left: 0.5rem;
   z-index: 1;
-  background: var(--cor-favorito);
-  border: 1px solid var(--cor-favorito);
-  color: white;
+  background: white;
+  border: 1px solid var(--cor-borda);
+  color: #1a1a1a;
   font-size: 0.65rem;
   font-weight: 700;
   padding: 0.2rem 0.5rem;
@@ -3065,7 +3065,6 @@ header.topo {
    contra as regras originais (mesma especificidade, ordem decide). */
 @media (prefers-color-scheme: dark) {
   :root:not([data-tema="claro"]) .btn-favorito.ativo,
-  :root:not([data-tema="claro"]) .badge-menor-preco,
   :root:not([data-tema="claro"]) .badge-menor-preco-titulo {
     color: #1a1a1a;
   }
@@ -3079,7 +3078,6 @@ header.topo {
 }
 
 :root[data-tema="escuro"] .btn-favorito.ativo,
-:root[data-tema="escuro"] .badge-menor-preco,
 :root[data-tema="escuro"] .badge-menor-preco-titulo,
 :root[data-tema="escuro"] .logo-lupa3d span,
 :root[data-tema="escuro"] .barra-comparacao .principal {
