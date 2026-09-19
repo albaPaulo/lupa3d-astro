@@ -32,6 +32,28 @@ function registrarClique(produtoId) {
   }).catch((e) => console.error("Falha ao registrar clique:", e));
 }
 
+// Fire-and-forget, mesmo padrão de registrarClique — só coleta pra dar pra
+// calcular taxa de conversão (cliques / visualizações) por produto mais pra
+// frente, quando o tráfego crescer. Chamado uma vez por carregamento da
+// página do produto (não por card na listagem).
+function registrarVisualizacao(produtoId) {
+  try {
+    if (sessionStorage.getItem("lupa3d_admin_session")) return;
+  } catch {}
+
+  const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.LUPA3D_CONFIG;
+  fetch(`${SUPABASE_URL}/rest/v1/visualizacoes_produto`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify({ produto_id: produtoId }),
+  }).catch((e) => console.error("Falha ao registrar visualização:", e));
+}
+
 function escapeHTMLJS(valor) {
   if (valor == null) return "";
   const mapa = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };

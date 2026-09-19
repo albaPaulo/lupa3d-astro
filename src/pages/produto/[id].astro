@@ -442,6 +442,12 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
   <script is:inline defer src="/js/config.js"></script>
   <script is:inline defer src="/js/favoritos.js"></script>
   <script is:inline defer src="/js/interativo.js"></script>
+  <script is:inline define:vars={{ produtoId: p.id }}>
+    // "defer" não tem efeito em script inline (só em script com src) — sem
+    // esse listener, isso roda antes do interativo.js (que é deferred de
+    // verdade) terminar de carregar, e registrarVisualizacao ainda não existe.
+    document.addEventListener("DOMContentLoaded", () => registrarVisualizacao(produtoId));
+  </script>
   <script>
     // Não é is:inline (precisa passar pelo bundler do Astro pra resolver o
     // import dinâmico de "html-to-image") — por isso o guard abaixo em vez
