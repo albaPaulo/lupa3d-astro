@@ -49,7 +49,7 @@ const produtosDiretos = produtos.filter((p) => !p.afiliado);
 const secoesPadrao = [
   {
     nome: "Mais vistos",
-    icone: "🔥",
+    icone: "👁️",
     verMaisHref: "/mais-clicados/",
     produtos: [...produtosDiretos]
       .filter((p) => (p.cliques_total || 0) > 0)
