@@ -1,5 +1,5 @@
 ---
-import { fetchProdutos, fetchLojas, LABEL_CATEGORIA } from "../../lib/supabase.js";
+import { fetchProdutos, fetchLojas, LABEL_CATEGORIA, normalizarBusca } from "../../lib/supabase.js";
 import Footer from "../../components/Footer.astro";
 import GlobalStyles from "../../components/GlobalStyles.astro";
 
@@ -8,6 +8,10 @@ const [produtos, lojasConfig] = await Promise.all([fetchProdutos(), fetchLojas()
 const contagemPorLoja = new Map();
 const contagemPixPorLoja = new Map();
 const categoriasPorLojaMap = new Map();
+// Nomes de produto normalizados (sem acento, minúsculo) por loja — usado na
+// busca abaixo pra achar "em qual loja tem X" sem precisar ir em /categoria/
+// primeiro e ler o nome da loja em cada card.
+const produtosBuscaPorLojaMap = new Map();
 for (const p of produtos) {
   contagemPorLoja.set(p.loja, (contagemPorLoja.get(p.loja) || 0) + 1);
   const temPix = p.preco_pix != null && Number(p.preco_pix) < Number(p.preco);
@@ -16,6 +20,8 @@ for (const p of produtos) {
     if (!categoriasPorLojaMap.has(p.loja)) categoriasPorLojaMap.set(p.loja, new Set());
     categoriasPorLojaMap.get(p.loja).add(p.categoria);
   }
+  if (!produtosBuscaPorLojaMap.has(p.loja)) produtosBuscaPorLojaMap.set(p.loja, []);
+  produtosBuscaPorLojaMap.get(p.loja).push(normalizarBusca(p.nome));
 }
 const nomesLojas = [...contagemPorLoja.keys()].sort();
 // Nicho da loja: quais categorias ela de fato vende (não é campo cadastrado,
@@ -67,6 +73,13 @@ const estados = [...new Set(lojasConfig.flatMap(estadosDeLoja))].sort();
   <main class="lojas-pagina">
     <h1 class="lojas-titulo">Lojas</h1>
 
+    <div class="busca-solo">
+      <div class="busca-grande">
+        <span class="busca-icone" aria-hidden="true">🔍</span>
+        <input type="search" id="lojas-busca" placeholder="Pesquisar por loja ou produto..." aria-label="Buscar loja ou produto" autocomplete="off" />
+      </div>
+    </div>
+
     <div class="lojas-filtros">
       {estados.length > 0 && (
         <div class="lojas-filtro-estado" role="group" aria-label="Filtrar por estado">
@@ -101,6 +114,8 @@ const estados = [...new Set(lojasConfig.flatMap(estadosDeLoja))].sort();
             class="loja-card"
             data-estados={ufsLoja.join(",")}
             data-categorias={categoriasLoja.join(",")}
+            data-nome-busca={normalizarBusca(nome)}
+            data-produtos-busca={(produtosBuscaPorLojaMap.get(nome) || []).join("|")}
           >
             <div class="loja-card-logo-wrap">
               {cfg?.logo_url ? (
@@ -124,6 +139,17 @@ const estados = [...new Set(lojasConfig.flatMap(estadosDeLoja))].sort();
   <script is:inline>
     let lojasFiltroEstado = "";
     let lojasFiltroCategoria = "";
+    let lojasBusca = "";
+
+    // Cópia local do normalizarBusca de src/lib/supabase.js — esse script é
+    // is:inline (roda antes do interativo.js, que é deferred) então não dá
+    // pra depender da função equivalente de lá.
+    function normalizarBuscaLojas(texto) {
+      return (texto || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "");
+    }
 
     function aplicarFiltrosLojas() {
       const cards = [...document.querySelectorAll("#lojas-grid .loja-card")];
@@ -133,12 +159,21 @@ const estados = [...new Set(lojasConfig.flatMap(estadosDeLoja))].sort();
         const categoriasCard = (card.dataset.categorias || "").split(",").filter(Boolean);
         const okEstado = !lojasFiltroEstado || ufsCard.includes(lojasFiltroEstado);
         const okCategoria = !lojasFiltroCategoria || categoriasCard.includes(lojasFiltroCategoria);
-        const mostra = okEstado && okCategoria;
+        const okBusca =
+          !lojasBusca ||
+          card.dataset.nomeBusca.includes(lojasBusca) ||
+          (card.dataset.produtosBusca || "").split("|").some((nome) => nome.includes(lojasBusca));
+        const mostra = okEstado && okCategoria && okBusca;
         card.classList.toggle("oculto-tela", !mostra);
         if (mostra) visiveis++;
       });
       document.getElementById("lojas-vazio").classList.toggle("oculto-tela", visiveis > 0);
     }
+
+    document.getElementById("lojas-busca")?.addEventListener("input", (ev) => {
+      lojasBusca = normalizarBuscaLojas(ev.target.value.trim());
+      aplicarFiltrosLojas();
+    });
 
     document.querySelectorAll(".lojas-filtro-estado-chip").forEach((chip) => {
       chip.addEventListener("click", () => {
