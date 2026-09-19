@@ -2174,10 +2174,16 @@ header.topo {
 
 .produto-preco-alvo-form {
   display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.produto-preco-alvo-linha {
+  display: flex;
   gap: 0.4rem;
 }
 
-.produto-preco-alvo-form .input-preco-alvo {
+.produto-preco-alvo-linha .input-preco-alvo {
   flex: 1;
   min-width: 0;
   padding: 0.4rem 0.6rem;
@@ -2187,6 +2193,15 @@ header.topo {
   color: var(--cor-texto);
   font-size: 0.85rem;
 }
+
+.produto-preco-alvo-ou {
+  margin: 0;
+  font-size: 0.75rem;
+  opacity: 0.75;
+  text-align: center;
+}
+
+.produto-preco-alvo-ou a { color: var(--cor-marca); font-weight: 600; }
 
 .btn-preco-alvo-salvar {
   background: var(--cor-marca);
