@@ -507,9 +507,12 @@ header.topo {
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+  gap: 0.3rem;
   flex-shrink: 0;
   white-space: nowrap;
 }
+
+.aba-telegram-icone { width: 0.95rem; height: 0.95rem; flex-shrink: 0; }
 
 /* Fallback pra quando o botão de tema é injetado fora de .abas (ex: página
    de lojas, que não tem essa nav) — dentro de .abas, a regra ".abas button"

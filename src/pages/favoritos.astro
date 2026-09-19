@@ -2,6 +2,7 @@
 import BarraComparacao from "../components/BarraComparacao.astro";
 import Footer from "../components/Footer.astro";
 import GlobalStyles from "../components/GlobalStyles.astro";
+import IconeTelegram from "../components/IconeTelegram.astro";
 import { ICONES_COMPARTILHAR } from "../lib/compartilhar.js";
 
 // Os ícones em si são estáticos (não dependem de dado nenhum), mas a URL de
@@ -44,6 +45,7 @@ const redesCompartilhar = Object.entries(ICONES_COMPARTILHAR).map(([rede, icone]
         <a href="/ofertas/">🔥 Ofertas</a>
         <a href="/lojas/">🏬 Lojas</a>
         <a href="/sugestoes/">💡 Sugestões</a>
+        <a href="https://t.me/lupa3d" target="_blank" rel="noopener"><IconeTelegram class="aba-telegram-icone" /> Ofertas no Telegram</a>
       </nav>
     </div>
     <div id="filtros-ativos" class="filtros-ativos"></div>

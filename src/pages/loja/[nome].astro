@@ -5,6 +5,7 @@ import IconeResina from "../../components/IconeResina.astro";
 import BarraComparacao from "../../components/BarraComparacao.astro";
 import Footer from "../../components/Footer.astro";
 import GlobalStyles from "../../components/GlobalStyles.astro";
+import IconeTelegram from "../../components/IconeTelegram.astro";
 import {
   fetchProdutos,
   fetchLojas,
@@ -116,6 +117,7 @@ const ufsLoja = (loja?.estado || "").split(",").map((uf) => uf.trim().toUpperCas
         <a href="/lojas/">🏬 Lojas</a>
         <a href="/favoritos/">♡ Favoritos (<span data-contador-favoritos>0</span>)</a>
         <a href="/sugestoes/">💡 Sugestões</a>
+        <a href="https://t.me/lupa3d" target="_blank" rel="noopener"><IconeTelegram class="aba-telegram-icone" /> Ofertas no Telegram</a>
       </nav>
     </div>
   </header>
