@@ -5,6 +5,9 @@ const { p, menorPreco = null, produtoNovo = null, precoAnterior = null } = Astro
 const material = materialEfetivo(p) || "";
 const kit = kitEfetivo(p);
 const temPix = p.preco_pix != null && Number(p.preco_pix) < Number(p.preco);
+const descontoPercentual = precoAnterior && precoAnterior > p.preco
+  ? Math.round(((precoAnterior - p.preco) / precoAnterior) * 100)
+  : null;
 ---
 <article
   class="card"
@@ -36,7 +39,12 @@ const temPix = p.preco_pix != null && Number(p.preco_pix) < Number(p.preco);
     <h3 class="card-nome">{p.nome}</h3>
     {material && <span class="card-material">{material}</span>}
     <div class="card-precos">
-      {precoAnterior && <span class="card-preco-anterior">{formatarPreco(precoAnterior)}</span>}
+      {precoAnterior && (
+        <div class="card-preco-linha-anterior">
+          <span class="card-preco-anterior">{formatarPreco(precoAnterior)}</span>
+          {descontoPercentual && <span class="card-desconto">-{descontoPercentual}%</span>}
+        </div>
+      )}
       <span class="card-preco">{formatarPreco(p.preco)}</span>
       {temPix && <span class="card-preco-pix">{formatarPreco(p.preco_pix)} no Pix</span>}
     </div>
