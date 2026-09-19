@@ -3088,6 +3088,16 @@ header.topo {
   text-decoration: underline;
 }
 
+.rodape-telegram {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 700;
+  color: #26A5E4 !important;
+}
+
+.rodape-telegram-icone { width: 1.1rem; height: 1.1rem; flex-shrink: 0; }
+
 /* --cor-favorito fica mais clara no modo escuro (pra ler bem como texto
    sobre o card escuro) — nesses três casos ela é usada como fundo sólido,
    então o texto branco padrão perderia contraste; troca pra texto escuro.

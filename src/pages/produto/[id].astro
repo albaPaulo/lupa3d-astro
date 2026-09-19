@@ -2,6 +2,7 @@
 import BarraComparacao from "../../components/BarraComparacao.astro";
 import ParecidoItem from "../../components/ParecidoItem.astro";
 import ProductCard from "../../components/ProductCard.astro";
+import IconeTelegram from "../../components/IconeTelegram.astro";
 import Footer from "../../components/Footer.astro";
 import GlobalStyles from "../../components/GlobalStyles.astro";
 import {
@@ -364,7 +365,7 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
                   <button type="button" class="btn-preco-alvo-salvar">Salvar</button>
                 </div>
                 <p class="produto-preco-alvo-ou">
-                  ou <a href="https://t.me/lupa3d" target="_blank" rel="noopener">✈️ entre no canal do Telegram</a> pra ver essa e outras quedas de preço
+                  ou <a href="https://t.me/lupa3d" target="_blank" rel="noopener" class="rodape-telegram"><IconeTelegram class="rodape-telegram-icone" /> entre no canal do Telegram</a> pra ver essa e outras quedas de preço
                 </p>
               </div>
               <div class="produto-preco-alvo-ativo oculto-tela">
