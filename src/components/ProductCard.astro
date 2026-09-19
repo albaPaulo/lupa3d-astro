@@ -23,8 +23,8 @@ const temPix = p.preco_pix != null && Number(p.preco_pix) < Number(p.preco);
   {p.destaque && <span class="badge-destaque">🔥</span>}
   {kit && <span class="badge-kit">Kit/Combo</span>}
   {p.afiliado && <span class="badge-afiliado" title="Link de afiliado — o LUPA3D pode receber uma comissão nessa compra, sem custo extra pra você">Afiliado</span>}
-  {menorPreco && <span class="badge-menor-preco">{menorPreco.icone ? `${menorPreco.icone} ` : ""}{menorPreco.label || `Menor preço em ${menorPreco.dias} dias`}</span>}
-  {produtoNovo && <span class="badge-produto-novo">{produtoNovo.icone ? `${produtoNovo.icone} ` : ""}{produtoNovo.label || "Novo"}</span>}
+  {menorPreco && <span class="badge-menor-preco" title={menorPreco.descricao || undefined}>{menorPreco.icone ? `${menorPreco.icone} ` : ""}{menorPreco.label || `Menor preço em ${menorPreco.dias} dias`}</span>}
+  {produtoNovo && <span class="badge-produto-novo" title={produtoNovo.descricao || undefined}>{produtoNovo.icone ? `${produtoNovo.icone} ` : ""}{produtoNovo.label || "Novo"}</span>}
   <div class="card-imagem">
     {p.imagem_url ? (
       <img src={otimizarImagem(p.imagem_url, 400)} alt={p.nome} loading="lazy" referrerpolicy="no-referrer" />

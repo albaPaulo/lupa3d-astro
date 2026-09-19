@@ -2601,6 +2601,7 @@ header.topo {
 
 .config-badge-item-icone { font-size: 1.1rem; }
 .config-badge-item-texto { flex: 1; font-size: 0.85rem; }
+.config-badge-item-descricao { cursor: help; opacity: 0.6; }
 
 .config-badge-item button {
   font-size: 0.8rem;
@@ -2614,7 +2615,7 @@ header.topo {
 
 .config-badges-novo {
   display: grid;
-  grid-template-columns: 4rem 6rem 1fr auto;
+  grid-template-columns: 4rem 6rem 1fr 1fr auto;
   gap: 0.5rem;
 }
 

@@ -292,7 +292,7 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
             <span class="card-loja-nome-texto">{p.loja}</span>
             <a href={`/loja/${p.loja}/`} class="produto-vendido-ver-mais">Ver página da loja</a>
             {menorPreco && (
-              <span class="produto-vendido-menor-preco">{menorPreco.icone ? `${menorPreco.icone} ` : "👍 "}{menorPreco.label || `Menor preço em ${menorPreco.dias} dias`}</span>
+              <span class="produto-vendido-menor-preco" title={menorPreco.descricao || undefined}>{menorPreco.icone ? `${menorPreco.icone} ` : "👍 "}{menorPreco.label || `Menor preço em ${menorPreco.dias} dias`}</span>
             )}
             <div class="card-precos">
               {precoAnterior && (

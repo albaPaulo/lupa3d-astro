@@ -58,11 +58,13 @@ const admEls = {
   badgeNovoIcone: document.getElementById("badge-novo-icone"),
   badgeNovoDias: document.getElementById("badge-novo-dias"),
   badgeNovoLabel: document.getElementById("badge-novo-label"),
+  badgeNovoDescricao: document.getElementById("badge-novo-descricao"),
   btnAdicionarBadge: document.getElementById("btn-adicionar-badge"),
   badgesNovidadeLista: document.getElementById("config-badges-novidade-lista"),
   badgeNovidadeNovoIcone: document.getElementById("badge-novidade-novo-icone"),
   badgeNovidadeNovoDias: document.getElementById("badge-novidade-novo-dias"),
   badgeNovidadeNovoLabel: document.getElementById("badge-novidade-novo-label"),
+  badgeNovidadeNovoDescricao: document.getElementById("badge-novidade-novo-descricao"),
   btnAdicionarBadgeNovidade: document.getElementById("btn-adicionar-badge-novidade"),
   configStatus: document.getElementById("config-status"),
   busca: document.getElementById("admin-busca"),
@@ -112,7 +114,7 @@ const admEls = {
 // Fábrica reutilizada pelas duas listas de badges (menor preço / produto
 // novo) — mesma UI de adicionar/remover linhas, só muda onde guarda os dados
 // e o texto padrão exibido quando a linha não tem um texto customizado.
-function criarEditorBadges({ elLista, elIcone, elDias, elLabel, elBtnAdicionar, getLista, setLista, textoPadrao, iconePadrao }) {
+function criarEditorBadges({ elLista, elIcone, elDias, elLabel, elDescricao, elBtnAdicionar, getLista, setLista, textoPadrao, iconePadrao }) {
   function render() {
     const lista = getLista();
     elLista.innerHTML = lista.length
@@ -122,6 +124,7 @@ function criarEditorBadges({ elLista, elIcone, elDias, elLabel, elBtnAdicionar, 
       <div class="config-badge-item">
         <span class="config-badge-item-icone">${b.icone || iconePadrao}</span>
         <span class="config-badge-item-texto">${b.label ? `${b.label} <small>(${b.dias} dias)</small>` : textoPadrao(b.dias)}</span>
+        ${b.descricao ? `<span class="config-badge-item-descricao" title="${escapeHTML(b.descricao)}">💬</span>` : ""}
         <button type="button" data-remover-badge="${i}">Remover</button>
       </div>
     `
@@ -134,6 +137,7 @@ function criarEditorBadges({ elLista, elIcone, elDias, elLabel, elBtnAdicionar, 
     const icone = elIcone.value.trim();
     const dias = parseInt(elDias.value, 10);
     const label = elLabel.value.trim();
+    const descricao = elDescricao?.value.trim() || "";
 
     if (!dias || dias <= 0) {
       alert("Informe um número de dias válido.");
@@ -141,7 +145,7 @@ function criarEditorBadges({ elLista, elIcone, elDias, elLabel, elBtnAdicionar, 
     }
 
     const lista = getLista();
-    lista.push({ dias, icone: icone || iconePadrao, label });
+    lista.push({ dias, icone: icone || iconePadrao, label, descricao });
     lista.sort((a, b) => a.dias - b.dias);
     setLista(lista);
     render();
@@ -149,6 +153,7 @@ function criarEditorBadges({ elLista, elIcone, elDias, elLabel, elBtnAdicionar, 
     elIcone.value = "";
     elDias.value = "";
     elLabel.value = "";
+    if (elDescricao) elDescricao.value = "";
   });
 
   elLista.addEventListener("click", (ev) => {
@@ -168,6 +173,7 @@ const editorMenorPreco = criarEditorBadges({
   elIcone: admEls.badgeNovoIcone,
   elDias: admEls.badgeNovoDias,
   elLabel: admEls.badgeNovoLabel,
+  elDescricao: admEls.badgeNovoDescricao,
   elBtnAdicionar: admEls.btnAdicionarBadge,
   getLista: () => MENOR_PRECO_BADGES_ATUAL,
   setLista: (l) => (MENOR_PRECO_BADGES_ATUAL = l),
@@ -180,6 +186,7 @@ const editorProdutoNovo = criarEditorBadges({
   elIcone: admEls.badgeNovidadeNovoIcone,
   elDias: admEls.badgeNovidadeNovoDias,
   elLabel: admEls.badgeNovidadeNovoLabel,
+  elDescricao: admEls.badgeNovidadeNovoDescricao,
   elBtnAdicionar: admEls.btnAdicionarBadgeNovidade,
   getLista: () => PRODUTO_NOVO_BADGES_ATUAL,
   setLista: (l) => (PRODUTO_NOVO_BADGES_ATUAL = l),
