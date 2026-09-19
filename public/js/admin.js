@@ -103,6 +103,8 @@ const admEls = {
   analyticsGraficoDias: document.getElementById("analytics-grafico-dias"),
   analyticsTopProdutos: document.getElementById("analytics-top-produtos"),
   analyticsPorLoja: document.getElementById("analytics-por-loja"),
+  analyticsMaisComparados: document.getElementById("analytics-mais-comparados"),
+  analyticsMaisAlertas: document.getElementById("analytics-mais-alertas"),
   sugestoesLista: document.getElementById("sugestoes-lista"),
 };
 
@@ -571,6 +573,63 @@ function graficoBarrasDiasSVG(dados) {
   `;
 }
 
+async function buscarTudoPaginado(caminhoSelect) {
+  const TAMANHO_PAGINA = 1000;
+  const todos = [];
+  let offset = 0;
+  while (true) {
+    const resp = await fetchAdmin(caminhoSelect, { headers: { Range: `${offset}-${offset + TAMANHO_PAGINA - 1}` } });
+    if (!resp.ok) throw new Error(await resp.text());
+    const lote = await resp.json();
+    todos.push(...lote);
+    if (lote.length < TAMANHO_PAGINA) break;
+    offset += TAMANHO_PAGINA;
+  }
+  return todos;
+}
+
+// Conta ocorrências de cada produto_id num array de linhas e monta o rótulo
+// "nome (loja)" a partir do catálogo já carregado — mesmo formato do top10
+// de cliques, pra reaproveitar renderizarListaRanking().
+function rankearPorProduto(contagemPorId) {
+  const porId = new Map(PRODUTOS_ADMIN.map((p) => [p.id, p]));
+  return [...contagemPorId.entries()]
+    .map(([id, valor]) => {
+      const p = porId.get(id);
+      return { valor, rotulo: p ? `${p.nome} (${p.loja})` : `Produto #${id}` };
+    })
+    .sort((a, b) => b.valor - a.valor)
+    .slice(0, 10);
+}
+
+async function carregarMaisComparados() {
+  admEls.analyticsMaisComparados.innerHTML = `<p class="admin-status">Carregando...</p>`;
+  try {
+    const linhas = await buscarTudoPaginado("/rest/v1/comparacoes?select=produto_ids");
+    const contagem = new Map();
+    for (const { produto_ids } of linhas) {
+      for (const id of produto_ids || []) contagem.set(id, (contagem.get(id) || 0) + 1);
+    }
+    renderizarListaRanking(admEls.analyticsMaisComparados, rankearPorProduto(contagem));
+  } catch (e) {
+    admEls.analyticsMaisComparados.innerHTML = `<p class="admin-status">Não foi possível carregar as comparações.</p>`;
+    console.error(e);
+  }
+}
+
+async function carregarMaisAlertas() {
+  admEls.analyticsMaisAlertas.innerHTML = `<p class="admin-status">Carregando...</p>`;
+  try {
+    const linhas = await buscarTudoPaginado("/rest/v1/alertas_preco?select=produto_id");
+    const contagem = new Map();
+    for (const { produto_id } of linhas) contagem.set(produto_id, (contagem.get(produto_id) || 0) + 1);
+    renderizarListaRanking(admEls.analyticsMaisAlertas, rankearPorProduto(contagem));
+  } catch (e) {
+    admEls.analyticsMaisAlertas.innerHTML = `<p class="admin-status">Não foi possível carregar os alertas de preço.</p>`;
+    console.error(e);
+  }
+}
+
 function renderizarListaRanking(el, itens) {
   const max = Math.max(...itens.map((i) => i.valor), 1);
   el.innerHTML = itens.length
@@ -614,6 +673,9 @@ async function carregarAnalytics() {
     admEls.analyticsGraficoDias.innerHTML = `<p class="grafico-vazio">Não foi possível carregar os cliques por dia.</p>`;
     console.error(e);
   }
+
+  carregarMaisComparados();
+  carregarMaisAlertas();
 }
 
 async function carregarLojas() {
