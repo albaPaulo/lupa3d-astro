@@ -145,8 +145,11 @@ function criarEditorBadges({ elLista, elIcone, elDias, elLabel, elDescricao, elB
       return;
     }
 
+    // Emoji é opcional de verdade: fica vazio se não for preenchido, em vez
+    // de cair num ícone padrão — iconePadrao só é usado como preview no item
+    // da lista abaixo (render()), não é salvo se o campo ficar em branco.
     const lista = getLista();
-    lista.push({ dias, icone: icone || iconePadrao, label, descricao });
+    lista.push({ dias, icone, label, descricao });
     lista.sort((a, b) => a.dias - b.dias);
     setLista(lista);
     render();

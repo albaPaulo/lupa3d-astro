@@ -2001,7 +2001,7 @@ header.topo {
 }
 
 .badge-menor-preco-titulo,
-.badge-novo-titulo {
+.badge-produto-novo-titulo {
   display: inline-block;
   font-size: 0.7rem;
   font-weight: 700;
@@ -2013,7 +2013,7 @@ header.topo {
 }
 
 .badge-menor-preco-titulo { background: var(--cor-favorito); border: 1px solid var(--cor-favorito); }
-.badge-novo-titulo { background: #16a34a; border: 1px solid #16a34a; }
+.badge-produto-novo-titulo { background: #16a34a; border: 1px solid #16a34a; }
 
 .produto-grid {
   display: grid;
