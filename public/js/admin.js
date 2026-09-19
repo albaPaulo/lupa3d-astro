@@ -107,6 +107,7 @@ const admEls = {
   analyticsPorLoja: document.getElementById("analytics-por-loja"),
   analyticsMaisComparados: document.getElementById("analytics-mais-comparados"),
   analyticsMaisAlertas: document.getElementById("analytics-mais-alertas"),
+  analyticsTermosBusca: document.getElementById("analytics-termos-busca"),
   btnAtivarAlertaScraper: document.getElementById("btn-ativar-alerta-scraper"),
   sugestoesLista: document.getElementById("sugestoes-lista"),
 };
@@ -638,6 +639,30 @@ async function carregarMaisAlertas() {
   }
 }
 
+// Agrupa por termo normalizado (minúsculo, sem espaço nas pontas) — sem
+// isso "PLA preto", "pla preto " e "Pla Preto" contariam como buscas
+// diferentes em vez de somar na mesma.
+async function carregarTermosBusca() {
+  admEls.analyticsTermosBusca.innerHTML = `<p class="admin-status">Carregando...</p>`;
+  try {
+    const linhas = await buscarTudoPaginado("/rest/v1/termos_busca?select=termo");
+    const contagem = new Map();
+    for (const { termo } of linhas) {
+      const chave = (termo || "").trim().toLowerCase();
+      if (!chave) continue;
+      contagem.set(chave, (contagem.get(chave) || 0) + 1);
+    }
+    const itens = [...contagem.entries()]
+      .map(([termo, valor]) => ({ rotulo: termo, valor }))
+      .sort((a, b) => b.valor - a.valor)
+      .slice(0, 10);
+    renderizarListaRanking(admEls.analyticsTermosBusca, itens);
+  } catch (e) {
+    admEls.analyticsTermosBusca.innerHTML = `<p class="admin-status">Não foi possível carregar os termos de busca.</p>`;
+    console.error(e);
+  }
+}
+
 function renderizarListaRanking(el, itens) {
   const max = Math.max(...itens.map((i) => i.valor), 1);
   el.innerHTML = itens.length
@@ -738,6 +763,7 @@ async function carregarAnalytics() {
 
   carregarMaisComparados();
   carregarMaisAlertas();
+  carregarTermosBusca();
 }
 
 async function carregarLojas() {
