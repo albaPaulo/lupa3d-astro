@@ -115,7 +115,7 @@ const admEls = {
 // Fábrica reutilizada pelas duas listas de badges (menor preço / produto
 // novo) — mesma UI de adicionar/remover linhas, só muda onde guarda os dados
 // e o texto padrão exibido quando a linha não tem um texto customizado.
-function criarEditorBadges({ elLista, elIcone, elDias, elLabel, elDescricao, elBtnAdicionar, getLista, setLista, textoPadrao, iconePadrao }) {
+function criarEditorBadges({ elLista, elIcone, elDias, elLabel, elDescricao, elBtnAdicionar, getLista, setLista, textoPadrao }) {
   function render() {
     const lista = getLista();
     elLista.innerHTML = lista.length
@@ -123,7 +123,7 @@ function criarEditorBadges({ elLista, elIcone, elDias, elLabel, elDescricao, elB
           .map(
             (b, i) => `
       <div class="config-badge-item">
-        <span class="config-badge-item-icone">${b.icone || iconePadrao}</span>
+        <span class="config-badge-item-icone${b.icone ? "" : " config-badge-item-icone-vazio"}" title="${b.icone ? "" : "Sem emoji cadastrado"}">${b.icone || "—"}</span>
         <span class="config-badge-item-texto">${b.label ? `${b.label} <small>(${b.dias} dias)</small>` : textoPadrao(b.dias)}</span>
         ${b.descricao ? `<span class="config-badge-item-descricao" title="${escapeHTML(b.descricao)}">💬</span>` : ""}
         <button type="button" data-remover-badge="${i}">Remover</button>
@@ -146,8 +146,8 @@ function criarEditorBadges({ elLista, elIcone, elDias, elLabel, elDescricao, elB
     }
 
     // Emoji é opcional de verdade: fica vazio se não for preenchido, em vez
-    // de cair num ícone padrão — iconePadrao só é usado como preview no item
-    // da lista abaixo (render()), não é salvo se o campo ficar em branco.
+    // de cair num ícone padrão — o item na lista abaixo (render()) mostra
+    // "—" quando não tem emoji, pra não parecer que tem um salvo sem ter.
     const lista = getLista();
     lista.push({ dias, icone, label, descricao });
     lista.sort((a, b) => a.dias - b.dias);
@@ -182,7 +182,6 @@ const editorMenorPreco = criarEditorBadges({
   getLista: () => MENOR_PRECO_BADGES_ATUAL,
   setLista: (l) => (MENOR_PRECO_BADGES_ATUAL = l),
   textoPadrao: (dias) => `Menor preço em ${dias} dias`,
-  iconePadrao: "🔥",
 });
 
 const editorProdutoNovo = criarEditorBadges({
@@ -195,7 +194,6 @@ const editorProdutoNovo = criarEditorBadges({
   getLista: () => PRODUTO_NOVO_BADGES_ATUAL,
   setLista: (l) => (PRODUTO_NOVO_BADGES_ATUAL = l),
   textoPadrao: () => "Novo",
-  iconePadrao: "🆕",
 });
 
 function ativarAba(nome) {
