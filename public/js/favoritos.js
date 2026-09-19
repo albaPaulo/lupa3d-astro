@@ -1,6 +1,7 @@
 const CHAVE_FAVORITOS = "lupa3d_favoritos";
 const CHAVE_COMPARACAO = "lupa3d_comparacao";
 const CHAVE_ALVOS = "lupa3d_alvos";
+const CHAVE_ALERTAS_ESTOQUE = "lupa3d_alertas_estoque";
 const MAX_COMPARACAO = 4;
 
 function _lerLista(chave) {
@@ -75,6 +76,26 @@ function definirAlvo(id, preco) {
   alvos[id] = preco;
   localStorage.setItem(CHAVE_ALVOS, JSON.stringify(alvos));
   if (!isFavorito(id)) toggleFavorito(id);
+}
+
+// Guarda localmente só pra saber que estado mostrar no botão ("já pedi" vs
+// "pedir") — alertas_estoque não tem policy de SELECT pra anon, então não
+// dá pra perguntar pro banco se já existe um alerta desse visitante.
+function getAlertasEstoque() {
+  return _lerLista(CHAVE_ALERTAS_ESTOQUE);
+}
+
+function temAlertaEstoque(id) {
+  return getAlertasEstoque().includes(id);
+}
+
+function adicionarAlertaEstoque(id) {
+  const lista = getAlertasEstoque();
+  if (!lista.includes(id)) _salvarLista(CHAVE_ALERTAS_ESTOQUE, [...lista, id]);
+}
+
+function removerAlertaEstoqueLocal(id) {
+  _salvarLista(CHAVE_ALERTAS_ESTOQUE, getAlertasEstoque().filter((x) => x !== id));
 }
 
 function removerAlvo(id) {

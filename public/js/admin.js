@@ -105,6 +105,7 @@ const admEls = {
   analyticsPorLoja: document.getElementById("analytics-por-loja"),
   analyticsMaisComparados: document.getElementById("analytics-mais-comparados"),
   analyticsMaisAlertas: document.getElementById("analytics-mais-alertas"),
+  btnAtivarAlertaScraper: document.getElementById("btn-ativar-alerta-scraper"),
   sugestoesLista: document.getElementById("sugestoes-lista"),
 };
 
@@ -647,6 +648,60 @@ function renderizarListaRanking(el, itens) {
     : `<p class="admin-status">Sem dados ainda.</p>`;
 }
 
+function base64UrlParaUint8ArrayAdmin(base64Url) {
+  const padding = "=".repeat((4 - (base64Url.length % 4)) % 4);
+  const base64 = (base64Url + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const bruto = atob(base64);
+  return Uint8Array.from([...bruto].map((c) => c.charCodeAt(0)));
+}
+
+// Inscreve ESTE navegador pra receber push quando o scraper detectar uma
+// loja com queda suspeita de produtos coletados — mesma mecânica de push do
+// alerta de preço/estoque do visitante (interativo.js), mas guardada numa
+// tabela separada (push_admin) só acessível com o JWT do admin.
+async function ativarAlertaScraperAdmin() {
+  const btn = admEls.btnAtivarAlertaScraper;
+  if (!btn) return;
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+    alert("Seu navegador não suporta notificações push.");
+    return;
+  }
+
+  const textoOriginal = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Ativando...";
+  try {
+    const registro = await navigator.serviceWorker.register("/sw.js");
+    await navigator.serviceWorker.ready;
+    let inscricao = await registro.pushManager.getSubscription();
+    if (!inscricao) {
+      const permissao = await Notification.requestPermission();
+      if (permissao !== "granted") throw new Error("Permissão de notificação negada.");
+      inscricao = await registro.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: base64UrlParaUint8ArrayAdmin(window.LUPA3D_CONFIG.VAPID_PUBLIC_KEY),
+      });
+    }
+
+    const chaves = inscricao.toJSON().keys;
+    const resp = await fetchAdmin("/rest/v1/push_admin", {
+      method: "POST",
+      headers: { Prefer: "return=minimal" },
+      body: JSON.stringify({ push_endpoint: inscricao.endpoint, push_p256dh: chaves.p256dh, push_auth: chaves.auth }),
+    });
+    // 409 = essa inscrição (endpoint é único) já estava salva — trata como
+    // sucesso, não tem nada novo pra gravar.
+    if (!resp.ok && resp.status !== 409) throw new Error(await resp.text());
+
+    btn.textContent = "🔔 Alertas ativados neste navegador";
+  } catch (e) {
+    console.error(e);
+    btn.disabled = false;
+    btn.textContent = textoOriginal;
+    alert("Não foi possível ativar os alertas agora.");
+  }
+}
+
 async function carregarAnalytics() {
   const top10 = [...PRODUTOS_ADMIN]
     .filter((p) => p.cliques_total > 0)
@@ -1173,6 +1228,8 @@ function ligarEventosAdmin() {
     if (!btn) return;
     excluirSugestao(Number(btn.dataset.id));
   });
+
+  admEls.btnAtivarAlertaScraper?.addEventListener("click", ativarAlertaScraperAdmin);
 }
 
 async function iniciarPainel(email) {

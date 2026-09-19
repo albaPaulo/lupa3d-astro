@@ -54,6 +54,39 @@ function registrarVisualizacao(produtoId) {
   }).catch((e) => console.error("Falha ao registrar visualização:", e));
 }
 
+// Fire-and-forget, debounce grande (só depois que a pessoa para de digitar,
+// não uma linha por tecla) — o que as pessoas procuram, pra revelar demanda
+// por produto/marca que talvez nem esteja no catálogo ainda. Sem UI nenhuma
+// usando isso ainda, mesma decisão de comparações/visualizações.
+function registrarBusca(termo) {
+  const valor = (termo || "").trim();
+  if (valor.length < 2) return;
+  try {
+    if (sessionStorage.getItem("lupa3d_admin_session")) return;
+  } catch {}
+
+  const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.LUPA3D_CONFIG;
+  fetch(`${SUPABASE_URL}/rest/v1/termos_busca`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify({ termo: valor.slice(0, 200) }),
+  }).catch((e) => console.error("Falha ao registrar busca:", e));
+}
+
+// Liga em qualquer página com #busca, independente de ser a busca que
+// filtra a grade (ligarFiltros) ou a que redireciona pra categoria
+// (ligarBuscaComRedirecionamento) — não depende de qual das duas está ativa.
+function ligarRegistroBusca() {
+  const input = document.getElementById("busca");
+  if (!input) return;
+  input.addEventListener("input", debounce(() => registrarBusca(input.value), 1500));
+}
+
 function escapeHTMLJS(valor) {
   if (valor == null) return "";
   const mapa = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
@@ -1126,6 +1159,99 @@ async function removerAlertaPush(produtoId) {
   }
 }
 
+// Mesmo mecanismo de push do alerta de preço (obterInscricaoPush), tabela
+// separada (alertas_estoque) porque esse alerta é de disparo único: sem
+// coluna "notificado" pra resetar, o scraper apaga a linha assim que avisa.
+async function salvarAlertaEstoque(produtoId) {
+  const inscricao = await obterInscricaoPush();
+  if (!inscricao) return false;
+  try {
+    const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.LUPA3D_CONFIG;
+    const chaves = inscricao.toJSON().keys;
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/alertas_estoque`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify({
+        produto_id: produtoId,
+        push_endpoint: inscricao.endpoint,
+        push_p256dh: chaves.p256dh,
+        push_auth: chaves.auth,
+      }),
+    });
+    // 409 = já existe esse alerta pra esse produto+inscrição — não tem
+    // nenhum valor pra atualizar (ao contrário do preço-alvo), trata como ok.
+    return resp.ok || resp.status === 409;
+  } catch (e) {
+    console.error("Falha ao salvar alerta de estoque:", e);
+    return false;
+  }
+}
+
+async function removerAlertaEstoque(produtoId) {
+  if (!("serviceWorker" in navigator)) return;
+  try {
+    const registro = await navigator.serviceWorker.ready;
+    const inscricao = await registro.pushManager.getSubscription();
+    if (!inscricao) return;
+    const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.LUPA3D_CONFIG;
+    await fetch(
+      `${SUPABASE_URL}/rest/v1/alertas_estoque?produto_id=eq.${produtoId}&push_endpoint=eq.${encodeURIComponent(inscricao.endpoint)}`,
+      {
+        method: "DELETE",
+        headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, Prefer: "return=minimal" },
+      }
+    );
+  } catch (e) {
+    console.error("Falha ao remover alerta de estoque:", e);
+  }
+}
+
+// Só existe na página de produto quando ele está indisponível no momento
+// (ver marcação condicional em produto/[id].astro).
+function ligarAlertaEstoque() {
+  const bloco = document.querySelector(".produto-alerta-estoque");
+  if (!bloco) return;
+
+  const id = Number(bloco.dataset.id);
+  const btnPedir = bloco.querySelector(".btn-alerta-estoque-pedir");
+  const caixaAtiva = bloco.querySelector(".produto-alerta-estoque-ativo");
+  const btnRemover = bloco.querySelector(".btn-alerta-estoque-remover");
+  const textoPedirOriginal = btnPedir.textContent;
+
+  function renderizar() {
+    const ativo = temAlertaEstoque(id);
+    btnPedir.classList.toggle("oculto-tela", ativo);
+    caixaAtiva.classList.toggle("oculto-tela", !ativo);
+  }
+
+  btnPedir.addEventListener("click", async () => {
+    btnPedir.disabled = true;
+    btnPedir.textContent = "Ativando...";
+    const ok = await salvarAlertaEstoque(id);
+    btnPedir.disabled = false;
+    btnPedir.textContent = textoPedirOriginal;
+    if (ok) {
+      adicionarAlertaEstoque(id);
+      renderizar();
+    } else {
+      alert("Não foi possível ativar o alerta agora — seu navegador pode não suportar notificações push.");
+    }
+  });
+
+  btnRemover.addEventListener("click", () => {
+    removerAlertaEstoqueLocal(id);
+    removerAlertaEstoque(id);
+    renderizar();
+  });
+
+  renderizar();
+}
+
 // Só existe na página de produto — permite pedir pra ver um aviso quando o
 // preço chegar num valor específico (usa o mesmo mecanismo de favoritos:
 // definirAlvo já favorita o produto, e é /favoritos/ que checa o alvo toda
@@ -1198,5 +1324,7 @@ ligarMenuMobile();
 ligarBotaoTopo();
 ligarBotaoSugestao();
 ligarPrecoAlvo();
+ligarAlertaEstoque();
+ligarRegistroBusca();
 aplicarFiltros(true);
 verificarConfigSite();

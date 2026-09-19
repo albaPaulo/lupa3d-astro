@@ -2078,6 +2078,8 @@ header.topo {
   margin-bottom: 0.75rem;
 }
 
+.produto-alerta-estoque { margin-bottom: 0.75rem; }
+
 .produto-vendido-menor-preco {
   display: inline-flex;
   align-items: center;

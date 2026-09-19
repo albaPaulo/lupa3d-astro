@@ -272,6 +272,18 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
             {!p.disponivel && (
               <div class="produto-indisponivel-aviso">⚠️ Indisponível no momento nessa loja</div>
             )}
+            {!p.disponivel && (
+              <div class="produto-alerta-estoque" data-id={p.id}>
+                <button type="button" class="btn-preco-alvo-toggle btn-alerta-estoque-pedir">
+                  <span class="btn-preco-alvo-icone" aria-hidden="true">🔔</span>
+                  <span class="btn-preco-alvo-texto">Avisar quando voltar ao estoque</span>
+                </button>
+                <div class="produto-preco-alvo-ativo produto-alerta-estoque-ativo oculto-tela">
+                  <span>✓ Vamos te avisar quando voltar</span>
+                  <button type="button" class="btn-alerta-estoque-remover" aria-label="Cancelar alerta de estoque" title="Cancelar alerta de estoque">✕</button>
+                </div>
+              </div>
+            )}
             {loja?.logo_url && (
               <a href={`/loja/${p.loja}/`} class="produto-vendido-logo-link">
                 <img src={loja.logo_url} alt={`Logotipo da ${p.loja}`} class="produto-vendido-logo" referrerpolicy="no-referrer" />
