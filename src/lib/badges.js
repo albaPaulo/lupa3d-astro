@@ -21,18 +21,24 @@ export function badgesProdutoNovoDeConfig(config) {
   return parseBadges(config.produto_novo_badges, "asc");
 }
 
-// Produtos sem histórico suficiente no período são incluídos por padrão —
-// sem dado pra comparar, o preço atual é trivialmente o "menor" que se conhece.
+// Exige rastreamento desde pelo menos `dias` atrás (historico[0] é o ponto
+// mais antigo — fetchHistoricoTodos já vem ordenado capturado_em.asc) —
+// sem isso, um produto recém-adicionado bateria "recorde" trivialmente por
+// falta de dado pra desmentir, mesmo sem nunca ter sido comparado de
+// verdade contra o período inteiro configurado no badge.
 export function ehMenorPrecoEmDias(produto, dias, historicoPorProduto) {
   const historico = historicoPorProduto.get(produto.id);
-  if (!historico || historico.length === 0) return true;
+  if (!historico || historico.length === 0) return false;
 
   const desde = Date.now() - dias * 86400000;
+  const rastreadoDesde = new Date(historico[0].capturado_em).getTime();
+  if (rastreadoDesde > desde) return false;
+
   const precosNoPeriodo = historico
     .filter((h) => new Date(h.capturado_em).getTime() >= desde)
     .map((h) => Number(h.preco));
 
-  if (precosNoPeriodo.length === 0) return true;
+  if (precosNoPeriodo.length === 0) return false;
   return Number(produto.preco) <= Math.min(...precosNoPeriodo);
 }
 
