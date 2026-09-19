@@ -3,7 +3,7 @@
   --cor-texto: #1a1a1a;
   --cor-card: #ffffff;
   --cor-borda: #e2e2e5;
-  --cor-marca: #2563eb;
+  --cor-marca: #18181b;
   --cor-pix: #146b38;
   --cor-favorito: #b45309;
 }
@@ -19,7 +19,7 @@
     --cor-texto: #f0f0f0;
     --cor-card: #1c1c1f;
     --cor-borda: #2e2e33;
-    --cor-marca: #60a5fa;
+    --cor-marca: #e4e4e7;
     --cor-pix: #34d399;
     --cor-favorito: #fbbf24;
   }
@@ -30,7 +30,7 @@
   --cor-texto: #f0f0f0;
   --cor-card: #1c1c1f;
   --cor-borda: #2e2e33;
-  --cor-marca: #60a5fa;
+  --cor-marca: #e4e4e7;
   --cor-pix: #34d399;
   --cor-favorito: #fbbf24;
 }
@@ -1187,8 +1187,8 @@ header.topo {
   align-self: flex-start;
   align-items: center;
   gap: 0.2rem;
-  background: color-mix(in srgb, #2563eb 14%, var(--cor-card));
-  color: #2563eb;
+  background: color-mix(in srgb, var(--cor-marca) 14%, var(--cor-card));
+  color: var(--cor-marca);
   font-size: 0.72rem;
   font-weight: 700;
   padding: 0.15rem 0.55rem;
@@ -3146,9 +3146,31 @@ header.topo {
   }
 
   /* mesmo problema com --cor-marca: fica clara no escuro (pra texto sobre
-     o card), mas branco em cima dela como fundo sólido perde contraste. */
+     o card, já que virou grafite/preto na base), mas branco em cima dela
+     como fundo sólido perde contraste — todo botão/selo que usa
+     background: var(--cor-marca) + texto branco precisa entrar nessa
+     lista, senão o texto some no modo escuro. */
   :root:not([data-tema="claro"]) .logo-lupa3d span,
-  :root:not([data-tema="claro"]) .barra-comparacao .principal {
+  :root:not([data-tema="claro"]) .busca-grande .busca-icone,
+  :root:not([data-tema="claro"]) .abas button.ativa,
+  :root:not([data-tema="claro"]) .secao-home--neutro .secao-ver-mais,
+  :root:not([data-tema="claro"]) .subcategoria-pill.ativo,
+  :root:not([data-tema="claro"]) .barra-comparacao .principal,
+  :root:not([data-tema="claro"]) .badge-afiliado,
+  :root:not([data-tema="claro"]) .btn-comparar-toggle.ativo,
+  :root:not([data-tema="claro"]) .btn-ver-oferta,
+  :root:not([data-tema="claro"]) .btn-comprar,
+  :root:not([data-tema="claro"]) .btn-print-comparacao,
+  :root:not([data-tema="claro"]) .form-sugestao button,
+  :root:not([data-tema="claro"]) .btn-preco-alvo-salvar,
+  :root:not([data-tema="claro"]) .grafico-periodo-tab.ativo,
+  :root:not([data-tema="claro"]) .tag-admin,
+  :root:not([data-tema="claro"]) .admin-config-form button,
+  :root:not([data-tema="claro"]) .admin-login-caixa button,
+  :root:not([data-tema="claro"]) .admin-menu-item.ativo,
+  :root:not([data-tema="claro"]) .admin-btn-salvar,
+  :root:not([data-tema="claro"]) .loja-config-card button,
+  :root:not([data-tema="claro"]) .banner-aviso {
     color: #1a1a1a;
   }
 }
@@ -3156,7 +3178,26 @@ header.topo {
 :root[data-tema="escuro"] .btn-favorito.ativo,
 :root[data-tema="escuro"] .badge-menor-preco-titulo,
 :root[data-tema="escuro"] .logo-lupa3d span,
-:root[data-tema="escuro"] .barra-comparacao .principal {
+:root[data-tema="escuro"] .busca-grande .busca-icone,
+:root[data-tema="escuro"] .abas button.ativa,
+:root[data-tema="escuro"] .secao-home--neutro .secao-ver-mais,
+:root[data-tema="escuro"] .subcategoria-pill.ativo,
+:root[data-tema="escuro"] .barra-comparacao .principal,
+:root[data-tema="escuro"] .badge-afiliado,
+:root[data-tema="escuro"] .btn-comparar-toggle.ativo,
+:root[data-tema="escuro"] .btn-ver-oferta,
+:root[data-tema="escuro"] .btn-comprar,
+:root[data-tema="escuro"] .btn-print-comparacao,
+:root[data-tema="escuro"] .form-sugestao button,
+:root[data-tema="escuro"] .btn-preco-alvo-salvar,
+:root[data-tema="escuro"] .grafico-periodo-tab.ativo,
+:root[data-tema="escuro"] .tag-admin,
+:root[data-tema="escuro"] .admin-config-form button,
+:root[data-tema="escuro"] .admin-login-caixa button,
+:root[data-tema="escuro"] .admin-menu-item.ativo,
+:root[data-tema="escuro"] .admin-btn-salvar,
+:root[data-tema="escuro"] .loja-config-card button,
+:root[data-tema="escuro"] .banner-aviso {
   color: #1a1a1a;
 }
 
