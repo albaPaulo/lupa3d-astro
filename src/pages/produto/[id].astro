@@ -135,15 +135,21 @@ const periodosGrafico = DEFINICAO_PERIODOS_GRAFICO.filter((periodo) => diasDeHis
 // no gráfico inline da página, sem surpresa ao abrir o modal.
 const graficoModalPeriodos = [...periodosGrafico, { chave: "tudo", label: "Tudo", svg: graficoSVG }];
 const precoMaximoHistorico = historico.length > 0 ? Math.max(...historico.map((h) => h.preco)) : null;
+const precoMinimoHistorico = historico.length > 0 ? Math.min(...historico.map((h) => h.preco)) : null;
 const economiaValor = precoMaximoHistorico && precoMaximoHistorico > p.preco
   ? precoMaximoHistorico - p.preco
   : null;
 // Complemento honesto da caixa de economia: quando o preço atual É o maior
 // já registrado (subiu, não caiu), não tem economia nenhuma pra mostrar —
 // mas avisar que é o pior momento histórico pra comprar é uma informação
-// tão real quanto a de queda. Exige pelo menos 2 pontos de histórico, senão
-// "maior preço já registrado" é trivialmente verdade pra qualquer produto novo.
-const noMaiorPrecoHistorico = historico.length >= 2 && precoMaximoHistorico != null && Number(p.preco) >= Number(precoMaximoHistorico);
+// tão real quanto a de queda. Exige pelo menos 2 pontos de histórico E que
+// o preço já tenha variado de verdade (min !== max) — senão um produto com
+// dezenas de pontos no mesmo preço (nunca mudou) trivialmente "bate" o
+// próprio máximo todo dia, disparando o aviso sem nenhuma alta real ter
+// acontecido.
+const noMaiorPrecoHistorico = historico.length >= 2 && precoMaximoHistorico != null
+  && precoMinimoHistorico !== precoMaximoHistorico
+  && Number(p.preco) >= Number(precoMaximoHistorico);
 const descontoPercentual = precoAnterior && precoAnterior > p.preco
   ? Math.round(((precoAnterior - p.preco) / precoAnterior) * 100)
   : null;
