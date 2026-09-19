@@ -1807,6 +1807,7 @@ header.topo {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
+  margin-top: 1.25rem;
   margin-bottom: 1.25rem;
 }
 
