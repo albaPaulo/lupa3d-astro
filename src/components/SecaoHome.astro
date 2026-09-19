@@ -9,7 +9,13 @@ const estilo = secao.neutro ? estiloGrade : `--cor-secao: ${secao.cor}; ${estilo
 ---
 <section class={classeSecao} style={estilo}>
   <div class="secao-cabecalho">
-    <h2 class="secao-titulo">{secao.icone ? `${secao.icone} ` : ""}{secao.nome}</h2>
+    <div class="secao-cabecalho-titulos">
+      <h2 class="secao-titulo">
+        {secao.icone && <span class="secao-titulo-selo" aria-hidden="true">{secao.icone}</span>}
+        {secao.nome}
+      </h2>
+      {secao.descricao && <p class="secao-descricao">{secao.descricao}</p>}
+    </div>
     {secao.verMaisHref && <a href={secao.verMaisHref} class="secao-ver-mais">Ver mais &rarr;</a>}
   </div>
   <div class={grade ? "secao-grade" : "secao-scroll"}>

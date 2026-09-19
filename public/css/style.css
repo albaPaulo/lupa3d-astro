@@ -593,9 +593,40 @@ header.topo {
   gap: 1rem;
 }
 
+.secao-cabecalho-titulos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
 .secao-titulo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   color: white;
   font-size: 1.2rem;
+}
+
+.secao-titulo-selo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 0.5rem;
+  background: var(--cor-marca);
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+
+.secao-home:not(.secao-home--neutro) .secao-titulo-selo {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.secao-descricao {
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.75;
 }
 
 .secao-ver-mais {
@@ -623,6 +654,8 @@ header.topo {
 }
 
 .secao-home--neutro .secao-titulo { color: var(--cor-texto); }
+
+.secao-home:not(.secao-home--neutro) .secao-descricao { color: white; }
 
 .secao-home--neutro .secao-ver-mais {
   color: white;
