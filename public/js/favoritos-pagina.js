@@ -101,7 +101,7 @@ function cardHTMLCliente(p) {
       ${p.afiliado ? `<span class="badge-afiliado" title="Link de afiliado — o LUPA3D pode receber uma comissão nessa compra, sem custo extra pra você">Afiliado</span>` : ""}
       <div class="card-imagem">${imagem}</div>
       <div class="card-corpo">
-        <h3 class="card-nome">${escapeHTMLJS(p.nome)}</h3>
+        <h3 class="card-nome" title="${escapeHTMLJS(p.nome)}">${escapeHTMLJS(p.nome)}</h3>
         ${material ? `<span class="card-material">${escapeHTMLJS(material)}</span>` : ""}
         <div class="card-precos">
           <span class="card-preco">${formatarPrecoJS(p.preco)}</span>

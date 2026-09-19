@@ -11,6 +11,7 @@ import {
   fetchConfiguracoes,
   fetchLojaEstadoMap,
   buildHistoricoPorProduto,
+  calcularBadgesAbaixoMercado,
   materialEfetivo,
   EMOJI_CATEGORIA,
   LABEL_CATEGORIA,
@@ -31,6 +32,7 @@ export async function getStaticPaths() {
   const badgesProdutoNovo = badgesProdutoNovoDeConfig(config);
   const historicoAtivo = config.menor_preco_historico_ativo !== "false";
   const colunasGrid = Math.min(6, Math.max(2, parseInt(config.colunas_grid, 10) || 3));
+  const idsAbaixoMercado = calcularBadgesAbaixoMercado(produtos);
 
   return categorias.map((categoria) => {
     const produtosDaCategoria = produtos.filter((p) => p.categoria === categoria);
@@ -49,6 +51,7 @@ export async function getStaticPaths() {
           menorPreco: badgeMenorPrecoEfetivo(p, badgesMenorPreco, historicoPorProduto, historicoAtivo),
           produtoNovo: badgeProdutoNovo(p, badgesProdutoNovo),
           precoAnterior: precoAnteriorParaExibicao(p, historicoPorProduto),
+          abaixoMercado: idsAbaixoMercado.has(p.id),
         })),
       },
     };
@@ -176,6 +179,7 @@ const descricao = `Compare preços de ${produtosDaCategoria.length} produtos de 
         menorPreco={badgesPorId.get(p.id)?.menorPreco}
         produtoNovo={badgesPorId.get(p.id)?.produtoNovo}
         precoAnterior={badgesPorId.get(p.id)?.precoAnterior}
+        abaixoMercado={badgesPorId.get(p.id)?.abaixoMercado}
       />
     ))}
   </main>

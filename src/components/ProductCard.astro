@@ -1,7 +1,7 @@
 ---
 import { formatarPreco, materialEfetivo, kitEfetivo, EMOJI_CATEGORIA, normalizarBusca, otimizarImagem } from "../lib/supabase.js";
 
-const { p, menorPreco = null, produtoNovo = null, precoAnterior = null } = Astro.props;
+const { p, menorPreco = null, produtoNovo = null, precoAnterior = null, abaixoMercado = false } = Astro.props;
 const material = materialEfetivo(p) || "";
 const kit = kitEfetivo(p);
 const temPix = p.preco_pix != null && Number(p.preco_pix) < Number(p.preco);
@@ -36,7 +36,7 @@ const descontoPercentual = precoAnterior && precoAnterior > p.preco
     )}
   </div>
   <div class="card-corpo">
-    <h3 class="card-nome">{p.nome}</h3>
+    <h3 class="card-nome" title={p.nome}>{p.nome}</h3>
     {material && <span class="card-material">{material}</span>}
     <div class="card-precos">
       {precoAnterior && (
@@ -47,6 +47,7 @@ const descontoPercentual = precoAnterior && precoAnterior > p.preco
       )}
       <span class="card-preco">{formatarPreco(p.preco)}</span>
       {temPix && <span class="card-preco-pix">{formatarPreco(p.preco_pix)} no Pix</span>}
+      {abaixoMercado && <span class="badge-abaixo-mercado" title="Preço bem abaixo da mediana de produtos parecidos anunciados agora">📊 Abaixo do mercado</span>}
     </div>
     <div class="card-loja-linha">
       <span class="card-loja-nome">{p.loja}</span>

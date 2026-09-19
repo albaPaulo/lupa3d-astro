@@ -11,6 +11,7 @@ import {
   fetchConfiguracoes,
   fetchLojaEstadoMap,
   buildHistoricoPorProduto,
+  calcularBadgesAbaixoMercado,
   materialEfetivo,
   EMOJI_CATEGORIA,
   LABEL_CATEGORIA,
@@ -28,6 +29,7 @@ const badgesMenorPreco = badgesMenorPrecoDeConfig(config);
 const badgesProdutoNovo = badgesProdutoNovoDeConfig(config);
 const historicoAtivo = config.menor_preco_historico_ativo !== "false";
 const colunasGrid = Math.min(6, Math.max(2, parseInt(config.colunas_grid, 10) || 3));
+const idsAbaixoMercado = calcularBadgesAbaixoMercado(produtos);
 
 // Mesmo critério do feed.xml: só entra quem teve queda de preço REAL
 // registrada no histórico, nunca o badge "menor preço" (que é trivialmente
@@ -66,6 +68,7 @@ const badgesPorId = new Map(
       menorPreco: badgeMenorPrecoEfetivo(p, badgesMenorPreco, historicoPorProduto, historicoAtivo),
       produtoNovo: badgeProdutoNovo(p, badgesProdutoNovo),
       precoAnterior: precoAnteriorParaExibicao(p, historicoPorProduto),
+      abaixoMercado: idsAbaixoMercado.has(p.id),
     },
   ])
 );
@@ -193,6 +196,7 @@ const descricao = `Confira ${produtosComQueda.length} produtos com queda de pre�
         menorPreco={badgesPorId.get(p.id)?.menorPreco}
         produtoNovo={badgesPorId.get(p.id)?.produtoNovo}
         precoAnterior={badgesPorId.get(p.id)?.precoAnterior}
+        abaixoMercado={badgesPorId.get(p.id)?.abaixoMercado}
       />
     ))}
   </main>

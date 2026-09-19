@@ -241,3 +241,43 @@ export function produtosParecidos(produtos, p, faixaPrecoAtiva) {
 
   return [...maisBaratoPorLoja.values()].sort((a, b) => a.preco - b.preco).slice(0, 6);
 }
+
+const LIMIAR_ABAIXO_MERCADO = 0.85; // preço <= 85% da mediana do grupo
+const MINIMO_GRUPO_MERCADO = 3; // mediana de 1-2 produtos não significa nada
+
+// Compara o preço do produto com a mediana de outros produtos do mesmo
+// "grupo" (categoria + material + kit/não-kit + afiliado/direto — mesma
+// definição de "parecido" usada em produtosParecidos, só que em lote pra
+// todo o catálogo de uma vez, em vez de sob demanda por produto). Diferente
+// dos badges de menor preço (que comparam com o histórico do PRÓPRIO
+// produto), este compara com a concorrência agora — "mais barato que os
+// outros", não "mais barato do que já foi".
+export function calcularBadgesAbaixoMercado(produtos) {
+  const chaveGrupo = (p) => `${p.categoria}|${materialEfetivo(p) || ""}|${kitEfetivo(p)}|${Boolean(p.afiliado)}`;
+
+  const precosPorGrupo = new Map();
+  for (const p of produtos) {
+    if (!p.categoria) continue;
+    const chave = chaveGrupo(p);
+    if (!precosPorGrupo.has(chave)) precosPorGrupo.set(chave, []);
+    precosPorGrupo.get(chave).push(Number(p.preco));
+  }
+
+  const medianaPorGrupo = new Map();
+  for (const [chave, precos] of precosPorGrupo) {
+    if (precos.length < MINIMO_GRUPO_MERCADO) continue;
+    const ordenado = [...precos].sort((a, b) => a - b);
+    const meio = Math.floor(ordenado.length / 2);
+    medianaPorGrupo.set(chave, ordenado.length % 2 ? ordenado[meio] : (ordenado[meio - 1] + ordenado[meio]) / 2);
+  }
+
+  const idsAbaixoMercado = new Set();
+  for (const p of produtos) {
+    if (!p.categoria) continue;
+    const mediana = medianaPorGrupo.get(chaveGrupo(p));
+    if (mediana != null && Number(p.preco) <= mediana * LIMIAR_ABAIXO_MERCADO) {
+      idsAbaixoMercado.add(p.id);
+    }
+  }
+  return idsAbaixoMercado;
+}

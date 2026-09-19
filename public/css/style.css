@@ -1112,7 +1112,7 @@ header.topo {
   font-size: 0.95rem;
   line-height: 1.3;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -1144,6 +1144,20 @@ header.topo {
   font-weight: 700;
   padding: 0.15rem 0.55rem;
   border-radius: 999px;
+}
+
+.badge-abaixo-mercado {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 0.2rem;
+  background: color-mix(in srgb, #2563eb 14%, var(--cor-card));
+  color: #2563eb;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  cursor: help;
 }
 
 /* Botão quadrado (1:1) que alterna estado no clique — mesmo padrão do
