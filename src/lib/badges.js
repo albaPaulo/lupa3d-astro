@@ -39,7 +39,12 @@ export function ehMenorPrecoEmDias(produto, dias, historicoPorProduto) {
     .map((h) => Number(h.preco));
 
   if (precosNoPeriodo.length === 0) return false;
-  return Number(produto.preco) <= Math.min(...precosNoPeriodo);
+  const minimo = Math.min(...precosNoPeriodo);
+  const maximo = Math.max(...precosNoPeriodo);
+  // Sem variação real no período, todo preço é "o menor" por não ter contra
+  // quem perder — mesma armadilha do aviso de maior preço histórico.
+  if (minimo === maximo) return false;
+  return Number(produto.preco) <= minimo;
 }
 
 function ehProdutoNovo(produto, dias) {
