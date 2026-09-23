@@ -171,7 +171,7 @@ export function desenharGraficoSVG(pontos) {
   const dataMaior = dataDoValor(maxNormal);
 
   const legenda = minNormal === maxNormal
-    ? `<div class="grafico-legendas grafico-legendas-unica"><span>Acompanhando desde ${dataInicial} — sem variação de preço ainda</span></div>`
+    ? `<div class="grafico-legendas grafico-legendas-unica"><span>Acompanhando desde ${dataInicial} — sem variação de preço</span></div>`
     : `
       <div class="grafico-legendas">
         <div class="grafico-stat grafico-stat-menor">
