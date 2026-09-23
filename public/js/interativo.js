@@ -638,6 +638,16 @@ function aplicarFiltros(resetarLimite = true) {
     tituloGrid.textContent = tituloGrid.textContent.replace(/\(\d+\)\s*$/, `(${combinam.length})`);
   }
 
+  // Com um material selecionado, mostra em quais lojas ele está disponível
+  // entre os produtos filtrados — sem filtro de material não faz sentido
+  // (seria só a lista de todas as lojas da página).
+  const lojasFiltro = document.getElementById("lojas-filtro-material");
+  if (lojasFiltro) {
+    const lojas = material ? [...new Set(combinam.map((c) => c.dataset.loja).filter(Boolean))].sort() : [];
+    lojasFiltro.textContent = lojas.length ? `Disponível em: ${lojas.join(", ")}` : "";
+    lojasFiltro.classList.toggle("oculto-tela", lojas.length === 0);
+  }
+
   atualizarChipsFiltros();
   atualizarDescricaoMaterial();
 }

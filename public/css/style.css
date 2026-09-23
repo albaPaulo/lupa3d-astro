@@ -872,6 +872,11 @@ header.topo {
   font-size: 1.4rem;
 }
 
+.lojas-filtro-material {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
 .btn-limpar-secao {
   background: transparent;
   border: 1px solid var(--cor-borda);
