@@ -641,11 +641,14 @@ header.topo {
    fundo de bloco inteiro repetido na home, ocupando bem mais que os 10%
    que a cor de destaque deveria ter na página. */
 .secao-home--neutro {
-  background: none;
-  padding: 1.25rem 1.25rem 0;
+  background: var(--cor-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: 1rem;
+  padding: 1.25rem;
 }
 
 .secao-home--neutro .secao-titulo { color: var(--cor-texto); }
+.secao-home--neutro .secao-descricao { color: var(--cor-texto); opacity: 0.7; }
 
 .secao-home:not(.secao-home--neutro) .secao-descricao { color: white; }
 
