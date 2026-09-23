@@ -633,6 +633,11 @@ function aplicarFiltros(resetarLimite = true) {
   document.getElementById("btn-ver-mais")?.classList.toggle("oculto-tela", combinam.length <= LIMITE_EXIBICAO);
   document.getElementById("grid-vazio")?.classList.toggle("oculto-tela", combinam.length > 0);
 
+  const tituloGrid = document.querySelector(".titulo-secao-grid");
+  if (tituloGrid) {
+    tituloGrid.textContent = tituloGrid.textContent.replace(/\(\d+\)\s*$/, `(${combinam.length})`);
+  }
+
   atualizarChipsFiltros();
   atualizarDescricaoMaterial();
 }
