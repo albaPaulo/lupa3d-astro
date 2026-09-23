@@ -20,6 +20,7 @@ import {
 import { badgesMenorPrecoDeConfig, badgesProdutoNovoDeConfig, badgeMenorPrecoEfetivo, badgeProdutoNovo, precoAnteriorParaExibicao } from "../../lib/badges.js";
 import { desenharGraficoSVG } from "../../lib/grafico.js";
 import { linksCompartilhar } from "../../lib/compartilhar.js";
+import { DESCRICAO_MATERIAL } from "../../lib/materiais.js";
 
 export async function getStaticPaths() {
   // "produtos" (só disponível) é o universo usado pra parecidos/descoberta —
@@ -102,10 +103,18 @@ function truncarTexto(texto, limite) {
   const ultimoEspaco = cortado.lastIndexOf(" ");
   return `${cortado.slice(0, ultimoEspaco > 0 ? ultimoEspaco : limite)}…`;
 }
-// null (não texto de fallback) quando não há descrição real — a caixa de
-// imagem some com o bloco de descrição inteiro nesse caso, em vez de
-// mostrar uma caixa "Sem descrição disponível" praticamente vazia.
-const descricaoProduto = truncarTexto(p.descricao_manual || p.descricao, DESCRICAO_LIMITE) || null;
+// null (não texto de fallback) quando não há descrição nem do produto nem
+// do material — a caixa de imagem some com o bloco de descrição inteiro
+// nesse caso, em vez de mostrar uma caixa "Sem descrição disponível"
+// praticamente vazia.
+const descricaoPropria = truncarTexto(p.descricao_manual || p.descricao, DESCRICAO_LIMITE) || null;
+const materialDoProduto = materialEfetivo(p);
+// Sem descrição própria da loja, cai pro resumo do material (mesmo texto
+// mostrado na busca ao clicar numa tag de material) — melhor um resumo
+// genérico do que nenhuma informação, mas o título muda pra não sugerir
+// que é uma descrição específica desse produto.
+const descricaoMaterial = !descricaoPropria && materialDoProduto ? DESCRICAO_MATERIAL[materialDoProduto] : null;
+const descricaoProduto = descricaoPropria || descricaoMaterial;
 const graficoSVG = desenharGraficoSVG(historico);
 
 // Recortes de período pro modal de gráfico expandido — só entra no seletor
@@ -266,7 +275,7 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
           </div>
           {descricaoProduto && (
             <div class="produto-imagem-descricao">
-              <h2 class="produto-box-titulo">Descrição</h2>
+              <h2 class="produto-box-titulo">{descricaoPropria ? "Descrição" : `Sobre o material: ${materialDoProduto}`}</h2>
               <p class="detalhe-descricao">{descricaoProduto}</p>
             </div>
           )}
@@ -331,7 +340,7 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
               </div>
             )}
             <div class="card-acoes">
-              <a href={p.url} target="_blank" rel={p.afiliado ? "noopener sponsored" : "noopener"} class="btn-ver-oferta" data-clique-produto={p.id}>{p.disponivel ? "Ver Oferta!" : "Ver na loja"}</a>
+              <a href={p.url} target="_blank" rel={p.afiliado ? "noopener sponsored" : "noopener"} class="btn-ver-oferta" data-clique-produto={p.id}>{p.disponivel ? "Ver Oferta!" : "Ver na loja"} <span aria-hidden="true">↗</span></a>
               <button type="button" class="btn-comparar-toggle" data-id={p.id} title="Comparar" aria-label="Comparar" aria-pressed="false">⇄</button>
             </div>
             {p.afiliado && (
