@@ -103,6 +103,8 @@ const descricao = `Compare preços de ${produtosDaCategoria.length} produtos de 
   <section class="barra-busca-categoria">
     <h1 class="hero-titulo">Compare preços de {categoriaLabel.toLowerCase()} entre várias lojas.</h1>
 
+    <p class="hero-subtitulo">Compare modelos, veja o histórico de preço e escolha onde comprar mais barato.</p>
+
     <nav class="atalhos-categoria" aria-label="Atalhos de categoria">
       {categorias.map((c) => (
         <a href={`/categoria/${c}/`} class={`atalho-categoria${c === categoria ? " ativo" : ""}`}>
@@ -119,8 +121,6 @@ const descricao = `Compare preços de ${produtosDaCategoria.length} produtos de 
         <div id="busca-sugestoes" class="busca-sugestoes oculto-tela"></div>
       </div>
     </div>
-
-    <p class="hero-subtitulo">Compare modelos, veja o histórico de preço e escolha onde comprar mais barato — sem cadastro.</p>
 
     {materiais.length > 0 && (
       <div class="tags-material" aria-label="Filtrar por material">
