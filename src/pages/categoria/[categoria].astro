@@ -108,7 +108,11 @@ const descricao = `Compare preços de ${produtosDaCategoria.length} produtos de 
     <nav class="atalhos-categoria" aria-label="Atalhos de categoria">
       {categorias.map((c) => (
         <a href={`/categoria/${c}/`} class={`atalho-categoria${c === categoria ? " ativo" : ""}`}>
-          <span class="atalho-categoria-icone" aria-hidden="true">{EMOJI_CATEGORIA[c] || "📦"}</span>
+          {c === "resina" ? (
+            <IconeResina id="atalho-categorias" class="icone-resina" somenteFrasco />
+          ) : (
+            <span class="atalho-categoria-icone" aria-hidden="true">{EMOJI_CATEGORIA[c] || "📦"}</span>
+          )}
           <span class="atalho-categoria-label">{LABEL_CATEGORIA[c] || c}</span>
         </a>
       ))}

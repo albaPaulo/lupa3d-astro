@@ -152,7 +152,11 @@ const ufsLoja = (loja?.estado || "").split(",").map((uf) => uf.trim().toUpperCas
       <nav class="atalhos-categoria" aria-label="Atalhos de categoria">
         {categorias.map((c) => (
           <button type="button" class="atalho-categoria" data-categoria={c}>
-            <span class="atalho-categoria-icone" aria-hidden="true">{EMOJI_CATEGORIA[c] || "📦"}</span>
+            {c === "resina" ? (
+              <IconeResina id="atalho-loja" class="icone-resina" somenteFrasco />
+            ) : (
+              <span class="atalho-categoria-icone" aria-hidden="true">{EMOJI_CATEGORIA[c] || "📦"}</span>
+            )}
             <span class="atalho-categoria-label">{LABEL_CATEGORIA[c] || c}</span>
           </button>
         ))}
