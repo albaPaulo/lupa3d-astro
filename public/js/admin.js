@@ -359,6 +359,7 @@ function linhaProdutoHTML(p) {
         </select>
       </td>
       <td><input type="text" data-campo="material_manual" value="${escapeHTML(p.material_manual || "")}" placeholder="${escapeHTML(p.material || "ex: PLA")}" list="admin-lista-materiais" class="${semSubcategoria ? "campo-alerta" : ""}"></td>
+      <td><input type="text" data-campo="marca_manual" value="${escapeHTML(p.marca_manual || "")}" placeholder="${escapeHTML(p.marca || "—")}"></td>
       <td><input type="text" data-campo="descricao_manual" value="${escapeHTML(p.descricao_manual || "")}"></td>
       <td class="admin-col-check"><input type="checkbox" data-campo="destaque" ${p.destaque ? "checked" : ""}></td>
       <td class="admin-col-check"><input type="checkbox" data-campo="oculto" ${p.oculto ? "checked" : ""}></td>
@@ -480,6 +481,7 @@ async function salvarProduto(tr) {
   const corpo = {
     categoria_manual: tr.querySelector('[data-campo="categoria_manual"]').value || null,
     material_manual: normalizarMaterialManual(tr.querySelector('[data-campo="material_manual"]').value.trim()) || null,
+    marca_manual: tr.querySelector('[data-campo="marca_manual"]').value.trim() || null,
     descricao_manual: tr.querySelector('[data-campo="descricao_manual"]').value.trim() || null,
     destaque: tr.querySelector('[data-campo="destaque"]').checked,
     oculto: tr.querySelector('[data-campo="oculto"]').checked,
