@@ -2999,6 +2999,31 @@ header.topo {
   gap: 0.75rem;
 }
 
+.secao-categorias {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0.75rem 0;
+}
+
+.secao-categorias-titulo {
+  font-size: 0.9rem;
+}
+
+.secao-categorias-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+}
+
+.secao-categorias-lista label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
 .secao-form-linha select, .secao-form-linha input {
   width: 100%;
   padding: 0.5rem;

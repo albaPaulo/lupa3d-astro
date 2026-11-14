@@ -9,9 +9,12 @@ function produtosDaSecaoFiltrados(secao, todosProdutos, historicoPorProduto) {
     .filter(Boolean);
   const idsFixados = new Set(fixados.map((p) => p.id));
 
+  // categoria_filtro pode ter várias categorias separadas por vírgula
+  const categoriasFiltro = (secao.categoria_filtro || "").split(",").map((c) => c.trim()).filter(Boolean);
+
   const automaticos = todosProdutos.filter((p) => {
     if (idsFixados.has(p.id)) return false;
-    if (secao.categoria_filtro && p.categoria !== secao.categoria_filtro) return false;
+    if (categoriasFiltro.length && !categoriasFiltro.includes(p.categoria)) return false;
     if (secao.marca_filtro && p.loja !== secao.marca_filtro) return false;
     if (secao.preco_maximo != null && Number(p.preco) > Number(secao.preco_maximo)) return false;
     if (secao.menor_preco_dias && !ehMenorPrecoEmDias(p, secao.menor_preco_dias, historicoPorProduto)) return false;

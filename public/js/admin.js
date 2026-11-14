@@ -958,8 +958,9 @@ function popularSelectsSecao() {
   const categorias = [...new Set(PRODUTOS_ADMIN.map(categoriaEfetivoAdmin).filter(Boolean))].sort();
   const lojas = [...new Set(PRODUTOS_ADMIN.map((p) => p.loja))].sort();
 
-  admEls.secaoCategoria.innerHTML = `<option value="">Qualquer categoria</option>` +
-    categorias.map((c) => `<option value="${c}">${c}</option>`).join("");
+  admEls.secaoCategoria.innerHTML = categorias
+    .map((c) => `<label><input type="checkbox" value="${escapeHTML(c)}"> ${escapeHTML(c)}</label>`)
+    .join("");
   admEls.secaoMarca.innerHTML = `<option value="">Qualquer loja</option>` +
     lojas.map((l) => `<option value="${l}">${l}</option>`).join("");
 }
@@ -1016,7 +1017,11 @@ function carregarSecaoNoForm(secao) {
   admEls.secaoLayout.value = secao.layout || "scroll";
   admEls.secaoColunas.value = secao.colunas || 4;
   admEls.secaoLinhas.value = secao.linhas || 1;
-  admEls.secaoCategoria.value = secao.categoria_filtro || "";
+  // categoria_filtro guarda uma ou mais categorias separadas por vírgula
+  const categoriasSecao = (secao.categoria_filtro || "").split(",").map((c) => c.trim()).filter(Boolean);
+  admEls.secaoCategoria.querySelectorAll("input[type=checkbox]").forEach((cb) => {
+    cb.checked = categoriasSecao.includes(cb.value);
+  });
   admEls.secaoMarca.value = secao.marca_filtro || "";
   admEls.secaoPrecoMaximo.value = secao.preco_maximo ?? "";
   admEls.secaoMenorPrecoDias.value = secao.menor_preco_dias ?? "";
@@ -1033,7 +1038,7 @@ function linhaSecaoHTML(secao) {
   return `
     <div class="secao-item" data-id="${secao.id}">
       <span class="secao-item-cor" style="background:${secao.cor}"></span>
-      <span class="secao-item-nome">${secao.icone || ""} ${secao.nome}<small>ordem ${secao.ordem} · ${secao.categoria_filtro || "qualquer categoria"} · ${secao.marca_filtro || "qualquer loja"} · ${secao.layout === "grade" ? `grade ${secao.colunas || 4}x${secao.linhas || 1}` : "rolagem horizontal"}${secao.menor_preco_dias ? ` · menor preço em ${secao.menor_preco_dias}d` : ""}${secao.ordenar_por_cliques ? " · mais clicados" : ""}</small></span>
+      <span class="secao-item-nome">${secao.icone || ""} ${secao.nome}<small>ordem ${secao.ordem} · ${(secao.categoria_filtro || "").split(",").join(", ") || "qualquer categoria"} · ${secao.marca_filtro || "qualquer loja"} · ${secao.layout === "grade" ? `grade ${secao.colunas || 4}x${secao.linhas || 1}` : "rolagem horizontal"}${secao.menor_preco_dias ? ` · menor preço em ${secao.menor_preco_dias}d` : ""}${secao.ordenar_por_cliques ? " · mais clicados" : ""}</small></span>
       <label class="checkbox-linha">
         <input type="checkbox" data-acao="toggle-ativo" ${secao.ativo ? "checked" : ""}>
         Ativa
@@ -1065,7 +1070,8 @@ async function salvarSecao(ev) {
     layout: admEls.secaoLayout.value,
     colunas: Number(admEls.secaoColunas.value) || 4,
     linhas: Number(admEls.secaoLinhas.value) || 1,
-    categoria_filtro: admEls.secaoCategoria.value || null,
+    categoria_filtro: [...admEls.secaoCategoria.querySelectorAll("input[type=checkbox]:checked")]
+      .map((cb) => cb.value).join(",") || null,
     marca_filtro: admEls.secaoMarca.value || null,
     preco_maximo: admEls.secaoPrecoMaximo.value ? Number(admEls.secaoPrecoMaximo.value) : null,
     menor_preco_dias: admEls.secaoMenorPrecoDias.value ? Number(admEls.secaoMenorPrecoDias.value) : null,
