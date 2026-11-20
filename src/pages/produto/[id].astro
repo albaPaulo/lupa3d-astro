@@ -145,8 +145,11 @@ const periodosGrafico = DEFINICAO_PERIODOS_GRAFICO.filter((periodo) => diasDeHis
 const graficoModalPeriodos = [...periodosGrafico, { chave: "tudo", label: "Tudo", svg: graficoSVG }];
 const precoMaximoHistorico = historico.length > 0 ? Math.max(...historico.map((h) => h.preco)) : null;
 const precoMinimoHistorico = historico.length > 0 ? Math.min(...historico.map((h) => h.preco)) : null;
-const economiaValor = precoMaximoHistorico && precoMaximoHistorico > p.preco
-  ? precoMaximoHistorico - p.preco
+// Economia medida contra o preço TÍPICO dos últimos 30 dias (mesma referência
+// do preço riscado do card), só quando é queda real — antes comparava com o
+// maior preço já registrado, que um único pico passageiro inflava.
+const economiaValor = precoAnterior && precoAnterior > p.preco
+  ? precoAnterior - p.preco
   : null;
 // Complemento honesto da caixa de economia: quando o preço atual É o maior
 // já registrado (subiu, não caiu), não tem economia nenhuma pra mostrar —
@@ -326,7 +329,7 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
                 <span class="produto-vendido-economia-icone" aria-hidden="true">🏆</span>
                 <div>
                   <span class="produto-vendido-economia-titulo">Você está economizando</span>
-                  <span class="produto-vendido-economia-valor">{formatarPreco(economiaValor)} em relação ao maior preço já registrado</span>
+                  <span class="produto-vendido-economia-valor">{formatarPreco(economiaValor)} abaixo do preço típico dos últimos 30 dias</span>
                 </div>
               </div>
             )}

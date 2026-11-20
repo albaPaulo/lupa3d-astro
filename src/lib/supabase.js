@@ -175,11 +175,19 @@ async function fetchHistoricoTodosSemCache() {
   const TAMANHO_PAGINA = 1000;
   let offset = 0;
   const todos = [];
+  // Pontos marcados como ignorados (dado errado de coleta, migration_029) ficam
+  // no banco mas fora de gráficos/badges/descontos. Se a coluna ainda não
+  // existir (migration não rodada), cai pra consulta sem o filtro em vez de
+  // quebrar o build.
+  let filtroIgnorado = "&ignorado=eq.false";
   while (true) {
-    const resp = await fetch(
-      `${SUPABASE_URL}/rest/v1/historico_precos?select=produto_id,preco,preco_pix,capturado_em&order=capturado_em.asc`,
-      { headers: { ...headers(), Range: `${offset}-${offset + TAMANHO_PAGINA - 1}` } }
-    );
+    const url = `${SUPABASE_URL}/rest/v1/historico_precos?select=produto_id,preco,preco_pix,capturado_em&order=capturado_em.asc`;
+    const opcoes = { headers: { ...headers(), Range: `${offset}-${offset + TAMANHO_PAGINA - 1}` } };
+    let resp = await fetch(url + filtroIgnorado, opcoes);
+    if (resp.status === 400 && filtroIgnorado) {
+      filtroIgnorado = "";
+      resp = await fetch(url, opcoes);
+    }
     if (!resp.ok) throw new Error(`Falha ao buscar histórico: ${resp.status}`);
     const lote = await resp.json();
     todos.push(...lote);

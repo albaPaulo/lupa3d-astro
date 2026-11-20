@@ -21,6 +21,50 @@ export function badgesProdutoNovoDeConfig(config) {
   return parseBadges(config.produto_novo_badges, "asc");
 }
 
+// Queda "de verdade": o preço atual precisa estar pelo menos 5% abaixo do
+// preço típico do período pra ser vendido como desconto/economia/menor preço.
+export const MARGEM_QUEDA_REAL = 0.05;
+
+// Preço típico = mediana dos preços do período ponderada pelo TEMPO que cada
+// preço durou (não pelo nº de coletas). Um pico de poucos dias (erro de coleta
+// ou aumento passageiro) quase não pesa, então não infla o "de" do desconto
+// nem a economia — ao contrário do preço máximo, que um único ponto errado
+// transforma em referência pra sempre. `historico` vem ordenado por data asc.
+export function precoTipico(historico, dias, agora = Date.now()) {
+  if (!historico || historico.length === 0) return null;
+
+  const inicio = agora - dias * 86400000;
+  const pontos = [];
+  let vigenteNoInicio = null;
+  for (const h of historico) {
+    const t = new Date(h.capturado_em).getTime();
+    if (t < inicio) vigenteNoInicio = Number(h.preco);
+    else pontos.push({ t, preco: Number(h.preco) });
+  }
+  // O preço em vigor quando a janela começou também conta (até o 1º ponto dentro dela).
+  if (vigenteNoInicio != null && (pontos.length === 0 || pontos[0].t > inicio)) {
+    pontos.unshift({ t: inicio, preco: vigenteNoInicio });
+  }
+
+  const segmentos = pontos
+    .map((p, i) => ({ preco: p.preco, duracao: (i + 1 < pontos.length ? pontos[i + 1].t : agora) - p.t }))
+    .filter((s) => s.duracao > 0)
+    .sort((a, b) => a.preco - b.preco);
+  if (segmentos.length === 0) return null;
+
+  const total = segmentos.reduce((soma, s) => soma + s.duracao, 0);
+  let acumulado = 0;
+  for (const s of segmentos) {
+    acumulado += s.duracao;
+    if (acumulado >= total / 2) return s.preco;
+  }
+  return segmentos[segmentos.length - 1].preco;
+}
+
+function quedaReal(precoAtual, tipico) {
+  return tipico != null && Number(precoAtual) <= tipico * (1 - MARGEM_QUEDA_REAL);
+}
+
 // Exige rastreamento desde pelo menos `dias` atrás (historico[0] é o ponto
 // mais antigo — fetchHistoricoTodos já vem ordenado capturado_em.asc) —
 // sem isso, um produto recém-adicionado bateria "recorde" trivialmente por
@@ -44,7 +88,10 @@ export function ehMenorPrecoEmDias(produto, dias, historicoPorProduto) {
   // Sem variação real no período, todo preço é "o menor" por não ter contra
   // quem perder — mesma armadilha do aviso de maior preço histórico.
   if (minimo === maximo) return false;
-  return Number(produto.preco) <= minimo;
+  if (Number(produto.preco) > minimo) return false;
+  // Voltar ao preço normal depois de um pico não é "menor preço": precisa estar
+  // de fato abaixo do que o produto costuma custar no período.
+  return quedaReal(produto.preco, precoTipico(historico, dias));
 }
 
 function ehProdutoNovo(produto, dias) {
@@ -82,22 +129,16 @@ export function badgeMenorPrecoEfetivo(p, badgesMenorPreco, historicoPorProduto,
   return badgeMenorPreco(p, badgesMenorPreco, historicoPorProduto);
 }
 
-// Maior preço que o próprio produto teve nos últimos `dias` — pra mostrar
-// "de/por" no card quando o preço atual é mais baixo que isso. Só retorna
-// valor quando há queda real registrada no histórico (nunca inventa um
-// preço "de" maior do que o produto já teve de fato).
+// Preço "de" do de/por no card: o preço TÍPICO dos últimos `dias` (ver
+// precoTipico), só quando o preço atual está de fato abaixo dele (queda real
+// de pelo menos 5%). Antes usava o maior preço do período, o que deixava um
+// único pico passageiro virar um "desconto" enorme.
 export function precoAnteriorParaExibicao(p, historicoPorProduto, dias = 30) {
   const historico = historicoPorProduto.get(p.id);
   if (!historico || historico.length === 0) return null;
 
-  const desde = Date.now() - dias * 86400000;
-  const precosNoPeriodo = historico
-    .filter((h) => new Date(h.capturado_em).getTime() >= desde)
-    .map((h) => Number(h.preco));
-
-  if (precosNoPeriodo.length === 0) return null;
-  const maior = Math.max(...precosNoPeriodo);
-  return maior > Number(p.preco) ? maior : null;
+  const tipico = precoTipico(historico, dias);
+  return quedaReal(p.preco, tipico) ? tipico : null;
 }
 
 // badgesProdutoNovo vem ordenado do menor prazo pro maior — ao contrário da
