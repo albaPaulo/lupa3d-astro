@@ -57,7 +57,15 @@ export function desenharGraficoSVG(pontos) {
   const escalaMax = Math.max(escalaMaxBruta, ticks[ticks.length - 1]);
   const faixa = escalaMax - escalaMin || 1;
 
-  const coordX = (i) => margemX + (i / (pontos.length - 1)) * (largura - margemX * 2);
+  // Eixo X proporcional ao TEMPO (data da coleta), não ao nº da coleta: o
+  // scraper roda 1-2x por dia e pula dias, então espaçar por índice
+  // esticava/encolhia períodos (um preço de 23 dias ocupava menos espaço que
+  // um de 13). Se todas as coletas tiverem o mesmo instante, cai no índice.
+  const tempos = pontos.map((p) => new Date(p.capturado_em).getTime());
+  const tInicio = tempos[0];
+  const duracao = tempos[tempos.length - 1] - tInicio;
+  const fracaoX = (i) => (duracao > 0 ? (tempos[i] - tInicio) / duracao : i / (pontos.length - 1));
+  const coordX = (i) => margemX + fracaoX(i) * (largura - margemX * 2);
   const coordY = (preco) => altura - margemBaixo - ((preco - escalaMin) / faixa) * (altura - margemTopo - margemBaixo);
 
   const pontosLinha = pontos.map((p, i) => `${coordX(i)},${coordY(p.preco)}`);
@@ -131,13 +139,17 @@ export function desenharGraficoSVG(pontos) {
   // Datas do eixo X: até 5 marcos espalhados (não só início/fim) — ficam
   // fora do SVG (linha flex simples) pra não distorcer texto quando o
   // gráfico estica horizontalmente pra caber na coluna.
-  const quantidadeDatas = Math.min(5, pontos.length);
-  const indicesDatas = Array.from({ length: quantidadeDatas }, (_, i) =>
-    Math.round((i / (quantidadeDatas - 1 || 1)) * (pontos.length - 1))
-  ).filter((v, i, arr) => arr.indexOf(v) === i);
-  const eixoX = indicesDatas
-    .map((i) => `<span>${new Date(pontos[i].capturado_em).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}</span>`)
-    .join("");
+  // Marcos igualmente espaçados NO TEMPO (como a linha agora é proporcional
+  // ao tempo, espaçamento igual = intervalo de dias igual). Poucos dias de
+  // histórico → menos marcos, pra não repetir a mesma data.
+  const diasNoPeriodo = Math.floor(duracao / 86400000) + 1;
+  const quantidadeDatas = duracao > 0 ? Math.min(5, Math.max(2, diasNoPeriodo)) : Math.min(5, pontos.length);
+  const eixoX = Array.from({ length: quantidadeDatas }, (_, i) => {
+    const instante = duracao > 0
+      ? tInicio + (i / (quantidadeDatas - 1)) * duracao
+      : tempos[Math.round((i / (quantidadeDatas - 1 || 1)) * (pontos.length - 1))];
+    return `<span>${new Date(instante).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}</span>`;
+  }).join("");
 
   const eixoY = minNormal !== maxNormal
     ? `<div class="grafico-eixo-y">${[...ticks].reverse().map((t) => `<span style="top:${coordY(t)}px">${formatarEixo(t)}</span>`).join("")}</div>`
