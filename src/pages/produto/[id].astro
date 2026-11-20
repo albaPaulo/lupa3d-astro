@@ -64,6 +64,19 @@ export async function getStaticPaths() {
       .sort((a, b) => (b.cliques_total || 0) - (a.cliques_total || 0))
       .slice(0, 5);
 
+    // Chips/desconto dos cards de "Produtos da loja" e "Continue explorando":
+    // sem isso eles apareciam sempre sem de/por nem selo, mesmo em queda real.
+    const badgesRelacionados = Object.fromEntries(
+      [...maisDaCategoria, ...produtosDaLoja].map((item) => [
+        item.id,
+        {
+          menorPreco: badgeMenorPrecoEfetivo(item, badgesMenorPreco, historicoPorProduto, historicoAtivo),
+          produtoNovo: badgeProdutoNovo(item, badgesProdutoNovo),
+          precoAnterior: precoAnteriorParaExibicao(item, historicoPorProduto),
+        },
+      ])
+    );
+
     return {
       params: { id: String(p.id) },
       props: {
@@ -73,6 +86,7 @@ export async function getStaticPaths() {
         parecidos,
         maisDaCategoria,
         produtosDaLoja,
+        badgesRelacionados,
         menorPreco: badgeMenorPrecoEfetivo(p, badgesMenorPreco, historicoPorProduto, historicoAtivo),
         produtoNovo: badgeProdutoNovo(p, badgesProdutoNovo),
         precoAnterior: precoAnteriorParaExibicao(p, historicoPorProduto),
@@ -81,7 +95,7 @@ export async function getStaticPaths() {
   });
 }
 
-const { produto: p, loja, historico, parecidos, maisDaCategoria, produtosDaLoja, menorPreco, produtoNovo, precoAnterior } = Astro.props;
+const { produto: p, loja, historico, parecidos, maisDaCategoria, produtosDaLoja, badgesRelacionados, menorPreco, produtoNovo, precoAnterior } = Astro.props;
 const categoriaLabel = LABEL_CATEGORIA[p.categoria] || p.categoria;
 // "parecidos" já é filtrado por mesma categoria + mesmo material (quando
 // detectado) em produtosParecidos() — o título reflete exatamente esse
@@ -324,7 +338,7 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
               <span class="card-preco">{formatarPreco(p.preco)}</span>
               {p.preco_pix != null && Number(p.preco_pix) < Number(p.preco) && <span class="card-preco-pix">{formatarPreco(p.preco_pix)} no Pix</span>}
             </div>
-            {economiaValor != null && (
+            {economiaValor != null && !menorPreco && (
               <div class="produto-vendido-economia">
                 <span class="produto-vendido-economia-icone" aria-hidden="true">💰</span>
                 <div>
@@ -414,7 +428,14 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
           <h2 class="titulo-secao-grid">Produtos da {p.loja}</h2>
         </div>
         <div class="grid" style="--colunas-grid: 5">
-          {produtosDaLoja.map((item) => <ProductCard p={item} />)}
+          {produtosDaLoja.map((item) => (
+            <ProductCard
+              p={item}
+              menorPreco={badgesRelacionados[item.id]?.menorPreco}
+              produtoNovo={badgesRelacionados[item.id]?.produtoNovo}
+              precoAnterior={badgesRelacionados[item.id]?.precoAnterior}
+            />
+          ))}
         </div>
         <div class="ver-mais-container">
           <a href={`/loja/${p.loja}/`} class="btn-ver-mais">Ver mais</a>
@@ -428,7 +449,14 @@ const breadcrumbJsonLdString = JSON.stringify(breadcrumbJsonLd).replace(/</g, "\
           <h2 class="titulo-secao-grid">Continue explorando {categoriaLabel}</h2>
         </div>
         <div class="grid" style="--colunas-grid: 5">
-          {maisDaCategoria.map((item) => <ProductCard p={item} />)}
+          {maisDaCategoria.map((item) => (
+            <ProductCard
+              p={item}
+              menorPreco={badgesRelacionados[item.id]?.menorPreco}
+              produtoNovo={badgesRelacionados[item.id]?.produtoNovo}
+              precoAnterior={badgesRelacionados[item.id]?.precoAnterior}
+            />
+          ))}
         </div>
         <div class="ver-mais-container">
           <a href={`/categoria/${p.categoria}/`} class="btn-ver-mais">Ver mais</a>

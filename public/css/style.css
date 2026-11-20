@@ -1369,6 +1369,23 @@ header.topo {
   justify-content: center;
 }
 
+/* Botão flutuante fica discreto (menor e translúcido até o hover) pra não
+   brigar com o conteúdo, e some no celular — lá ele cobria cards e o botão
+   de topo, e "Sugestões" já está no menu e no rodapé. */
+.btn-sugestao-flutuante {
+  width: 2.3rem;
+  height: 2.3rem;
+  font-size: 1.1rem;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.btn-sugestao-flutuante:hover { opacity: 1; }
+
+@media (max-width: 720px) {
+  .btn-sugestao-flutuante { display: none; }
+}
+
 .modal {
   display: none;
   position: fixed;
@@ -2344,11 +2361,22 @@ header.topo {
    mais alto aqui) — sem o max-width da grade, ele acompanha e vira um
    quadrado de verdade em vez de uma pílula fina com o ícone sumido. */
 .produto-vendido-box .btn-comparar-toggle {
-  width: 3.2rem;
+  width: 3.6rem;
   height: 3.2rem;
+  aspect-ratio: auto;
   max-width: none;
   align-self: center;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+/* Legenda sob o ícone (o JS troca o texto do botão entre ⇄ e ✓, então a
+   legenda vem por CSS pra não ser apagada). */
+.produto-vendido-box .btn-comparar-toggle::after {
+  content: "Comparar";
+  font-size: 0.6rem;
+  line-height: 1;
 }
 
 .produto-atualizado {
