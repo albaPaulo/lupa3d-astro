@@ -35,6 +35,10 @@ const badgesPorId = new Map(
 const secoes = secoesRaw
   .map((secao) => ({ secao, ...computarProdutosDaSecao(secao, produtos, historicoPorProduto) }))
   .filter(({ produtos: p }) => p.length > 0);
+// Ordem negativa no admin = antes das seções fixas (Mais vistos, Novidades...);
+// zero ou positiva = depois delas, como sempre foi.
+const secoesAntesDasFixas = secoes.filter(({ secao }) => Number(secao.ordem) < 0);
+const secoesDepoisDasFixas = secoes.filter(({ secao }) => !(Number(secao.ordem) < 0));
 
 // Seções fixas, sempre presentes independente de configuração no admin —
 // diferente da grade completa que a home tinha antes (todo o catálogo
@@ -191,6 +195,10 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
   <FaixaProvaSocial totalProdutos={produtos.length} totalLojas={totalLojas} />
 
   <main>
+    {secoesAntesDasFixas.map(({ secao, produtos: produtosDaSecao }) => (
+      <SecaoHome secao={secao} produtos={produtosDaSecao} badgesPorId={badgesPorId} />
+    ))}
+
     {secoesPadrao.map((s) => (
       <SecaoHome
         secao={{ nome: s.nome, icone: s.icone, descricao: s.descricao, neutro: true, layout: "grade", colunas: LIMITE_SECAO_PADRAO, verMaisHref: s.verMaisHref }}
@@ -199,7 +207,7 @@ const tituloPagina = config.titulo_site || "LUPA3D — Comparador de preços de 
       />
     ))}
 
-    {secoes.map(({ secao, produtos: produtosDaSecao }) => (
+    {secoesDepoisDasFixas.map(({ secao, produtos: produtosDaSecao }) => (
       <SecaoHome secao={secao} produtos={produtosDaSecao} badgesPorId={badgesPorId} />
     ))}
   </main>

@@ -1038,7 +1038,7 @@ function linhaSecaoHTML(secao) {
   return `
     <div class="secao-item" data-id="${secao.id}">
       <span class="secao-item-cor" style="background:${secao.cor}"></span>
-      <span class="secao-item-nome">${secao.icone || ""} ${secao.nome}<small>ordem ${secao.ordem} · ${(secao.categoria_filtro || "").split(",").join(", ") || "qualquer categoria"} · ${secao.marca_filtro || "qualquer loja"} · ${secao.layout === "grade" ? `grade ${secao.colunas || 4}x${secao.linhas || 1}` : "rolagem horizontal"}${secao.menor_preco_dias ? ` · menor preço em ${secao.menor_preco_dias}d` : ""}${secao.ordenar_por_cliques ? " · mais clicados" : ""}</small></span>
+      <span class="secao-item-nome">${secao.icone || ""} ${secao.nome}<small>ordem ${secao.ordem}${secao.ordem < 0 ? " (antes das fixas)" : ""} · ${(secao.categoria_filtro || "").split(",").join(", ") || "qualquer categoria"} · ${secao.marca_filtro || "qualquer loja"} · ${secao.layout === "grade" ? `grade ${secao.colunas || 4}x${secao.linhas || 1}` : "rolagem horizontal"}${secao.menor_preco_dias ? ` · menor preço em ${secao.menor_preco_dias}d` : ""}${secao.ordenar_por_cliques ? " · mais clicados" : ""}</small></span>
       <label class="checkbox-linha">
         <input type="checkbox" data-acao="toggle-ativo" ${secao.ativo ? "checked" : ""}>
         Ativa
