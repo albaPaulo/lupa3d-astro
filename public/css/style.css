@@ -1559,6 +1559,11 @@ header.topo {
   opacity: 0.6;
 }
 
+/* No gráfico expandido o plot é mais alto (320px): o eixo Y acompanha, senão
+   os valores ficavam fora das linhas de grade. */
+.modal-grafico-caixa .grafico-eixo-y,
+.produto-historico-expandido .grafico-eixo-y { height: 320px; }
+
 .grafico-eixo-y span {
   position: absolute;
   right: 0;
@@ -1610,7 +1615,8 @@ header.topo {
 }
 
 .grafico-preco-final {
-  transform: translate(calc(-100% - 6px), -50%);
+  /* 14px de folga à esquerda do ponto atual, pra etiqueta não tapar o marcador */
+  transform: translate(calc(-100% - 14px), -50%);
   color: white;
   padding: 0.15rem 0.5rem;
   border-radius: 999px;
@@ -1620,7 +1626,59 @@ header.topo {
 
 .grafico-preco-final-pix {
   background: var(--cor-pix);
-  transform: translate(calc(-100% - 6px), calc(-50% + 24px));
+  transform: translate(calc(-100% - 14px), calc(-50% + 24px));
+}
+
+/* Marcadores em HTML (o SVG estica só na horizontal e achataria círculos). */
+.grafico-marcador {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid var(--cor-card);
+  background: var(--cor-marca);
+  pointer-events: none;
+}
+
+.grafico-marcador-minimo { background: var(--cor-favorito); }
+.grafico-marcador-pix { background: var(--cor-pix); width: 9px; height: 9px; }
+.grafico-marcador-queda { background: #dc2626; }
+.grafico-marcador-alta { background: var(--cor-favorito); }
+
+/* Trecho da última variação, em destaque (espessura fixa em px, mesmo com o
+   SVG esticado — uma linha quase vertical ficava finíssima). */
+.grafico-trecho-recente { stroke-width: 3.5; vector-effect: non-scaling-stroke; }
+.grafico-trecho-queda { stroke: #dc2626; }
+.grafico-trecho-alta { stroke: var(--cor-favorito); }
+
+.grafico-selo-variacao {
+  position: absolute;
+  transform: translate(calc(-100% + 4px), -140%);
+  font-size: 0.66rem;
+  font-weight: 700;
+  white-space: nowrap;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.grafico-selo-esquerda { transform: translate(-4px, -140%); }
+
+.grafico-selo-queda {
+  background: color-mix(in srgb, #dc2626 14%, var(--cor-card));
+  color: #dc2626;
+}
+
+.grafico-selo-alta {
+  background: color-mix(in srgb, var(--cor-favorito) 16%, var(--cor-card));
+  color: var(--cor-favorito);
+}
+
+/* Linhas com espessura constante apesar do SVG esticado na horizontal. */
+.grafico-linha,
+.grafico-linha-pix {
+  vector-effect: non-scaling-stroke;
 }
 
 .grafico-grade-y {

@@ -89,10 +89,43 @@ export function desenharGraficoSVG(pontos) {
     ? `<line x1="${margemX}" y1="${coordY(minNormal)}" x2="${largura - margemX}" y2="${coordY(minNormal)}" stroke="var(--cor-favorito)" stroke-width="1" stroke-dasharray="3 3" opacity="0.6" class="grafico-linha-minima"></line>`
     : "";
 
+  // Última variação de preço (o ponto onde o preço mudou pela última vez) —
+  // é o fato que o gráfico precisa destacar: com o eixo proporcional ao
+  // tempo, uma queda de ontem vira um traço de ~1% da largura, quase
+  // invisível. Só destaca se foi uma variação de pelo menos 1% e recente
+  // (até 60 dias antes do último ponto); senão o gráfico fica poluído com
+  // uma mudança que já virou rotina.
+  let idxMudanca = -1;
+  for (let i = pontos.length - 1; i > 0; i--) {
+    if (pontos[i].preco !== pontos[i - 1].preco) {
+      idxMudanca = i;
+      break;
+    }
+  }
+  let variacaoRecente = null;
+  if (idxMudanca > 0) {
+    const antes = pontos[idxMudanca - 1].preco;
+    const depois = pontos[idxMudanca].preco;
+    const pct = (depois - antes) / antes;
+    const recente = tempos[tempos.length - 1] - tempos[idxMudanca] <= 60 * 86400000;
+    if (antes > 0 && Math.abs(pct) >= 0.01 && recente) {
+      variacaoRecente = { idx: idxMudanca, antes, depois, queda: depois < antes, pct };
+    }
+  }
+  const idxVariacao = variacaoRecente ? variacaoRecente.idx : -1;
+  const ultimoIdx = pontos.length - 1;
+  const ultimoIndicePix = temPix
+    ? [...pontos].reverse().findIndex((p) => p.preco_pix != null)
+    : -1;
+  const idxUltimoPix = ultimoIndicePix >= 0 ? pontos.length - 1 - ultimoIndicePix : -1;
+
   // Marca visível só nos pontos onde o preço realmente mudou (+ primeiro e
   // último) — evita uma trilha de pontinhos grudados quando o scraper
   // reconfirma o mesmo preço em dias seguidos. O ponto ainda existe pro
   // tooltip (área invisível maior), só não ganha um círculo próprio.
+  // O ponto atual e o da variação recente são desenhados em HTML (marcadores
+  // abaixo): o SVG estica só na horizontal (preserveAspectRatio="none") e
+  // achatava esses círculos numa fatia quase invisível.
   const pontosCirculo = pontos
     .map((p, i) => {
       const x = coordX(i);
@@ -105,8 +138,8 @@ export function desenharGraficoSVG(pontos) {
       const tooltip = `<title>${formatarPreco(p.preco)}${detalhePix} — ${data}${ehMenorPreco ? " — menor preço já registrado" : ""}</title>`;
       const corPonto = ehMenorPreco ? "var(--cor-favorito)" : "var(--cor-marca)";
       const atributosAtual = ehUltimo ? ` stroke="var(--cor-card)" stroke-width="2"` : "";
-      const marcador = mudouPreco
-        ? `<circle cx="${x}" cy="${y}" r="${ehUltimo ? 5 : 3}" fill="${corPonto}"${atributosAtual} class="grafico-ponto${ehMenorPreco ? " grafico-ponto-minimo" : ""}${ehUltimo ? " grafico-ponto-atual" : ""}">${tooltip}</circle>`
+      const marcador = mudouPreco && !ehUltimo && i !== idxVariacao
+        ? `<circle cx="${x}" cy="${y}" r="3" fill="${corPonto}"${atributosAtual} class="grafico-ponto${ehMenorPreco ? " grafico-ponto-minimo" : ""}">${tooltip}</circle>`
         : "";
       return `
         <circle cx="${x}" cy="${y}" r="9" fill="transparent" class="grafico-ponto-area">${tooltip}</circle>
@@ -125,7 +158,7 @@ export function desenharGraficoSVG(pontos) {
           const anterior = pontos[i - 1];
           const mudouPreco = i === 0 || i === pontos.length - 1 || !anterior || anterior.preco_pix !== p.preco_pix;
           const tooltip = `<title>${formatarPreco(p.preco_pix)} no Pix — ${data}</title>`;
-          const marcador = mudouPreco
+          const marcador = mudouPreco && i !== idxUltimoPix
             ? `<circle cx="${x}" cy="${y}" r="2.5" fill="var(--cor-pix)" class="grafico-ponto-pix">${tooltip}</circle>`
             : "";
           return `
@@ -152,7 +185,7 @@ export function desenharGraficoSVG(pontos) {
   }).join("");
 
   const eixoY = minNormal !== maxNormal
-    ? `<div class="grafico-eixo-y">${[...ticks].reverse().map((t) => `<span style="top:${coordY(t)}px">${formatarEixo(t)}</span>`).join("")}</div>`
+    ? `<div class="grafico-eixo-y">${[...ticks].reverse().map((t) => `<span style="top:${(coordY(t) / altura) * 100}%">${formatarEixo(t)}</span>`).join("")}</div>`
     : "";
 
   // Preços flutuantes sobre o próprio gráfico (início da linha + fim da
@@ -160,15 +193,38 @@ export function desenharGraficoSVG(pontos) {
   // por fora do viewBox 560, então px cru não bateria) e px de Y (a altura é
   // fixa em 260px = mesma unidade do viewBox, então bate 1 pra 1).
   const xPercent = (i) => (coordX(i) / largura) * 100;
-  const ultimoIndicePix = temPix
-    ? [...pontos].reverse().findIndex((p) => p.preco_pix != null)
-    : -1;
-  const idxUltimoPix = ultimoIndicePix >= 0 ? pontos.length - 1 - ultimoIndicePix : -1;
+  // Y em % da altura (não px): o modal de "Expandir" estica o gráfico pra 320px
+  // e a posição em px deixava marcadores/etiquetas fora do lugar.
+  const yPercent = (preco) => (coordY(preco) / altura) * 100;
+
+  const ultimoPonto = pontos[ultimoIdx];
+  const ehMenorAtual = ultimoPonto.preco === minNormal && minNormal !== maxNormal;
+  const marcadores = `
+    <span class="grafico-marcador grafico-marcador-atual${ehMenorAtual ? " grafico-marcador-minimo" : ""}" style="left:${xPercent(ultimoIdx)}%; top:${yPercent(ultimoPonto.preco)}%"></span>
+    ${idxUltimoPix >= 0 ? `<span class="grafico-marcador grafico-marcador-pix" style="left:${xPercent(idxUltimoPix)}%; top:${yPercent(pontos[idxUltimoPix].preco_pix)}%"></span>` : ""}
+    ${variacaoRecente ? `<span class="grafico-marcador grafico-marcador-variacao ${variacaoRecente.queda ? "grafico-marcador-queda" : "grafico-marcador-alta"}" style="left:${xPercent(idxVariacao)}%; top:${yPercent(variacaoRecente.depois)}%"></span>` : ""}
+  `;
+
+  // Selo da última variação ("−31% em 20/11"): fica acima do degrau, alinhado à
+  // direita do ponto (ou à esquerda dele se a variação for logo no começo).
+  let seloVariacao = "";
+  if (variacaoRecente) {
+    const pctTexto = `${variacaoRecente.queda ? "−" : "+"}${Math.abs(Math.round(variacaoRecente.pct * 100))}%`;
+    const dataVariacao = new Date(pontos[idxVariacao].capturado_em).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+    const noComeco = xPercent(idxVariacao) < 30;
+    seloVariacao = `<div class="grafico-selo-variacao ${variacaoRecente.queda ? "grafico-selo-queda" : "grafico-selo-alta"}${noComeco ? " grafico-selo-esquerda" : ""}" style="left:${xPercent(idxVariacao)}%; top:${yPercent(Math.max(variacaoRecente.antes, variacaoRecente.depois))}%">${pctTexto} em ${dataVariacao}</div>`;
+  }
+
+  const trechoRecente = variacaoRecente
+    ? `<line x1="${coordX(idxVariacao - 1)}" y1="${coordY(variacaoRecente.antes)}" x2="${coordX(idxVariacao)}" y2="${coordY(variacaoRecente.depois)}" class="grafico-trecho-recente ${variacaoRecente.queda ? "grafico-trecho-queda" : "grafico-trecho-alta"}" stroke-linecap="round"></line>`
+    : "";
 
   const precosFlutuantes = `
-    <div class="grafico-preco-inicial" style="left:${xPercent(0)}%; top:${coordY(pontos[0].preco)}px">${formatarPreco(pontos[0].preco)}</div>
-    <div class="grafico-preco-final grafico-preco-final-normal" style="left:${xPercent(pontos.length - 1)}%; top:${coordY(pontos[pontos.length - 1].preco)}px">${formatarPreco(pontos[pontos.length - 1].preco)}</div>
-    ${idxUltimoPix >= 0 ? `<div class="grafico-preco-final grafico-preco-final-pix" style="left:${xPercent(idxUltimoPix)}%; top:${coordY(pontos[idxUltimoPix].preco_pix)}px">${formatarPreco(pontos[idxUltimoPix].preco_pix)}</div>` : ""}
+    <div class="grafico-preco-inicial" style="left:${xPercent(0)}%; top:${yPercent(pontos[0].preco)}%">${formatarPreco(pontos[0].preco)}</div>
+    <div class="grafico-preco-final grafico-preco-final-normal" style="left:${xPercent(pontos.length - 1)}%; top:${yPercent(pontos[pontos.length - 1].preco)}%">${formatarPreco(pontos[pontos.length - 1].preco)}</div>
+    ${idxUltimoPix >= 0 ? `<div class="grafico-preco-final grafico-preco-final-pix" style="left:${xPercent(idxUltimoPix)}%; top:${yPercent(pontos[idxUltimoPix].preco_pix)}%">${formatarPreco(pontos[idxUltimoPix].preco_pix)}</div>` : ""}
+    ${marcadores}
+    ${seloVariacao}
   `;
 
   const dataInicial = new Date(pontos[0].capturado_em).toLocaleDateString("pt-BR");
@@ -221,9 +277,10 @@ export function desenharGraficoSVG(pontos) {
         <svg viewBox="0 0 ${largura} ${altura}" class="grafico-historico" preserveAspectRatio="none">
           ${gradeY}
           ${linhaMinima}
-          <path d="${areaPath}" fill="var(--cor-marca)" fill-opacity="0.12" class="grafico-area"></path>
+          <path d="${areaPath}" fill="var(--cor-marca)" fill-opacity="0.05" class="grafico-area"></path>
           ${temPix ? `<polyline points="${linhaPix}" fill="none" stroke="var(--cor-pix)" stroke-width="2" stroke-dasharray="4 3" class="grafico-linha-pix"></polyline>` : ""}
           <polyline points="${linha}" fill="none" stroke="var(--cor-marca)" stroke-width="2" class="grafico-linha"></polyline>
+          ${trechoRecente}
           ${pontosCirculoPix}
           ${pontosCirculo}
         </svg>
