@@ -1,7 +1,8 @@
 ---
-import { formatarPreco, otimizarImagem } from "../lib/supabase.js";
+import { formatarPreco, otimizarImagem, precoPorKg } from "../lib/supabase.js";
 
 const { p } = Astro.props;
+const porKg = precoPorKg(p);
 ---
 <div class="parecido-item" data-id={p.id} data-href={`/produto/${p.id}/`}>
   {p.imagem_url ? (
@@ -11,6 +12,13 @@ const { p } = Astro.props;
   )}
   <span class="parecido-loja">{p.loja}</span>
   <span class="parecido-nome">{p.nome}</span>
-  <span class="parecido-preco">{formatarPreco(p.preco)}</span>
+  <span class="parecido-preco">
+    {formatarPreco(p.preco)}
+    {porKg && (
+      <small class="parecido-preco-kg" title={porKg.estimada ? "Peso estimado em 1 kg (a loja não informa)" : undefined}>
+        {formatarPreco(porKg.valor)}/{porKg.unidade}{porKg.estimada ? " (est.)" : ""}
+      </small>
+    )}
+  </span>
   <button type="button" class="btn-comparar-toggle" data-id={p.id} title="Comparar" aria-label="Comparar" aria-pressed="false">⇄</button>
 </div>

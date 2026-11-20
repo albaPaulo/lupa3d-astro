@@ -215,9 +215,80 @@ export function buildHistoricoPorProduto(historicoTodos) {
 // de uma listagem de afiliado (comissão embutida) apareceria competindo
 // com a loja direta, criando conflito de interesse (a comissão incentivaria
 // promover justamente a oferta que NÃO é a mais barata).
+// Peso/volume do produto (colunas quantidade/unidade, preenchidas pelo scraper:
+// nome do produto ou variação da página). Filamento sem dado é assumido 1 kg
+// (90% dos filamentos com peso conhecido são de 1 kg) e marcado como
+// estimado; resina sem dado fica sem quantidade — nunca se chuta resina.
+const CATEGORIAS_COM_QUANTIDADE = new Set(["filamento", "resina"]);
+
+export function quantidadeEfetiva(p) {
+  if (!CATEGORIAS_COM_QUANTIDADE.has(p.categoria)) return null;
+  if (p.quantidade != null && p.unidade) {
+    return { quantidade: Number(p.quantidade), unidade: p.unidade, estimada: false };
+  }
+  if (p.categoria === "filamento") return { quantidade: 1000, unidade: "g", estimada: true };
+  return null;
+}
+
+// Preço por kg (ou por litro, se o produto é em ml) — base de comparação justa
+// entre embalagens. null quando não dá pra saber o peso.
+export function precoPorKg(p) {
+  const q = quantidadeEfetiva(p);
+  if (!q || !(q.quantidade > 0)) return null;
+  return {
+    valor: (Number(p.preco) * 1000) / q.quantidade,
+    unidade: q.unidade === "ml" ? "L" : "kg",
+    estimada: q.estimada,
+  };
+}
+
+// "1 kg", "500 g", "1 L", "500 ml"
+export function formatarQuantidade({ quantidade, unidade }) {
+  const grande = quantidade >= 1000;
+  const valor = grande ? quantidade / 1000 : quantidade;
+  const rotulo = unidade === "ml" ? (grande ? "L" : "ml") : (grande ? "kg" : "g");
+  return `${valor.toLocaleString("pt-BR", { maximumFractionDigits: 2 })} ${rotulo}`;
+}
+
+// Mínimo de comparáveis pra mostrar a seção "em outras lojas" de filamento/resina:
+// uma lista de 1-2 itens não diz nada sobre o preço de mercado.
+const MINIMO_COMPARAVEIS = 3;
+
 export function produtosParecidos(produtos, p, faixaPrecoAtiva) {
   const material = materialEfetivo(p);
   const kitAtual = kitEfetivo(p);
+
+  // Filamento e resina só se comparam com MESMO material e MESMO peso/volume —
+  // senão a lista misturava resina dental com standard, 300 g com 1 kg, etc.
+  // Sem material ou (resina) sem peso conhecido, não há o que comparar: lista
+  // vazia, e a página esconde a seção.
+  if (CATEGORIAS_COM_QUANTIDADE.has(p.categoria)) {
+    const qAtual = quantidadeEfetiva(p);
+    if (!material || !qAtual) return [];
+
+    const comparaveis = produtos.filter((outro) => {
+      if (
+        outro.id === p.id ||
+        outro.categoria !== p.categoria ||
+        outro.loja === p.loja ||
+        Boolean(outro.afiliado) !== Boolean(p.afiliado) ||
+        kitEfetivo(outro) !== kitAtual ||
+        materialEfetivo(outro) !== material
+      ) {
+        return false;
+      }
+      const q = quantidadeEfetiva(outro);
+      return q && q.unidade === qAtual.unidade && q.quantidade === qAtual.quantidade;
+    });
+
+    const maisBaratoDaLoja = new Map();
+    for (const item of comparaveis) {
+      const atual = maisBaratoDaLoja.get(item.loja);
+      if (!atual || item.preco < atual.preco) maisBaratoDaLoja.set(item.loja, item);
+    }
+    const lista = [...maisBaratoDaLoja.values()].sort((a, b) => a.preco - b.preco).slice(0, 6);
+    return lista.length >= MINIMO_COMPARAVEIS ? lista : [];
+  }
 
   let candidatos = produtos.filter(
     (outro) =>
